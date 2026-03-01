@@ -1,0 +1,8 @@
+package pt.up.fe.comp.cp1.core.semantics.declarations.symboltable;
+
+class DuplicateLocalVariableNameOk {
+    public void foo() {
+        int a;
+        int b;
+    }
+}

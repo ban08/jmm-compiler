@@ -1,0 +1,10 @@
+package pt.up.fe.comp.cp1.core.semantics.declarations.symboltable;
+
+import util.io;
+
+class MethodReturnsImportedClass {
+
+    public io make() {
+        return new io();
+    }
+}

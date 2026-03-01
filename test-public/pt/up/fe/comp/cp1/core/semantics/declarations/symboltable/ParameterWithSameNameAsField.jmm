@@ -1,0 +1,8 @@
+package pt.up.fe.comp.cp1.core.semantics.declarations.symboltable;
+
+class ParameterWithSameNameAsField {
+    int a;
+
+    public void foo(int a) {
+    }
+}

@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp1.core.semantics.declarations.symboltable;
+
+import util.io;
+import util.ioPlus;
+
+
+class Imports {
+
+}

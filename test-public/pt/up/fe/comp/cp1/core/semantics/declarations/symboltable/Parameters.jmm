@@ -1,0 +1,8 @@
+package pt.up.fe.comp.cp1.core.semantics.declarations.symboltable;
+
+class Parameters {
+
+    public int all(int a, boolean b, Parameters maf) {
+        return 0;
+    }
+}

@@ -1,0 +1,25 @@
+#!/bin/sh
+
+set -e
+
+./gradlew websiteInstallDist
+
+TMP_DIR=$(mktemp -d)
+PROJECT_DIR=$(pwd)
+
+cp -r build/install/jmm $TMP_DIR
+cp config.properties $TMP_DIR
+
+cd $TMP_DIR
+zip -r $PROJECT_DIR/jmm-tmp.zip .
+
+cd $PROJECT_DIR
+rm -rf $TMP_DIR
+
+DIGEST=$(sha256sum jmm-tmp.zip | cut -d ' ' -f 1)
+FILE_NAME=jmm-$DIGEST.zip
+
+mv jmm-tmp.zip $FILE_NAME
+
+wrangler r2 object put general/jmm/$FILE_NAME -f $FILE_NAME
+echo "Upload complete. Compiler is available at https://bucket.limwa.pt/jmm/$FILE_NAME."

@@ -1,0 +1,172 @@
+// java
+package pt.up.fe.comp.cp1.core.parser.declarations;
+
+import org.junit.Test;
+import pt.up.fe.comp.TestUtils;
+import pt.up.fe.comp.jmm.ast.Kind;
+import pt.up.fe.comp.test.env.JmmTestEnv;
+import pt.up.fe.comp2026.jmm.ast.JmmKind;
+
+import static pt.up.fe.comp.cp1.core.parser.RulesNames.*;
+
+public class ClassDeclParserTest extends JmmTestEnv {
+
+
+    public ClassDeclParserTest() {
+        super("", "");
+    }
+
+
+    @Test
+    public void testSingleLineComment() {
+        //use of comment should be independent of starting rule (it is ignored)
+        parseSnippet("// Single line comment\nclass A{}", CLASS);
+    }
+
+    @Test
+    public void testMultiLineComment() {
+        parseSnippet("/* Multi-line comment*/\nclass A{}", CLASS);
+    }
+
+
+
+    @Test
+    public void testClass() {
+        parseSnippet("class Foo {}", CLASS);
+    }
+
+    @Test
+    public void testClassWithSuper() {
+        parseSnippet("class Foo extends Bar {}", CLASS);
+    }
+
+    @Test
+    public void testClassFromRoot() {
+        parseSnippet("package comp; class Foo {}");
+    }
+
+
+
+    @Test
+    public void testPrimitiveBool() {
+        parseSnippet("boolean", TYPE);
+    }
+
+    @Test
+    public void testIntArray() {
+        parseSnippet("int[]", TYPE);
+    }
+
+    @Test
+    public void testVoid() {
+        parseSnippet("void", TYPE);
+    }
+
+    @Test
+    public void testCustomType() {
+        parseSnippet("MyClass", TYPE);
+    }
+
+    @Test
+    public void testStringTypeArray() {
+        parseSnippet("String[]", TYPE);
+    }
+
+
+    @Test
+    public void testSingleFieldDecl() {
+        parseSnippet("package comp; class Foo {int a;}");
+    }
+
+    @Test
+    public void testMultipleFieldDecls() {
+        parseSnippet("package comp; class Foo {int a; int[] b; int c; boolean d; Bar e;}");
+    }
+
+    @Test
+    public void testSingleCharId() {
+        parseSnippet("class A{int a;}", CLASS);
+    }
+
+    @Test
+    public void testStringField() {
+        parseSnippet("class A{String a;}", CLASS);
+    }
+
+    @Test
+    public void testIdStartingChar1() {
+        parseSnippet("class A{String _a;}", CLASS);
+    }
+
+    @Test
+    public void testIdStartingChar2() {
+        parseSnippet("class A{String $a;}", CLASS);
+    }
+
+
+    @Test
+    public void testClassWithCommentsInside() {
+        parseSnippet("class A { // comment\n int a; /* multi */ }", CLASS);
+    }
+
+
+    @Test
+    public void testClassWithComplexIdentifiers() {
+        parseSnippet("class A{int _a$1; String $s_2;}", CLASS);
+    }
+
+
+    @Test
+    public void testClassWithSimpleMethod() {
+        parseSnippet("class A {void foo() {}}", CLASS);
+    }
+
+
+    @Test
+    public void testClassWithMainMethod() {
+        parseSnippet("package foo; class A {public static void main(String[] args) {}}");
+    }
+
+    @Test
+    public void testClassWithMultipleMethods() {
+        parseSnippet("""
+                package foo;
+                class A {
+                    public static void main(String[] args) {}
+                    void bar() {}
+                    void foo(int anInt, int[] anArray, boolean aBool, String aString) {}
+                }
+                """);
+    }
+
+    @Test
+    public void testClassWithOneFieldsAndOneMethod() {
+        parseSnippet("""
+                package foo;
+                class A {
+                    int a;
+                    void bar() {}
+                }
+                """);
+    }
+
+    @Test
+    public void testClassWithMultipleFieldsAndMethods() {
+        parseSnippet("""
+                package foo;
+                class A {
+                    int a; int[] b; int c; boolean d; Bar e;
+                    public static void main(String[] args) {}
+                    void bar() {}
+                    void foo(int anInt, int[] anArray, boolean aBool, String aString) {}
+                }
+                """);
+    }
+
+
+    @Test
+    public void testClassWithFieldArrayAndMethod() {
+        parseSnippet("package p; class A { int[] arr; void m(int[] a) {} }");
+    }
+
+}
