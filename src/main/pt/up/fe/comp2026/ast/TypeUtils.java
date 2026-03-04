@@ -43,9 +43,49 @@ public class TypeUtils {
     public JmmType convertType(JmmNode typeNode) {
         assert (TYPE.check(typeNode));
 
-        System.out.println("[TODO] TypeUtils.convertType(): Implement for classes and arrays");
         var name = typeNode.get("name");
-        return JmmPrimitiveType.fromString(name).orElseThrow();
+        boolean isArray = NodeUtils.getBooleanAttribute(typeNode, "isArray", "false");
+
+        // Check primitives first
+        var primitive = JmmPrimitiveType.fromString(name);
+        if (primitive.isPresent()) {
+            if (isArray) {
+                return JmmArrayType.of(primitive.get());
+            }
+            return primitive.get();
+        }
+
+        // Class type - resolve via symbol table
+        var importedFqn = table.getImportedFullyQualifiedName(name);
+        if (importedFqn.isPresent()) {
+            var classType = JmmClassType.ofInstance(importedFqn.get(), true);
+            if (isArray) return JmmArrayType.of(classType);
+            return classType;
+        }
+
+        // Check if it's the declared class itself
+        var className = table.getFullyQualifiedName();
+        var simpleName = className.substring(className.lastIndexOf('.') + 1);
+        if (name.equals(simpleName)) {
+            var classType = JmmClassType.ofInstance(className, false);
+            if (isArray) return JmmArrayType.of(classType);
+            return classType;
+        }
+
+        // Check implicit imports
+        if (table.isImplicitImport(name)) {
+            var implicitTable = table.getImplicitImport(name);
+            if (implicitTable.isPresent()) {
+                var classType = JmmClassType.ofInstance(implicitTable.get().getFullyQualifiedName(), true);
+                if (isArray) return JmmArrayType.of(classType);
+                return classType;
+            }
+        }
+
+        // Fallback - unknown class type
+        var classType = JmmClassType.ofInstance(name, false);
+        if (isArray) return JmmArrayType.of(classType);
+        return classType;
     }
 
 
@@ -73,11 +113,16 @@ public class TypeUtils {
         // Get name of the method
         var methodName = methodDecl.get("name");
 
-        System.out.println("[TODO] TypeUtils.getMethodDeclSignature(): Supporting only methods with a single parameter that is an int, needs to be expanded");
-        var params = List.of(intType());
+        // Get the types of all parameters
+        var paramTypes = methodDecl.getChildren(PARAM).stream()
+                .map(param -> {
+                    var typeNode = param.getObject("typeNode", JmmNode.class);
+                    return convertType(typeNode);
+                })
+                .toList();
 
         // Create method signature with method name and types of parameters
-        return new Signature(methodName, params);
+        return new Signature(methodName, paramTypes);
     }
 
 

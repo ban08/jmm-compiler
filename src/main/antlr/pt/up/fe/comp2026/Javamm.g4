@@ -4,16 +4,27 @@ grammar Javamm;
     package pt.up.fe.comp2026;
 }
 
+// Keywords
 CLASS : 'class' ;
 INT : 'int' ;
+BOOLEAN : 'boolean' ;
+VOID : 'void' ;
 STATIC : 'static' ;
 RETURN : 'return' ;
 PACKAGE: 'package';
 IMPORT: 'import';
 PUBLIC: 'public';
+EXTENDS: 'extends' ;
+NEW : 'new' ;
+IF : 'if' ;
+ELSE : 'else' ;
+WHILE : 'while' ;
+TRUE : 'true' ;
+FALSE : 'false' ;
+THIS : 'this' ;
 
 INTEGER : '0' | [1-9][0-9]* ;
-ID : [a-zA-Z]+ ;
+ID : [a-zA-Z_$][a-zA-Z0-9_$]* ;
 
 WS : [ \t\n\r\f]+ -> skip ;
 
@@ -21,12 +32,12 @@ SINGLE_COMMENT: '//' ~[\r\n]*-> skip;
 BLOCK_COMMENT : '/*' .*? '*/' -> skip;
 
 program
-    : importDecl? packageDecl classNode=classDecl EOF
+    : packageDecl importDecl* classNode=classDecl EOF
     ;
 
-importDecl:
-    IMPORT ID ';'
-;
+importDecl
+    : IMPORT path += ID ('.' path += ID)* ';'
+    ;
 
 //package is mandatory
 packageDecl
@@ -34,9 +45,10 @@ packageDecl
     ;
 
 classDecl
-    : CLASS name=ID
+    : CLASS name=ID (EXTENDS superName=ID)?
         '{'
-        methodDecl
+        varDecl*
+        methodDecl*
         '}'
     ;
 
@@ -45,30 +57,49 @@ varDecl
     ;
 
 param
-    : typeNode = type name=ID
-;
+    : typeNode = type name = ID
+    ;
 
-type
-    : name = INT;
+type locals[boolean isArray=false]
+    : name = INT ('[' ']' {$isArray=true;})?
+    | name = BOOLEAN
+    | name = VOID
+    | name = ID ('[' ']' {$isArray=true;})?
+    ;
 
 methodDecl locals[boolean isStatic=false]
-    : visibility=PUBLIC (STATIC {$isStatic=true;})?
+    : (visibility=PUBLIC)? (STATIC {$isStatic=true;})?
         returnType = type name=ID
-        '(' params = param  ')'
+        '(' (params += param  (',' params += param)*)? ')'
         '{' varDecl* stmt* '}'
     ;
 
 stmt
-    : var = ID '=' expr ';' #AssignStmt //
-    | RETURN expr ';' #ReturnStmt
+    : '{' stmt* '}' #CompoundStmt
+    | IF '(' expr ')' stmt ELSE stmt #IfStmt
+    | WHILE '(' expr ')' stmt #WhileStmt
+    | expr ';' #ExprStmt
+    | var = ID '=' expr ';' #AssignStmt
+    | var = ID '[' expr ']' '=' expr ';' #ArrayAssignStmt
+    | RETURN expr? ';' #ReturnStmt
     ;
 
 expr
-    : expr op= '*' expr #BinaryExpr //
-    | expr op= '+' expr #BinaryExpr //
-    | value=INTEGER #IntegerLiteral //
-    | name=ID #VarRefExpr //
+    : '(' expr ')' #ParenExpr
+    | expr '.' 'length' #LengthExpr
+    | expr '.' name=ID '(' (expr (',' expr)*)? ')' #MethodCallExpr
+    | expr '[' expr ']' #ArrayAccessExpr
+    | '!' expr #NotExpr
+    | NEW INT '[' expr ']' #NewIntArrayExpr
+    | NEW name=ID '(' ')' #NewExpr
+    | expr op=('*' | '/') expr #BinaryExpr
+    | expr op=('+' | '-') expr #BinaryExpr
+    | expr op='<' expr #BinaryExpr
+    | expr op='&&' expr #BinaryExpr
+    | value=INTEGER #IntegerLiteral
+    | value=TRUE #BooleanLiteral
+    | value=FALSE #BooleanLiteral
+    | name=ID #VarRefExpr
+    | THIS #ThisExpr
     ;
-
-
 

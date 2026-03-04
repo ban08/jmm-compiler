@@ -26,14 +26,11 @@ public class JmmSymbolTableBuilder {
     private final JmmNode root;
     private final Importer importer;
     public String className;
+    private String fullyQualifiedName;
     private final List<Report> reports;
     private final List<String> imports;
     private final Map<String, String> declaredClasses;
 
-    /**
-     * Only build() can create new instances, this ensures that each instance is used only once,
-     * and we do not have to worry about "cleaning state".
-     */
     private JmmSymbolTableBuilder(JmmNode root) {
         this.root = root;
         reports = new ArrayList<>();
@@ -57,16 +54,24 @@ public class JmmSymbolTableBuilder {
 
     private SymbolTableBuilderResult buildInternal() {
 
-
         var packageDecl = root.getChildren(PACKAGE_DECL).getFirst();
         var packagePathList = packageDecl.getObjectAsList("path", String.class);
         var packagePath = String.join(".", packagePathList);
+
+        // Process imports (with dedup)
+        var importSet = new LinkedHashSet<String>();
+        for (var importDecl : root.getChildren(IMPORT_DECL)) {
+            var importPath = importDecl.getObjectAsList("path", String.class);
+            var importFqn = String.join(".", importPath);
+            importSet.add(importFqn);
+        }
+        imports.addAll(importSet);
 
         var classDecl = root.getObject("classNode", JmmNode.class);
         SpecsCheck.checkArgument(CLASS_DECL.check(classDecl), () -> "Expected a class declaration: " + classDecl);
 
         this.className = classDecl.get("name");
-        var fullyQualifiedName = packagePath + "." + className;
+        this.fullyQualifiedName = packagePath + "." + className;
 
         // Check if className is available
         if (declaredClasses.containsKey(className)) {
@@ -74,40 +79,200 @@ public class JmmSymbolTableBuilder {
         }
         declaredClasses.put(className, fullyQualifiedName);
 
+        // Resolve super class
+        String superQualifiedName = null;
+        var superNameOpt = classDecl.getOptional("superName");
+        if (superNameOpt.isPresent()) {
+            var superName = superNameOpt.get();
 
+            // Check class doesn't extend itself
+            if (superName.equals(className)) {
+                reports.add(newError(classDecl, "Class '" + className + "' cannot extend itself"));
+            } else {
+                superQualifiedName = resolveClassName(superName, classDecl);
+            }
+        }
+
+        // Build fields
+        var fields = buildFields(classDecl);
+
+        // Build methods
         var methods = buildMethods(classDecl);
 
-        var symbolTable = new JmmSymbolTable(imports, fullyQualifiedName, null, Collections.emptyList(), methods, importer);
+        var symbolTable = new JmmSymbolTable(imports, fullyQualifiedName, superQualifiedName, fields, methods, importer);
 
         return new SymbolTableBuilderResult(symbolTable, reports);
     }
 
-    private List<MethodSymbol> buildMethods(JmmNode classDecl) {
+    /**
+     * Resolve a class name to its fully qualified name.
+     * Checks: explicit imports, implicit imports (java.lang), declared class.
+     */
+    private String resolveClassName(String simpleName, JmmNode contextNode) {
+        // Check explicit imports
+        var dotName = "." + simpleName;
+        for (var imp : imports) {
+            if (imp.equals(simpleName) || imp.endsWith(dotName)) {
+                return imp;
+            }
+        }
 
+        // Check if it's the declared class
+        if (simpleName.equals(className)) {
+            return fullyQualifiedName;
+        }
+
+        // Check implicit imports (java.lang.*)
+        if (importer.isImplicitImport(simpleName)) {
+            var clazz = importer.loadImplicit(simpleName);
+            if (clazz.isPresent()) {
+                return clazz.get().getName();
+            }
+        }
+
+        // Not found - report error
+        reports.add(newError(contextNode, "Class '" + simpleName + "' is not imported"));
+        return simpleName;
+    }
+
+    /**
+     * Convert a type AST node into a JmmType.
+     */
+    private JmmType convertType(JmmNode typeNode) {
+        var typeName = typeNode.get("name");
+        boolean isArray = NodeUtils.getBooleanAttribute(typeNode, "isArray", "false");
+
+        // Check primitives
+        var primitive = JmmPrimitiveType.fromString(typeName);
+        if (primitive.isPresent()) {
+            if (isArray) {
+                return JmmArrayType.of(primitive.get());
+            }
+            return primitive.get();
+        }
+
+        // It's a class type - resolve it
+        String resolvedFqn;
+
+        // Check explicit imports
+        var dotName = "." + typeName;
+        String importedFqn = null;
+        for (var imp : imports) {
+            if (imp.equals(typeName) || imp.endsWith(dotName)) {
+                importedFqn = imp;
+                break;
+            }
+        }
+
+        if (importedFqn != null) {
+            // Explicitly imported class
+            var classType = JmmClassType.ofInstance(importedFqn, true);
+            if (isArray) {
+                return JmmArrayType.of(classType);
+            }
+            return classType;
+        }
+
+        // Check if it's the declared class itself
+        if (typeName.equals(className)) {
+            var classType = JmmClassType.ofInstance(fullyQualifiedName, false);
+            if (isArray) {
+                return JmmArrayType.of(classType);
+            }
+            return classType;
+        }
+
+        // Check implicit imports (java.lang.*)
+        if (importer.isImplicitImport(typeName)) {
+            var clazz = importer.loadImplicit(typeName);
+            if (clazz.isPresent()) {
+                var classType = JmmClassType.ofInstance(clazz.get().getName(), true);
+                if (isArray) {
+                    return JmmArrayType.of(classType);
+                }
+                return classType;
+            }
+        }
+
+        // Unknown class - treat as non-imported class type
+        var classType = JmmClassType.ofInstance(typeName, false);
+        if (isArray) {
+            return JmmArrayType.of(classType);
+        }
+        return classType;
+    }
+
+    /**
+     * Build the list of class-level fields from varDecl children of classDecl.
+     */
+    private List<Symbol> buildFields(JmmNode classDecl) {
+        var fields = new ArrayList<Symbol>();
+        for (var varDecl : classDecl.getChildren(VAR_DECL)) {
+            var fieldName = varDecl.get(JmmAttributes.VAR_DECL.NAME);
+            var typeNode = varDecl.getObject("typeNode", JmmNode.class);
+            var type = convertType(typeNode);
+            fields.add(new Symbol(type, fieldName));
+        }
+        return fields;
+    }
+
+    private List<MethodSymbol> buildMethods(JmmNode classDecl) {
         return classDecl.getChildren(METHOD_DECL).stream()
                 .map(this::buildMethod)
                 .toList();
-
     }
 
     private MethodSymbol buildMethod(JmmNode method) {
         var methodName = method.get("name");
 
-        System.out.println("[TODO] JmmSymbolTableBuilder.buildMethod(): Assuming return type of method is always int, and always has a single int parameter, needs to be expanded");
-        var returnType = TypeUtils.intType();
+        // Get return type
+        var returnTypeNode = method.getObject("returnType", JmmNode.class);
+        var returnType = convertType(returnTypeNode);
 
+        // Get parameters
+        var paramNodes = method.getChildren(PARAM);
+        var params = new ArrayList<Symbol>();
+        var paramNames = new HashSet<String>();
 
-        var params = List.of(new Symbol(TypeUtils.intType(), method.getChildren(PARAM).getFirst().get(JmmAttributes.PARAM.NAME)));
+        for (var paramNode : paramNodes) {
+            var paramName = paramNode.get(JmmAttributes.PARAM.NAME);
+            var paramTypeNode = paramNode.getObject("typeNode", JmmNode.class);
+            var paramType = convertType(paramTypeNode);
 
-        System.out.println("[TODO] JmmSymbolTableBuilder.buildMethod(): Assuming all VarDecls are ints, needs to be expanded");
-        var locals = method.getChildren(VAR_DECL).stream()
-                .map(varDecl -> new Symbol(TypeUtils.intType(), varDecl.get(JmmAttributes.VAR_DECL.NAME)))
-                .toList();
+            // Check for duplicate parameter names
+            if (!paramNames.add(paramName)) {
+                reports.add(newError(paramNode, "Duplicate parameter name '" + paramName + "' in method '" + methodName + "'"));
+            }
 
-        var visibility =  Visibility.PUBLIC;
+            params.add(new Symbol(paramType, paramName));
+        }
+
+        // Get local variables
+        var localVarNodes = method.getChildren(VAR_DECL);
+        var locals = new ArrayList<Symbol>();
+        var localNames = new HashSet<String>();
+
+        for (var varDecl : localVarNodes) {
+            var localName = varDecl.get(JmmAttributes.VAR_DECL.NAME);
+            var localTypeNode = varDecl.getObject("typeNode", JmmNode.class);
+            var localType = convertType(localTypeNode);
+
+            // Check for duplicate local variable names
+            if (!localNames.add(localName)) {
+                reports.add(newError(varDecl, "Duplicate local variable '" + localName + "' in method '" + methodName + "'"));
+            }
+
+            // Check for parameter-local conflict
+            if (paramNames.contains(localName)) {
+                reports.add(newError(varDecl, "Local variable '" + localName + "' conflicts with parameter in method '" + methodName + "'"));
+            }
+
+            locals.add(new Symbol(localType, localName));
+        }
+
+        var visibility = method.getOptional("visibility").isPresent() ? Visibility.PUBLIC : Visibility.PACKAGE_PROTECTED;
         var isStatic = method.getBoolean(JmmAttributes.METHOD_DECL.IS_STATIC, false);
         return new MethodSymbol(methodName, returnType, params, locals, isStatic, visibility);
     }
-
 
 }
