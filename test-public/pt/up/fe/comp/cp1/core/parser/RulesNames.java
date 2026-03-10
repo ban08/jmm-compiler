@@ -12,6 +12,4 @@ public class RulesNames {
     public static final Kind METHOD = JmmKind.METHOD_DECL;
     public static final Kind STATEMENT = JmmKind.STMT;
     public static final Kind EXPRESSION = JmmKind.EXPR;
-
-
 }

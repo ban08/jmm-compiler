@@ -18,18 +18,18 @@ public class ImportsSemanticAnalysisTest extends pt.up.fe.comp.test.env.JmmTestE
     @Test
     public void superWithImplicitImport() {
         setDescription("Test that a class that extends another class that is implicitly imported (like Object) is accepted");
-        symbolTable("SuperWithImplicitImport.jmm", false);
+        semantics("SuperWithImplicitImport.jmm", false);
     }
 
     @Test
     public void methodReturnTypeIsImplicitlyImported() {
         setDescription("Test that a method with a return type that is implicitly imported (like Object) is accepted");
-        symbolTable("MethodReturnTypeIsImplicitlyImported.jmm", false);
+        semantics("MethodReturnTypeIsImplicitlyImported.jmm", false);
     }
 
     @Test
     public void fieldTypeIsImplicitlyImported() {
         setDescription("Test that a field with a type that is implicitly imported (like Object) is accepted");
-        symbolTable("FieldTypeIsImplicitlyImported.jmm", false);
+        semantics("FieldTypeIsImplicitlyImported.jmm", false);
     }
 }

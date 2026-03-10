@@ -2,6 +2,7 @@ package pt.up.fe.comp.cp1.core.semantics.declarations;
 
 import org.junit.Test;
 import pt.up.fe.comp.jmm.analysis.table.Signature;
+import pt.up.fe.comp.jmm.analysis.table.Visibility;
 import pt.up.fe.comp.jmm.analysis.table.type.JmmType;
 import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmArrayType;
 import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmClassType;
@@ -22,6 +23,30 @@ public class MethodDeclSymbolTableTest extends pt.up.fe.comp.test.env.JmmTestEnv
         super(BASE_PATH, RESOURCES_LOCATION);
     }
 
+
+    @Test
+    public void testPublicMethod() {
+        var semantics = symbolTableFromSnippet("""
+                package x;
+                class A{ public void foo() {} }""", false);
+        var st = semantics.getSymbolTable();
+        var methods = st.getMethods("foo");
+        super.assertEquals("Number of methods should be 1", 1, methods.size());
+        var method = methods.getFirst();
+        super.assertEquals("Method should be public", Visibility.PUBLIC, method.visibility());
+    }
+
+    @Test
+    public void testPackageProtectedMethod() {
+        var semantics = symbolTableFromSnippet("""
+                package x;
+                class A{ void foo() {} }""", false);
+        var st = semantics.getSymbolTable();
+        var methods = st.getMethods("foo");
+        super.assertEquals("Number of methods should be 1", 1, methods.size());
+        var method = methods.getFirst();
+        super.assertEquals("Method should be package protected", Visibility.PACKAGE_PROTECTED, method.visibility());
+    }
 
     @Test
     public void Methods() {

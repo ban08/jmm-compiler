@@ -19,12 +19,7 @@ public class ImportsSemanticAnalysisErrorTest extends pt.up.fe.comp.test.env.Jmm
     public void superWithClassNotImported() {
         setDescription("Test that a class that extends another class that is not imported is not accepted");
         symbolTable("SuperWithClassNotImported.jmm", true);
-    }
-
-    @Test
-    public void superWithClassNotImportedOk() {
-        setDescription("Valid class that extends another class that is imported should be accepted");
         symbolTable("SuperWithClassNotImportedOk.jmm", false);
-    }
 
+    }
 }

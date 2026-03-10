@@ -6,6 +6,7 @@ import pt.up.fe.comp.jmm.analysis.table.Signature;
 import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmArrayType;
 import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmClassType;
 import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmPrimitiveType;
+import pt.up.fe.comp.test.env.JmmTestEnv;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ import java.util.List;
 /**
  * Test variable lookup.
  */
-public class ClassDeclSymbolTableTest extends pt.up.fe.comp.test.env.JmmTestEnv {
+public class ClassDeclSymbolTableTest extends JmmTestEnv {
     private static final String BASE_PATH = "pt/up/fe/comp/cp1/core/semantics/declarations/symboltable/";
     private static final String RESOURCES_LOCATION = "test-public";
 
@@ -33,6 +34,15 @@ public class ClassDeclSymbolTableTest extends pt.up.fe.comp.test.env.JmmTestEnv 
         var semantics = symbolTable("ClassDecl.jmm", false);
         super.assertEquals("Class name should be ${expected}", "ClassDecl", semantics.getSymbolTable().getClassName());
         super.assertEquals("Class fully qualified name should be ${expected}", qualifiedNameFor("ClassDecl"), semantics.getSymbolTable().getFullyQualifiedName());
+    }
+
+
+    @Test
+    public void ClassAndSuper() {
+        var semantics = symbolTable("Super.jmm", false);
+        super.assertEquals("Class name should be ${expected}", "Super", semantics.getSymbolTable().getClassName());
+        super.assertEquals("Super class should be ${expected}", "Quicksort", semantics.getSymbolTable().getSuper());
+        super.assertEquals("Super fully qualified name should be ${expected}", "examples.Quicksort", semantics.getSymbolTable().getSuperFullyQualifiedName());
     }
 
 

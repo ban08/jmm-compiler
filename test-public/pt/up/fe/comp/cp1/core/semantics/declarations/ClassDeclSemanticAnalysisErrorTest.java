@@ -23,12 +23,7 @@ public class ClassDeclSemanticAnalysisErrorTest extends pt.up.fe.comp.test.env.J
     @Test
     public void classWithSameNameAsExtends() {
         setDescription("Test that a class with the same name as its superclass is not accepted");
-        symbolTable("ClassWithSameNameAsExtends.jmm", true);
-    }
-
-    @Test
-    public void classWithSameNameAsExtendsOk() {
-        setDescription("Valid class with a different name than its superclass should be accepted");
-        symbolTable("ClassWithSameNameAsExtendsOk.jmm", false);
+        semantics("ClassWithSameNameAsExtends.jmm", true);
+        semantics("ClassWithSameNameAsExtendsOk.jmm", false);
     }
 }

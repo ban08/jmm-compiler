@@ -1,7 +1,7 @@
 package pt.up.fe.comp.cp1.core.semantics.declarations.semanticanalysis;
 
-import pt.up.fe.comp.cp1.core.semantics.declarations.symboltable.examples.ExternalClass;
+import examples.Quicksort;
 
-class SuperWithClassNotImportedOk extends ExternalClass {
+class SuperWithClassNotImportedOk extends Quicksort {
 
 }
