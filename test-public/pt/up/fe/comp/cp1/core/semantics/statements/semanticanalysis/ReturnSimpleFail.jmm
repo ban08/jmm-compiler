@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp1.core.semantics.statements.semanticanalysis;
+
+class ReturnSimpleFail {
+    int something(boolean value) {
+        int res;
+        boolean cond;
+        cond = true;
+        if (value) {
+            res = 1;
+        } else {
+            res = 0;
+        }
+        return cond;
+    }
+}

@@ -1,0 +1,8 @@
+package pt.up.fe.comp.cp1.core.semantics.calls.semanticanalysis;
+
+class LocalMethodParentCallOk extends Exception {
+    int method1() {
+        this.printStackTrace();
+        return 0;
+    }
+}

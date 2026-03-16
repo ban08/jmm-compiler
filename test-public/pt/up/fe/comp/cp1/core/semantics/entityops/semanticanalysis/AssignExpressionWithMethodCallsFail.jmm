@@ -1,0 +1,21 @@
+package pt.up.fe.comp.cp1.core.semantics.entityops.semanticanalysis;
+
+class AssignExpressionWithMethodCallsFail {
+    int method1(int a, int b, int c) {
+        int n;
+        n = a * 2 + this.pow(b) / this.isOdd(c) + this.pow(this.poly(c));
+        return n;
+    }
+
+    int pow(int n) {
+        return n * n;
+    }
+
+    int poly(int n) {
+        return n * n + 2 * n + 1;
+    }
+
+    boolean isOdd(int n) {
+        return !((n / 2) * 2 < n);
+    }
+}

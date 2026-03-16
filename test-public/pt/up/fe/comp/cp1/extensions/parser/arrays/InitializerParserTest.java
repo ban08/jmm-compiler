@@ -49,6 +49,6 @@ public class InitializerParserTest extends JmmTestEnv {
     public void testWithNoInitializerNeitherSize() {
         setDescription("Test that an array creation without size or initializer is not accepted");
         parseSnippetWithErrors("a = new int[];", STATEMENT);
-        parseSnippet("a = new int[1][2];", STATEMENT);
+        parseSnippet("a = new int[1];", STATEMENT);
     }
 }

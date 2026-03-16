@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp1.core.semantics.entityops.semanticanalysis;
+
+class AssignThisToParentTypeFail extends Throwable {
+    int method1(int a, int b) {
+        String obj;
+        obj = this;
+        return 0;
+    }
+}

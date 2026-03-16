@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp1.core.semantics.statements.semanticanalysis;
+
+class WhileSimpleBooleanOk {
+    int something(int value) {
+        int res;
+        boolean cond;
+        res = 0;
+        cond = true;
+        while (cond) {
+            res = res + 5;
+            cond = false;
+        }
+        return res;
+    }
+}

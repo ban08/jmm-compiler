@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp1.core.semantics.calls.semanticanalysis;
+
+class LocalMethodExistsOk {
+    int method1() {
+        int a;
+        a = this.existingMethod();
+        return a;
+    }
+
+    int existingMethod() {
+        return 1;
+    }
+}

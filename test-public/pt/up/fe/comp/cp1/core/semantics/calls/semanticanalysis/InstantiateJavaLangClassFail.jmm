@@ -1,0 +1,16 @@
+package pt.up.fe.comp.cp1.core.semantics.calls.semanticanalysis;
+
+class InstantiateJavaLangClassFail {
+    int method1() {
+        ArrayList s;
+        int i;
+        boolean b;
+        Exception e;
+
+        s = new ArrayList();
+        i = 2;
+        b = false;
+        e = new Exception();
+        return i;
+    }
+}

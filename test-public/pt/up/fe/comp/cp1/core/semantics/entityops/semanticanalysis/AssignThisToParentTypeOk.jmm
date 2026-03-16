@@ -1,0 +1,10 @@
+package pt.up.fe.comp.cp1.core.semantics.entityops.semanticanalysis;
+
+class AssignThisToParentTypeOk extends Throwable {
+    int method1() {
+        Throwable obj;
+        obj = this;
+        return 0;
+    }
+}
+

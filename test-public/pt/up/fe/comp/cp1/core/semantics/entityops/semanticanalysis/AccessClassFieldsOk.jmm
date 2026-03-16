@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp1.core.semantics.entityops.semanticanalysis;
+
+class AccessClassFieldsOk {
+    int field1;
+    int field2;
+    int field3;
+
+    int method1(int a, int b) {
+        int c;
+        c = a + field1 + b + field2;
+        return c;
+    }
+}

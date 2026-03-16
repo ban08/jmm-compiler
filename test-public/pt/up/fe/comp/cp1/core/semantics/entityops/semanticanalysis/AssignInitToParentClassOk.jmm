@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp1.core.semantics.entityops.semanticanalysis;
+
+class AssignInitToParentClassOk {
+    int method1() {
+        Exception parent1;
+        Exception parent2;
+
+        parent1 = new NullPointerException();
+        parent2 = new IndexOutOfBoundsException();
+
+        return 0;
+    }
+}

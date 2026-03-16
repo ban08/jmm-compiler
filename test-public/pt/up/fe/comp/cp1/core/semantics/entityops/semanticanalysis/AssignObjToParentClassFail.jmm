@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp1.core.semantics.entityops.semanticanalysis;
+
+class AssignObjToParentClassFail {
+    int method1() {
+        NullPointerException e1;
+        AssertionError e2;
+        Exception parent1;
+        Exception parent2;
+
+        e1 = new NullPointerException();
+        e2 = new AssertionError();
+        parent1 = e1;
+        parent2 = e2;
+
+        return 0;
+    }
+}

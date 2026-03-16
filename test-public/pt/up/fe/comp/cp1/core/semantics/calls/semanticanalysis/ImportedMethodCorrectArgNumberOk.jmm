@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp1.core.semantics.calls.semanticanalysis;
+
+import java.util.SplittableRandom;
+
+class ImportedMethodCorrectArgNumberOk {
+    int method1(int a, int b) {
+        int res;
+        SplittableRandom sr;
+        sr = new SplittableRandom();
+        res = sr.nextInt(a, b);
+        return res;
+    }
+}

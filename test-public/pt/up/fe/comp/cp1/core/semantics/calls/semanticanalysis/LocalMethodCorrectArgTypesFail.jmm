@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp1.core.semantics.calls.semanticanalysis;
+
+class LocalMethodCorrectArgTypesFail {
+    int method1(boolean b, int c) {
+        int a;
+        int s;
+        s = 1;
+        a = this.existingMethod(42, b, s);
+        return a;
+    }
+
+    int existingMethod(int a, int b, String s) {
+        return b;
+    }
+}

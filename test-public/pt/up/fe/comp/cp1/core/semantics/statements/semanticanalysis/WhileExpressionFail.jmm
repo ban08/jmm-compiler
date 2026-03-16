@@ -1,0 +1,12 @@
+package pt.up.fe.comp.cp1.core.semantics.statements.semanticanalysis;
+
+class WhileExpressionFail {
+    int something(int value) {
+        int res;
+        res = 0;
+        while (value - res) {
+            res = res + 5;
+        }
+        return res;
+    }
+}

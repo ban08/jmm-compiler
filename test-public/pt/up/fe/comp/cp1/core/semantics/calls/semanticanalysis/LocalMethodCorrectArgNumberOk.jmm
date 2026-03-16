@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp1.core.semantics.calls.semanticanalysis;
+
+class LocalMethodCorrectArgNumberOk {
+    int method1(int b, int c) {
+        int a;
+        a = this.existingMethod(42, b, c);
+        return a;
+    }
+
+    int existingMethod(int a, int b, int c) {
+        return a + b + c;
+    }
+}

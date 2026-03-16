@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp1.core.semantics.entityops.semanticanalysis;
+
+class AssignMethodReturnValFail {
+    boolean method1(int n1) {
+        boolean n2;
+        n2 = this.pow(n1);
+        return n2;
+    }
+
+    int pow(int n) {
+        return n * n;
+    }
+}

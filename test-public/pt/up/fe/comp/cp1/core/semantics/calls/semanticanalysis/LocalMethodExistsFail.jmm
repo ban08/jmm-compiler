@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp1.core.semantics.calls.semanticanalysis;
+
+class LocalMethodExistsFail {
+    int method1() {
+        int a;
+        a = this.nonexistingMethod();
+        return a;
+    }
+}

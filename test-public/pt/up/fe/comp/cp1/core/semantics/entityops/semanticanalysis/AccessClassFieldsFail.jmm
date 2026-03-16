@@ -1,0 +1,14 @@
+package pt.up.fe.comp.cp1.core.semantics.entityops.semanticanalysis;
+
+class AccessClassFieldsFail {
+    boolean field1;
+    int field2;
+
+    int method1(int a, int b) {
+        int c;
+        int field1;
+        field1 = 2;
+        c = this.field1 + this.field2;
+        return c;
+    }
+}

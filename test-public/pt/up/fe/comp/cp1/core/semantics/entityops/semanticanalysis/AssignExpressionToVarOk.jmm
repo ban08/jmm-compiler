@@ -1,0 +1,20 @@
+package pt.up.fe.comp.cp1.core.semantics.entityops.semanticanalysis;
+
+class AssignExpressionToVarOk {
+    int method1(int n1, int n2, boolean b1, boolean b2) {
+        int n3;
+        int n4;
+        boolean b3;
+        boolean b4;
+        int intRes;
+        boolean boolRes;
+
+        n3 = n1 * n2;
+        n4 = n3 / n2 + n1;
+        b3 = b1 && b2;
+        b4 = n1 < n2;
+        b1 = (n1 < n4) && !(n3 < n2);
+
+        return n3 + n4;
+    }
+}

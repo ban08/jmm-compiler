@@ -18,8 +18,8 @@ public class IfErrorParserTest extends JmmTestEnv {
     @Test
     public void testElseIf() {
         setDescription("Parse an if-else statement with an else-if in the middle, but with the else-if written as elseif, which is not valid");
-        parseSnippetWithErrors("if(a) {} elseif(b) {} else {}", STATEMENT);
-        parseSnippet("if(a) {} else if(b) {} else {}", STATEMENT);
+        parseSnippetWithErrors("package x; class A{ void foo(){if(a) {} elseif(b) {} else {}}}");
+        parseSnippet("package x; class A{ void foo(){if(a) {} else if(b) {} else {}}}");
     }
 
     @Test

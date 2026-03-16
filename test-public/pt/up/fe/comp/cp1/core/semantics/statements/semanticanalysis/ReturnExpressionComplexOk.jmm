@@ -1,0 +1,43 @@
+package pt.up.fe.comp.cp1.core.semantics.statements.semanticanalysis;
+
+class ReturnExpressionComplexOk {
+    boolean mustReturnBoolean(boolean value) {
+        int res;
+        int res1;
+        int res2;
+        boolean cond1;
+        boolean cond2;
+        boolean cond3;
+        res1 = 2;
+        res2 = 3;
+        cond1 = true;
+        cond2 = false;
+        cond3 = true;
+        if (value) {
+            res = 1;
+        } else {
+            res = 0;
+        }
+        return ((res1 + res2) < res) && !(cond1 && cond2 && cond3);
+    }
+
+    int mustReturnInt(boolean value) {
+        int res;
+        int res1;
+        int res2;
+        boolean cond1;
+        boolean cond2;
+        boolean cond3;
+        res1 = 2;
+        res2 = 3;
+        cond1 = true;
+        cond2 = false;
+        cond3 = true;
+        if (value) {
+            res = 1;
+        } else {
+            res = 0;
+        }
+        return res + res2 * res1;
+    }
+}

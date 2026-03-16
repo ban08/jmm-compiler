@@ -1,0 +1,64 @@
+package pt.up.fe.comp.cp1.core.semantics.entityops.semanticanalysis;
+
+class AllOperators {
+    int bigMethod(int a, int b, int c, boolean p, boolean q) {
+        int r1;
+        int r2;
+        boolean c1;
+        int c2;
+        boolean c3;
+        boolean isEquiv;
+        boolean isGreaterOrEqual;
+        boolean complexBranch;
+        boolean factor;
+        int finalMetric;
+
+        r1 = (a + b) * (c - a) / (b + 1);
+        r2 = (r1 * 2) - (a / (c + 1)) + (b * b);
+
+        c1 = (a < b) && (b < c);
+        c2 = !(r1 < r2);
+        c3 = !(!p && !q);
+
+        if (c1 && (c2 && !(!p && !(a < r1)))) {
+            a = (a + b + c) * (r1 - r2);
+            if (!(a < 0)) {
+                b = a / (b + 1);
+            }
+        }
+
+        isEquiv = !(a < b) && !(b < a);
+        isGreaterOrEqual = !(a < (b + c));
+
+        if (isEquiv && !(!c3 && !isGreaterOrEqual)) {
+            c = (a * b) / (c + 1);
+            r1 = r1 + r2 - a;
+        } else {
+            r2 = (r2 / (r1 + 1)) * (a - b);
+            if (p && !(q && (a < b))) {
+                a = a + 1;
+            }
+        }
+
+        complexBranch = !(!(c1 && p) && !(!(r2 < r1) && q));
+
+        if (complexBranch && !((a + b + c) < (r1 + r2))) {
+            factor = (a - b) * (b - c);
+            if (!(factor < 0) && !(!(factor < 1) && !(1 < factor))) {
+                r1 = r1 * factor;
+            }
+        }
+
+        if (!(!((a * 2) < b) && !((b * 2) < a))) {
+            p = !p;
+            q = !q;
+        }
+
+        finalMetric = (a + b) * (c + r1) - (r2 / (a + 1));
+        if (!(finalMetric < 1000) && (p && q)) {
+            a = 0;
+            b = 0;
+        }
+        return a + b;
+    }
+}

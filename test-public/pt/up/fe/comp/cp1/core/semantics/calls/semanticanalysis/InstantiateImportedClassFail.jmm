@@ -1,0 +1,16 @@
+package pt.up.fe.comp.cp1.core.semantics.calls.semanticanalysis;
+
+class InstantiateImportedClassFail {
+    int method1() {
+        Date d;
+        int i;
+        boolean b;
+        Exception e;
+
+        d = new Date();
+        i = 2;
+        b = false;
+        e = new Exception();
+        return i;
+    }
+}

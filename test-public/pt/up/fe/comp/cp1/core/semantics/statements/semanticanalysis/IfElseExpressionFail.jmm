@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp1.core.semantics.statements.semanticanalysis;
+
+class IfElseExpressionFail {
+    int threshold(int value, int threshold) {
+        int res;
+        if (value - threshold) {
+            res = 0;
+        } else {
+            res = 1;
+        }
+        return res;
+    }
+}

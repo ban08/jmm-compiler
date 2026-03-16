@@ -1,0 +1,16 @@
+package pt.up.fe.comp.cp1.core.semantics.calls.semanticanalysis;
+
+class InstantiateJavaLangClassOk {
+    int method1() {
+        String s;
+        int i;
+        boolean b;
+        Exception e;
+
+        s = new String();
+        i = 2;
+        b = false;
+        e = new Exception();
+        return i;
+    }
+}

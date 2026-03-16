@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp1.core.semantics.calls.semanticanalysis;
+
+import java.util.Date;
+
+class CallImportedMethodOk {
+    int method1() {
+        Date d;
+        String s;
+        d = new Date();
+        s = d.toString();
+        return 0;
+    }
+}

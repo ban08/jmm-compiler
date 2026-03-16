@@ -1,0 +1,7 @@
+package pt.up.fe.comp.cp1.core.semantics.calls.semanticanalysis;
+
+class InstantiateSelfFail {
+    int instSelf() {
+        return new InstantiateSelfOk();
+    }
+}
