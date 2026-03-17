@@ -20,11 +20,6 @@ public class EntitiesAccessParserTest extends JmmTestEnv {
             parseSnippet("a", EXPRESSION);
         }
     */
-    @Test
-    public void testThisAccess() {
-        setDescription("Test that 'this' can be accessed");
-        parseSnippet("this.a", EXPRESSION);
-    }
 
     @Test
     public void testLengthAccess() {

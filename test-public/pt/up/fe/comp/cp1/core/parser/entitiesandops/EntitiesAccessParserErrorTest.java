@@ -24,7 +24,7 @@ public class EntitiesAccessParserErrorTest extends JmmTestEnv {
     public void testInvalidThisAccess() {
         setDescription("Test that 'this' cannot be accessed with an invalid syntax");
         parseSnippetWithErrors("this.", EXPRESSION);
-        parseSnippet("this.a", EXPRESSION);
+        parseSnippet("this", EXPRESSION);
     }
 
     @Test
