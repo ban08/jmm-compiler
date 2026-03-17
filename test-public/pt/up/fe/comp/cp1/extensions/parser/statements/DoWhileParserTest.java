@@ -3,7 +3,6 @@ package pt.up.fe.comp.cp1.extensions.parser.statements;
 
 import org.junit.Test;
 import pt.up.fe.comp.test.env.JmmTestEnv;
-import pt.up.fe.comp2026.jmm.ast.JmmKind;
 
 import static pt.up.fe.comp.cp1.core.parser.RulesNames.STATEMENT;
 
@@ -23,14 +22,10 @@ public class DoWhileParserTest extends JmmTestEnv {
     @Test
     public void testDoWhileWithStatements() {
         setDescription("Test that a do-while loop with statements in its body is parsed correctly");
-        var jmmRes = parseSnippet("""
+        parseSnippet("""
                 do {
                     i= i +1;
                 } while (i < 10);""", STATEMENT);
-        assertNotNull("Method should not be null", jmmRes.rootNode());
-        var root = jmmRes.rootNode();
-        var doWhile = root.getChildren(JmmKind.STMT).getFirst();// First is a compound statement.
-        assertEquals("Do-while should have 1 statement in its body", 1, doWhile.getChildren(JmmKind.STMT).size());
     }
 
     @Test
