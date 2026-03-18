@@ -13,13 +13,8 @@ class MethodsAndFields {
         return field2;
     }
 
-    public MethodsAndFields getField3() {
-        return field3;
-    }
-
-    public int[] all(int a, boolean b, MethodsAndFields maf) {
-        int[] c;
-        return c;
+    public MethodsAndFields getField3(int a, boolean b, MethodsAndFields maf) {
+        return maf;
     }
 
     public static void main(String[] args) {

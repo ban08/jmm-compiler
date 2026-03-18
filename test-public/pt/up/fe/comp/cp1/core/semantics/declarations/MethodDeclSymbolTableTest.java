@@ -7,7 +7,6 @@ import pt.up.fe.comp.jmm.analysis.table.type.JmmType;
 import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmArrayType;
 import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmClassType;
 import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmPrimitiveType;
-import pt.up.fe.comp2026.ast.TypeUtils;
 
 import java.util.List;
 
@@ -53,11 +52,10 @@ public class MethodDeclSymbolTableTest extends pt.up.fe.comp.test.env.JmmTestEnv
         var semantics = symbolTable("MethodsAndFields.jmm", false);
         var st = semantics.getSymbolTable();
         var methods = st.getMethods();
-        super.assertEquals("Expected to have ${expected} methods.", 5, methods.size());
+        super.assertEquals("Expected to have ${expected} methods.", 4, methods.size());
         var checkInt = 0;
         var checkBool = 0;
         var checkObj = 0;
-        var checkAll = 0;
         var checkVoid = 0;
         var classObj = JmmClassType.ofInstance(qualifiedNameFor("MethodsAndFields"), false);
         for (var m : methods) {
@@ -69,16 +67,13 @@ public class MethodDeclSymbolTableTest extends pt.up.fe.comp.test.env.JmmTestEnv
             var message = "Method " + m.name() + " should have ${expected} parameters, but has ${actual}.";
             if (ret.equals(classObj)) {
                 checkObj++;
-                super.assertEquals(message, 0, numParameters);
+                super.assertEquals(message, 3, numParameters);
             } else if (ret.equals(JmmPrimitiveType.BOOLEAN)) {
                 checkBool++;
                 super.assertEquals(message, 0, numParameters);
             } else if (ret.equals(JmmPrimitiveType.INT)) {
                 checkInt++;
                 super.assertEquals(message, 0, numParameters);
-            } else if (ret instanceof JmmArrayType) {
-                checkAll++;
-                super.assertEquals(message, 3, numParameters);
             } else if (ret == JmmPrimitiveType.VOID) {
                 checkVoid++;
                 super.assertEquals(message, 1, numParameters); //main method
@@ -89,8 +84,6 @@ public class MethodDeclSymbolTableTest extends pt.up.fe.comp.test.env.JmmTestEnv
         super.assertEquals("Method with return type boolean", 1, checkBool);
         super.assertEquals("Method with return type object", 1, checkObj);
         super.assertEquals("Method with return type void", 1, checkVoid);
-        super.assertEquals("Method with three arguments", 1, checkAll);
-
 
     }
 
