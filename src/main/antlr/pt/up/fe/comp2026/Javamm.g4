@@ -22,6 +22,7 @@ WHILE : 'while' ;
 TRUE : 'true' ;
 FALSE : 'false' ;
 THIS : 'this' ;
+STRING : 'String' ;
 
 INTEGER : '0' | [1-9][0-9]* ;
 ID : [a-zA-Z_$][a-zA-Z0-9_$]* ;
@@ -64,6 +65,7 @@ type locals[boolean isArray=false]
     : name = INT ('[' ']' {$isArray=true;})?
     | name = BOOLEAN
     | name = VOID
+    | name = STRING ('[' ']' {$isArray=true;})?
     | name = ID ('[' ']' {$isArray=true;})?
     ;
 
@@ -94,8 +96,10 @@ expr
     | NEW name=ID '(' ')' #NewExpr
     | expr op=('*' | '/') expr #BinaryExpr
     | expr op=('+' | '-') expr #BinaryExpr
-    | expr op='<' expr #BinaryExpr
+    | expr op=('<' | '>' | '<=' | '>=') expr #BinaryExpr
+    | expr op=('==' | '!=') expr #BinaryExpr
     | expr op='&&' expr #BinaryExpr
+    | expr op='||' expr #BinaryExpr
     | value=INTEGER #IntegerLiteral
     | value=TRUE #BooleanLiteral
     | value=FALSE #BooleanLiteral
