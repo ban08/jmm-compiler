@@ -217,9 +217,17 @@ public class JmmSymbolTableBuilder {
     }
 
     private List<MethodSymbol> buildMethods(JmmNode classDecl) {
-        return classDecl.getChildren(METHOD_DECL).stream()
-                .map(this::buildMethod)
-                .toList();
+        var methods = new ArrayList<MethodSymbol>();
+        var methodNames = new HashSet<String>();
+
+        for (var methodNode : classDecl.getChildren(METHOD_DECL)) {
+            var methodName = methodNode.get("name");
+            if (!methodNames.add(methodName)) {
+                reports.add(newError(methodNode, "Duplicate method '" + methodName + "' in class '" + className + "'"));
+            }
+            methods.add(buildMethod(methodNode));
+        }
+        return methods;
     }
 
     private MethodSymbol buildMethod(JmmNode method) {
