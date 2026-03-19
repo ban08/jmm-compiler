@@ -1,9 +1,7 @@
-
 package pt.up.fe.comp.cp1.core.semantics.declarations;
 
 import org.junit.Test;
 import pt.up.fe.comp.jmm.analysis.table.Signature;
-import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmArrayType;
 import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmClassType;
 import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmPrimitiveType;
 import pt.up.fe.comp.test.env.JmmTestEnv;
@@ -78,7 +76,7 @@ public class ClassDeclSymbolTableTest extends JmmTestEnv {
         var semantics = symbolTable("MethodsAndFields.jmm", false);
         var st = semantics.getSymbolTable();
         var methods = st.getMethods();
-        super.assertEquals("Expected to have ${expected} methods.", 5, methods.size());
+        super.assertEquals("Expected to have ${expected} methods.", 4, methods.size());
 
         var getField1Opt = st.getMethod(Signature.of("getField1", List.of()));
         super.assertTrue("getField1 method should exist", getField1Opt.isPresent());
