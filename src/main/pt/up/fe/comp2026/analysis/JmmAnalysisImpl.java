@@ -27,7 +27,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
      */
     private List<AnalysisPass> buildPasses(SymbolTable table) {
         return List.of(
-                // TODO: Add your analysis passes here
+                new FieldInitializerValidation(table)
         );
     }
 

@@ -14,6 +14,8 @@ RETURN : 'return' ;
 PACKAGE: 'package';
 IMPORT: 'import';
 PUBLIC: 'public';
+PRIVATE: 'private';
+PROTECTED: 'protected';
 EXTENDS: 'extends' ;
 NEW : 'new' ;
 IF : 'if' ;
@@ -48,13 +50,12 @@ packageDecl
 classDecl
     : CLASS name=ID (EXTENDS superName=ID)?
         '{'
-        varDecl*
-        methodDecl*
+        (varDecl | methodDecl)*
         '}'
     ;
 
 varDecl
-    : typeNode = type name=ID ';'
+    : typeNode = type name=ID ('=' expr)? ';'
     ;
 
 param
@@ -70,9 +71,9 @@ type locals[boolean isArray=false]
     ;
 
 methodDecl locals[boolean isStatic=false]
-    : (visibility=PUBLIC)? (STATIC {$isStatic=true;})?
+    : (visibility=(PUBLIC | PRIVATE | PROTECTED))? (STATIC {$isStatic=true;})?
         returnType = type name=ID
-        '(' (params += param  (',' params += param)*)? ')'
+        '(' (param (',' param)*)? ')'
         '{' varDecl* stmt* '}'
     ;
 
@@ -93,7 +94,7 @@ expr
     | expr '[' expr ']' #ArrayAccessExpr
     | '!' expr #NotExpr
     | NEW INT '[' expr ']' #NewIntArrayExpr
-    | NEW name=ID '(' ')' #NewExpr
+    | NEW name=(ID | STRING) '(' ')' #NewExpr
     | expr op=('*' | '/') expr #BinaryExpr
     | expr op=('+' | '-') expr #BinaryExpr
     | expr op=('<' | '>' | '<=' | '>=') expr #BinaryExpr
@@ -106,4 +107,3 @@ expr
     | name=ID #VarRefExpr
     | THIS #ThisExpr
     ;
-

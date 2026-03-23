@@ -278,7 +278,9 @@ public class JmmSymbolTableBuilder {
             locals.add(new Symbol(localType, localName));
         }
 
-        var visibility = method.getOptional("visibility").isPresent() ? Visibility.PUBLIC : Visibility.PACKAGE_PROTECTED;
+        var visibility = method.getOptional("visibility")
+                .map(Visibility::fromString)
+                .orElse(Visibility.PACKAGE_PROTECTED);
         var isStatic = method.getBoolean(JmmAttributes.METHOD_DECL.IS_STATIC, false);
         return new MethodSymbol(methodName, returnType, params, locals, isStatic, visibility);
     }
