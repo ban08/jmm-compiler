@@ -24,7 +24,11 @@ class AllOperators {
             a = (a + b + c) * (r1 - r2);
             if (!(a < 0)) {
                 b = a / (b + 1);
+            } else {
+
             }
+        } else {
+
         }
 
         isEquiv = !(a < b) && !(b < a);
@@ -37,6 +41,8 @@ class AllOperators {
             r2 = (r2 / (r1 + 1)) * (a - b);
             if (p && !(q && (a < b))) {
                 a = a + 1;
+            } else {
+
             }
         }
 
@@ -46,18 +52,26 @@ class AllOperators {
             factor = (a - b) * (b - c);
             if (!(factor < 0) && !(!(factor < 1) && !(1 < factor))) {
                 r1 = r1 * factor;
+            } else {
+
             }
+        } else {
+
         }
 
         if (!(!((a * 2) < b) && !((b * 2) < a))) {
             p = !p;
             q = !q;
+        } else {
+
         }
 
         finalMetric = (a + b) * (c + r1) - (r2 / (a + 1));
         if (!(finalMetric < 1000) && (p && q)) {
             a = 0;
             b = 0;
+        } else {
+
         }
         return a + b;
     }

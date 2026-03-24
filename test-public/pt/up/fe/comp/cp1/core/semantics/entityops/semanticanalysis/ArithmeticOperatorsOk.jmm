@@ -34,6 +34,8 @@ class ArithmeticOperatorsOk {
         if (!(r6 < 0)) {
             r7 = r6 * 2;
             r8 = r7 / (a + b + 1);
+        } else {
+
         }
 
         r1 = r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;

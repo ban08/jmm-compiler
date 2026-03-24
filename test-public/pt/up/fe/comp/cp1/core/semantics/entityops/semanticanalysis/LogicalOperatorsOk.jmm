@@ -23,11 +23,15 @@ class LogicalOperatorsOk {
         if (c1 && (c3 && !(c5 && !c8))) {
             p = !p;
             q = !q;
+        } else {
+
         }
 
         if (!(c2 && c4) && !(!c6 && !c7)) {
             r = !r;
             c1 = !c1;
+        } else {
+        
         }
 
         c3 = !(!p && !(q && !r));
