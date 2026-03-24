@@ -79,7 +79,7 @@ methodDecl locals[boolean isStatic=false]
 
 stmt
     : '{' stmt* '}' #CompoundStmt
-    | IF '(' expr ')' stmt ELSE stmt #IfStmt
+    | IF '(' expr ')' stmt (ELSE stmt)? #IfStmt
     | WHILE '(' expr ')' stmt #WhileStmt
     | expr ';' #ExprStmt
     | var = ID '=' expr ';' #AssignStmt
@@ -91,11 +91,13 @@ expr
     : '(' expr ')' #ParenExpr
     | expr '.' 'length' #LengthExpr
     | expr '.' name=ID '(' (expr (',' expr)*)? ')' #MethodCallExpr
+    | expr '.' name=ID #FieldAccessExpr
     | expr '[' expr ']' #ArrayAccessExpr
     | '!' expr #NotExpr
+    | op=('++' | '--' | '+' | '-') expr #UnaryExpr
     | NEW INT '[' expr ']' #NewIntArrayExpr
     | NEW name=(ID | STRING) '(' ')' #NewExpr
-    | expr op=('*' | '/') expr #BinaryExpr
+    | expr op=('*' | '/' | '%') expr #BinaryExpr
     | expr op=('+' | '-') expr #BinaryExpr
     | expr op=('<' | '>' | '<=' | '>=') expr #BinaryExpr
     | expr op=('==' | '!=') expr #BinaryExpr

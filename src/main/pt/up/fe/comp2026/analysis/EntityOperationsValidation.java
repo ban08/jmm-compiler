@@ -1,0 +1,231 @@
+package pt.up.fe.comp2026.analysis;
+
+import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
+import pt.up.fe.comp.jmm.analysis.table.type.JmmType;
+import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp2026.ast.AccessType;
+import pt.up.fe.comp2026.ast.TypeUtils;
+import pt.up.fe.comp2026.jmm.ast.JmmKind;
+
+/**
+ * Validates entity access, assignments and arithmetic/logical expressions.
+ */
+public class EntityOperationsValidation extends AnalysisVisitorWithTable {
+
+    public EntityOperationsValidation(SymbolTable table) {
+        super(table);
+    }
+
+    @Override
+    protected void buildVisitor() {
+        addVisit(JmmKind.TYPE, this::visitType);
+        addVisit(JmmKind.NEW_EXPR, this::visitNewExpr);
+        addVisit(JmmKind.VAR_REF_EXPR, this::visitVarRefExpr);
+        addVisit(JmmKind.THIS_EXPR, this::visitThisExpr);
+        addVisit(JmmKind.ASSIGN_STMT, this::visitAssignStmt);
+        addVisit(JmmKind.BINARY_EXPR, this::visitBinaryExpr);
+        addVisit(JmmKind.NOT_EXPR, this::visitNotExpr);
+        addVisit(JmmKind.UNARY_EXPR, this::visitUnaryExpr);
+        addVisit(JmmKind.METHOD_CALL_EXPR, this::visitMethodCallExpr);
+        addVisit(JmmKind.FIELD_ACCESS_EXPR, this::visitFieldAccessExpr);
+        addVisit(JmmKind.NEW_INT_ARRAY_EXPR, this::visitNewIntArrayExpr);
+        addVisit(JmmKind.LENGTH_EXPR, this::visitLengthExpr);
+        setDefaultVisit((node, st) -> null);
+    }
+
+    private Void visitType(JmmNode typeNode, SymbolTable ignored) {
+        var typeName = typeNode.get("name");
+
+        if (!types.isKnownTypeName(typeName)) {
+            addReport(newError(typeNode, "Type '" + typeName + "' is not available in the current compilation unit"));
+        }
+
+        return null;
+    }
+
+    private Void visitNewExpr(JmmNode newExpr, SymbolTable ignored) {
+        var className = newExpr.get("name");
+        if (!types.isKnownTypeName(className)) {
+            addReport(newError(newExpr, "Class '" + className + "' is not imported"));
+        }
+
+        return null;
+    }
+
+    private Void visitVarRefExpr(JmmNode varRefExpr, SymbolTable ignored) {
+        var identifier = varRefExpr.get("name");
+        var resolved = types.resolveIdentifier(varRefExpr, identifier);
+
+        if (resolved.isEmpty()) {
+            addReport(newError(varRefExpr, "Identifier '" + identifier + "' is not declared"));
+            return null;
+        }
+
+        if (resolved.get().accessType() == AccessType.FIELD && types.isStaticMethodContext(varRefExpr)) {
+            addReport(newError(varRefExpr, "Field '" + identifier + "' cannot be accessed from a static method"));
+        }
+
+        return null;
+    }
+
+    private Void visitThisExpr(JmmNode thisExpr, SymbolTable ignored) {
+        if (types.isStaticMethodContext(thisExpr)) {
+            addReport(newError(thisExpr, "Keyword 'this' cannot be used inside a static method"));
+        }
+
+        return null;
+    }
+
+    private Void visitAssignStmt(JmmNode assignStmt, SymbolTable ignored) {
+        var targetName = assignStmt.get("var");
+        var target = types.resolveIdentifier(assignStmt, targetName);
+
+        if (target.isEmpty()) {
+            addReport(newError(assignStmt, "Identifier '" + targetName + "' is not declared"));
+            return null;
+        }
+
+        if (target.get().accessType() == AccessType.IMPORT) {
+            addReport(newError(assignStmt, "Cannot assign to imported class '" + targetName + "'"));
+            return null;
+        }
+
+        if (target.get().accessType() == AccessType.FIELD && types.isStaticMethodContext(assignStmt)) {
+            addReport(newError(assignStmt, "Field '" + targetName + "' cannot be assigned inside a static method"));
+            return null;
+        }
+
+        var exprType = types.getExprType(assignStmt.getChild(0));
+        if (exprType == null) {
+            return null;
+        }
+
+        if (!types.isAssignable(target.get().type(), exprType)) {
+            addReport(newError(assignStmt,
+                    "Cannot assign expression of type '" + exprType.print() + "' to '" + targetName +
+                            "' of type '" + target.get().type().print() + "'"));
+        }
+
+        return null;
+    }
+
+    private Void visitBinaryExpr(JmmNode binaryExpr, SymbolTable ignored) {
+        var leftType = types.getExprType(binaryExpr.getChild(0));
+        var rightType = types.getExprType(binaryExpr.getChild(1));
+
+        if (leftType == null || rightType == null) {
+            return null;
+        }
+
+        var operator = binaryExpr.get("op");
+        var valid = switch (operator) {
+            case "+", "-", "*", "/", "%" -> isInt(leftType) && isInt(rightType);
+            case "<", ">", "<=", ">=" -> isInt(leftType) && isInt(rightType);
+            case "&&", "||" -> isBoolean(leftType) && isBoolean(rightType);
+            case "==", "!=" -> types.areComparable(leftType, rightType);
+            default -> true;
+        };
+
+        if (!valid) {
+            addReport(newError(binaryExpr,
+                    "Operator '" + operator + "' cannot be applied to '" + leftType.print() +
+                            "' and '" + rightType.print() + "'"));
+        }
+
+        return null;
+    }
+
+    private Void visitNotExpr(JmmNode notExpr, SymbolTable ignored) {
+        var exprType = types.getExprType(notExpr.getChild(0));
+        if (exprType != null && !isBoolean(exprType)) {
+            addReport(newError(notExpr, "Operator '!' requires a boolean operand"));
+        }
+
+        return null;
+    }
+
+    private Void visitUnaryExpr(JmmNode unaryExpr, SymbolTable ignored) {
+        var exprType = types.getExprType(unaryExpr.getChild(0));
+        if (exprType != null && !isInt(exprType)) {
+            addReport(newError(unaryExpr, "Operator '" + unaryExpr.get("op") + "' requires an integer operand"));
+        }
+
+        var operator = unaryExpr.get("op");
+        if ((operator.equals("++") || operator.equals("--"))
+                && !isAssignableEntity(unaryExpr.getChild(0))) {
+            addReport(newError(unaryExpr, "Operator '" + operator + "' requires a variable or array access"));
+        }
+
+        return null;
+    }
+
+    private Void visitMethodCallExpr(JmmNode methodCallExpr, SymbolTable ignored) {
+        var receiverType = types.getExprType(methodCallExpr.getChild(0));
+        if (receiverType == null) {
+            return null;
+        }
+
+        if (!receiverType.isClass()) {
+            addReport(newError(methodCallExpr, "Method calls require a class receiver"));
+            return null;
+        }
+
+        if (types.resolveMethodCall(methodCallExpr).isEmpty()) {
+            addReport(newError(methodCallExpr,
+                    "Method '" + methodCallExpr.get("name") + "' is not applicable to receiver '" +
+                            receiverType.print() + "'"));
+        }
+
+        return null;
+    }
+
+    private Void visitFieldAccessExpr(JmmNode fieldAccessExpr, SymbolTable ignored) {
+        var receiverType = types.getExprType(fieldAccessExpr.getChild(0));
+        if (receiverType == null) {
+            return null;
+        }
+
+        if (!receiverType.isClass()) {
+            addReport(newError(fieldAccessExpr, "Field access requires a class receiver"));
+            return null;
+        }
+
+        if (types.resolveFieldAccessType(fieldAccessExpr).isEmpty()) {
+            addReport(newError(fieldAccessExpr,
+                    "Field '" + fieldAccessExpr.get("name") + "' is not available on receiver '" +
+                            receiverType.print() + "'"));
+        }
+
+        return null;
+    }
+
+    private Void visitNewIntArrayExpr(JmmNode newArrayExpr, SymbolTable ignored) {
+        var sizeType = types.getExprType(newArrayExpr.getChild(0));
+        if (sizeType != null && !isInt(sizeType)) {
+            addReport(newError(newArrayExpr, "Array size expression must have type 'int'"));
+        }
+
+        return null;
+    }
+
+    private Void visitLengthExpr(JmmNode lengthExpr, SymbolTable ignored) {
+        var receiverType = types.getExprType(lengthExpr.getChild(0));
+        if (receiverType != null && !receiverType.isArray()) {
+            addReport(newError(lengthExpr, "Expression '.length' requires an array receiver"));
+        }
+
+        return null;
+    }
+
+    private boolean isBoolean(JmmType type) {
+        return TypeUtils.booleanType().equals(type);
+    }
+
+    private boolean isInt(JmmType type) {
+        return TypeUtils.intType().equals(type);
+    }
+
+    private boolean isAssignableEntity(JmmNode expr) {
+        return JmmKind.VAR_REF_EXPR.check(expr) || JmmKind.ARRAY_ACCESS_EXPR.check(expr);
+    }
+}
