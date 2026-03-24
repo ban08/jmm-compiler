@@ -15,13 +15,6 @@ public class ImportedClassesSemanticAnalysisTest extends pt.up.fe.comp.test.env.
     }
 
     @Test
-    public void importedClassExists() {
-        setDescription("Test that an imported class exists");
-        semantics("ImportedClassExistsFail.jmm", true);
-        semantics("ImportedClassExistsOk.jmm", false);
-    }
-
-    @Test
     public void callImportedMethod() {
         setDescription("Test that an imported method can be called");
         semantics("CallImportedMethodFail.jmm", true);

@@ -22,4 +22,11 @@ public class ImportsSemanticAnalysisErrorTest extends pt.up.fe.comp.test.env.Jmm
         symbolTable("SuperWithClassNotImportedOk.jmm", false);
 
     }
+
+    @Test
+    public void importedClassExists() {
+        setDescription("Test that an imported class exists");
+        semantics("ImportedClassExistsFail.jmm", true);
+        semantics("ImportedClassExistsOk.jmm", false);
+    }
 }
