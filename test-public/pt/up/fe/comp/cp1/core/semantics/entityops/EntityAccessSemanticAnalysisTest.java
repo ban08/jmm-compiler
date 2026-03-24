@@ -28,10 +28,4 @@ public class EntityAccessSemanticAnalysisTest extends pt.up.fe.comp.test.env.Jmm
         semantics("AccessClassFieldsOk.jmm", false);
     }
 
-    @Test
-    public void accessImportedClass() {
-        setDescription("Test if an imported class exists");
-        semantics("AccessImportedClassFail.jmm", true);
-        semantics("AccessImportedClassOk.jmm", false);
-    }
 }

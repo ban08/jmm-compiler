@@ -4,7 +4,7 @@ import util.io;
 
 class AccessImportedClassOk {
     int method1(int a, int b) {
-        io.print(b);
+        io i;
         return a;
     }
 }
