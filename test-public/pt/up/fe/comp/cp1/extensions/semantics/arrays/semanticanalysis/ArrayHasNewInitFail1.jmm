@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp1.core.semantics.arrays.semanticanalysis;
+
+class ArrayHasNewInitFail1 {
+    int createArray() {
+        int[] a;
+        a = 100;
+        return 1;
+    }
+}

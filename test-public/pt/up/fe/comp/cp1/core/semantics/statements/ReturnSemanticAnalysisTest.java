@@ -22,10 +22,22 @@ public class ReturnSemanticAnalysisTest extends pt.up.fe.comp.test.env.JmmTestEn
     }
 
     @Test
+    public void returnStatementEmpty() {
+        setDescription("Test an empty return statement in a void method");
+        semantics("ReturnEmptyOk.jmm", false);
+    }
+
+    @Test
     public void returnStatementDoesNotExist() {
-        setDescription("Test that a return statement does not exist (main() edge case)");
-        semantics("ReturnNotExistFail.jmm", true);
+        setDescription("Test a void method without return");
         semantics("ReturnNotExistOk.jmm", false);
+    }
+
+    @Test
+    public void returnStatementNoExpression() {
+        setDescription("Test a return statement with no expression (main() edge case)");
+        semantics("ReturnNoExprFail.jmm", true);
+        semantics("ReturnNoExprOk.jmm", false);
     }
 
     @Test

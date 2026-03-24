@@ -31,7 +31,7 @@ class LogicalOperatorsOk {
             r = !r;
             c1 = !c1;
         } else {
-        
+
         }
 
         c3 = !(!p && !(q && !r));

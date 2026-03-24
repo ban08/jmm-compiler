@@ -1,0 +1,12 @@
+package pt.up.fe.comp.cp1.core.semantics.statements.semanticanalysis;
+
+class ReturnNoExprFail {
+    public static void main(String[] args) {
+        int a;
+        int b;
+        a = 1;
+        b = 2;
+        b = a + b;
+        return 1;
+    }
+}

@@ -1,0 +1,7 @@
+package pt.up.fe.comp.cp1.core.semantics.arrays.semanticanalysis;
+
+class ArrayReturnOk {
+    int[] methodA(int[] a) {
+        return a;
+    }
+}
