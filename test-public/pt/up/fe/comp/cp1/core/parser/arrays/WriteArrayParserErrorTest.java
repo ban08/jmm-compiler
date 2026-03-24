@@ -4,7 +4,6 @@ package pt.up.fe.comp.cp1.core.parser.arrays;
 import org.junit.Test;
 import pt.up.fe.comp.test.env.JmmTestEnv;
 
-import static pt.up.fe.comp.cp1.core.parser.RulesNames.EXPRESSION;
 import static pt.up.fe.comp.cp1.core.parser.RulesNames.STATEMENT;
 
 public class WriteArrayParserErrorTest extends JmmTestEnv {
