@@ -170,10 +170,55 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
             return null;
         }
 
-        if (types.resolveMethodCall(methodCallExpr).isEmpty()) {
-            addReport(newError(methodCallExpr,
-                    "Method '" + methodCallExpr.get("name") + "' is not applicable to receiver '" +
-                            receiverType.print() + "'"));
+        var resolvedOpt = types.resolveMethodCall(methodCallExpr);
+        if (resolvedOpt.isEmpty()) {
+            var receiverClassType = receiverType.asClass();
+            var importedTableOpt = table.getImportedSymbolTable(receiverClassType.fullyQualifiedName());
+            if (importedTableOpt.isPresent()) {
+                var importedTable = importedTableOpt.get();
+                var methodName = methodCallExpr.get("name");
+                var methods = importedTable.getMethods(methodName);
+                if (methods.isEmpty()) {
+                    addReport(newError(methodCallExpr, "Method '" + methodName + "' does not exist in imported class '" + receiverClassType.fullyQualifiedName() + "'"));
+                } else {
+                    var argTypes = new java.util.ArrayList<pt.up.fe.comp.jmm.analysis.table.type.JmmType>();
+                    for (int i = 1; i < methodCallExpr.getNumChildren(); i++) {
+                        var argType = types.tryGetExprType(methodCallExpr.getChild(i));
+                        if (argType.isEmpty()) {
+                            addReport(newError(methodCallExpr, "Cannot determine type of argument " + (i)));
+                            return null;
+                        }
+                        argTypes.add(argType.get());
+                    }
+                    boolean foundMatching = false;
+                    for (var method : methods) {
+                        if (method.parameters().size() != argTypes.size()) {
+                            continue;
+                        }
+                        boolean allTypesMatch = true;
+                        for (int i = 0; i < argTypes.size(); i++) {
+                            if (!types.isAssignable(method.parameters().get(i).type(), argTypes.get(i))) {
+                                allTypesMatch = false;
+                                break;
+                            }
+                        }
+                        if (allTypesMatch) {
+                            foundMatching = true;
+                            break;
+                        }
+                    }
+                    if (!foundMatching) {
+                        boolean anyWithSameCount = methods.stream().anyMatch(m -> m.parameters().size() == argTypes.size());
+                        if (!anyWithSameCount) {
+                            addReport(newError(methodCallExpr, "Wrong number of arguments for method '" + methodName + "' in imported class '" + receiverClassType.fullyQualifiedName() + "'"));
+                        } else {
+                            addReport(newError(methodCallExpr, "Wrong argument types for method '" + methodName + "' in imported class '" + receiverClassType.fullyQualifiedName() + "'"));
+                        }
+                    }
+                }
+            } else {
+                addReport(newError(methodCallExpr, "Imported class '" + receiverClassType.fullyQualifiedName() + "' not found or has no symbol table"));
+            }
         }
 
         return null;
