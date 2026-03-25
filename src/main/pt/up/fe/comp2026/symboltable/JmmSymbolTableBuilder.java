@@ -1,6 +1,7 @@
 package pt.up.fe.comp2026.symboltable;
 
 import pt.up.fe.comp.jmm.analysis.table.MethodSymbol;
+import pt.up.fe.comp.jmm.analysis.table.Signature;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Visibility;
 import pt.up.fe.comp.jmm.analysis.table.reflection.Importer;
@@ -221,16 +222,36 @@ public class JmmSymbolTableBuilder {
 
     private List<MethodSymbol> buildMethods(JmmNode classDecl) {
         var methods = new ArrayList<MethodSymbol>();
-        var methodNames = new HashSet<String>();
+        var methodSignatures = new HashSet<Signature>();
 
         for (var methodNode : classDecl.getChildren(METHOD_DECL)) {
-            var methodName = methodNode.get("name");
-            if (!methodNames.add(methodName)) {
-                reports.add(newError(methodNode, "Duplicate method '" + methodName + "' in class '" + className + "'"));
+            var method = buildMethod(methodNode);
+            var signature = method.signature();
+
+            if (!methodSignatures.add(signature)) {
+                reports.add(newError(methodNode,
+                        "Duplicate method signature '" + formatSignature(signature) +
+                                "' in class '" + className + "'"));
+                continue;
             }
-            methods.add(buildMethod(methodNode));
+
+            methods.add(method);
         }
         return methods;
+    }
+
+    private String formatSignature(Signature signature) {
+        var builder = new StringBuilder(signature.name()).append("(");
+
+        for (int i = 0; i < signature.parameters().size(); i++) {
+            if (i > 0) {
+                builder.append(", ");
+            }
+
+            builder.append(signature.parameters().get(i).print());
+        }
+
+        return builder.append(")").toString();
     }
 
     private MethodSymbol buildMethod(JmmNode method) {
