@@ -25,6 +25,7 @@ TRUE : 'true' ;
 FALSE : 'false' ;
 THIS : 'this' ;
 STRING : 'String' ;
+FOR : 'for' ;
 
 INTEGER : '0' | [1-9][0-9]* ;
 ID : [a-zA-Z_$][a-zA-Z0-9_$]* ;
@@ -81,6 +82,7 @@ stmt
     : '{' stmt* '}' #CompoundStmt
     | IF '(' expr ')' stmt (ELSE stmt)? #IfStmt
     | WHILE '(' expr ')' stmt #WhileStmt
+    | FOR '(' (initId=ID '=' initExpr=expr)? ';' (condition=expr)? ';' (stepId=ID '=' stepExpr=expr)? ')' body=stmt #ForStmt
     | expr ';' #ExprStmt
     | var = ID '=' expr ';' #AssignStmt
     | var = ID '[' expr ']' '=' expr ';' #ArrayAssignStmt

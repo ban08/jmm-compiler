@@ -30,6 +30,10 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
         addVisit(JmmKind.FIELD_ACCESS_EXPR, this::visitFieldAccessExpr);
         addVisit(JmmKind.NEW_INT_ARRAY_EXPR, this::visitNewIntArrayExpr);
         addVisit(JmmKind.LENGTH_EXPR, this::visitLengthExpr);
+        addVisit(JmmKind.IF_STMT, this::visitIfStmt);
+        addVisit(JmmKind.WHILE_STMT, this::visitWhileStmt);
+        addVisit(JmmKind.FOR_STMT, this::visitForStmt);
+
         setDefaultVisit((node, st) -> null);
     }
 
@@ -260,6 +264,65 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
         }
 
         return null;
+    }
+
+    private Void visitIfStmt(JmmNode ifStmt, SymbolTable ignored) {
+        // O primeiro filho (índice 0) é a condição
+        var condition = ifStmt.getChild(0);
+        var condType = types.getExprType(condition);
+
+        if (condType != null && !isBoolean(condType)) {
+            addReport(newError(ifStmt, "IF condition must be of type 'boolean', but is '" + condType.print() + "'"));
+        }
+
+        // Opcional: Se precisares de analisar o bloco 'then' ou 'else',
+        // fazes o check de segurança:
+        // JmmNode thenBlock = ifStmt.getChild(1);
+
+        // Check para a extensão: else opcional
+        if (ifStmt.getNumChildren() > 2) {
+            // JmmNode elseBlock = ifStmt.getChild(2);
+            // Validar algo no else se necessário
+        }
+
+        return null;
+    }
+
+    private Void visitWhileStmt(JmmNode whileStmt, SymbolTable ignored) {
+        var condition = whileStmt.getChild(0);
+        var condType = types.getExprType(condition);
+
+        if (condType != null && !isBoolean(condType)) {
+            addReport(newError(whileStmt, "WHILE condition must be of type 'boolean'"));
+        }
+        return null;
+    }
+
+    private Void visitForStmt(JmmNode forStmt, SymbolTable ignored) {
+        // 1. Validar a condição (é um NÓ/JmmNode, não uma String)
+        // Usamos getOptionalObject porque na gramática definimos (condition=expr)?
+        var condition = forStmt.getOptionalObject("condition", JmmNode.class);
+
+        if (condition.isPresent()) {
+            JmmNode condNode = condition.get();
+            var condType = types.getExprType(condNode);
+            if (condType != null && !isBoolean(condType)) {
+                addReport(newError(condNode, "FOR condition must be boolean"));
+            }
+        }
+
+        // 2. Validar IDs (estes SIM são Strings/Atributos)
+        forStmt.getOptional("initId").ifPresent(id -> this.myValidateId(forStmt, id));
+        forStmt.getOptional("stepId").ifPresent(id -> this.myValidateId(forStmt, id));
+
+        return null;
+    }
+
+    // Adiciona este método auxiliar no fim da tua classe (antes do último })
+    private void myValidateId(JmmNode node, String id) {
+        if (types.resolveIdentifier(node, id).isEmpty()) {
+            addReport(newError(node, "Identifier '" + id + "' in FOR loop is not declared"));
+        }
     }
 
     private boolean isBoolean(JmmType type) {
