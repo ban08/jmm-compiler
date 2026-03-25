@@ -58,14 +58,15 @@ public class TypeUtils {
 
         var name = typeNode.get("name");
         var isArray = NodeUtils.getBooleanAttribute(typeNode, "isArray", "false");
+        var arrayDepth = NodeUtils.getIntegerAttribute(typeNode, "arrayDepth", isArray ? "1" : "0");
 
         var primitive = JmmPrimitiveType.fromString(name);
         if (primitive.isPresent()) {
-            return isArray ? JmmArrayType.of(primitive.get()) : primitive.get();
+            return wrapArrayType(primitive.get(), arrayDepth);
         }
 
         var classType = resolveClassType(name, false);
-        return isArray ? JmmArrayType.of(classType) : classType;
+        return wrapArrayType(classType, arrayDepth);
     }
 
     public boolean isKnownTypeName(String name) {
@@ -93,7 +94,8 @@ public class TypeUtils {
             case THIS_EXPR -> Optional.of(JmmClassType.ofInstance(table.getFullyQualifiedName(), false));
             case NOT_EXPR -> Optional.of(booleanType());
             case UNARY_EXPR -> Optional.of(intType());
-            case NEW_INT_ARRAY_EXPR -> Optional.of(JmmArrayType.of(intType()));
+            case NEW_INT_ARRAY_EXPR -> Optional.of(wrapArrayType(intType(), expr.getNumChildren()));
+            case ARRAY_INITIALIZER_EXPR -> Optional.of(JmmArrayType.of(intType()));
             case NEW_EXPR -> Optional.of(resolveClassType(expr.get("name"), false));
             case BINARY_EXPR -> Optional.of(getBinExprType(expr));
             case LENGTH_EXPR -> Optional.of(intType());
@@ -408,5 +410,14 @@ public class TypeUtils {
         } catch (ClassNotFoundException e) {
             return false;
         }
+    }
+
+    private JmmType wrapArrayType(JmmType baseType, int arrayDepth) {
+        var currentType = baseType;
+        for (int i = 0; i < arrayDepth; i++) {
+            currentType = JmmArrayType.of(currentType);
+        }
+
+        return currentType;
     }
 }
