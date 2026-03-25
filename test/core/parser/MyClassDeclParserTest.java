@@ -28,4 +28,10 @@ public class MyClassDeclParserTest extends JmmTestEnv {
     public void testMultiPackage() {
         parseSnippet("package bar.foo.org;", PACKAGE);
     }
+
+    @Test
+    public void testImportRequiresQualifiedName() {
+        parseSnippet("import bar.Foo;", IMPORT);
+        parseSnippetWithErrors("import Foo;", IMPORT);
+    }
 }

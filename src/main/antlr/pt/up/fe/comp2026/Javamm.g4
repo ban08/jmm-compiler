@@ -39,7 +39,7 @@ program
     ;
 
 importDecl
-    : IMPORT path += ID ('.' path += ID)* ';'
+    : IMPORT path += ID '.' path += ID ('.' path += ID)* ';'
     ;
 
 packageDecl
