@@ -102,6 +102,7 @@ public class TypeUtils {
             case FIELD_ACCESS_EXPR -> resolveFieldAccessType(expr);
             case ARRAY_ACCESS_EXPR -> getArrayElementType(expr.getChild(0));
             case METHOD_CALL_EXPR -> resolveMethodCall(expr).map(ResolvedMethodCall::returnType);
+            case IMPLICIT_THIS_CALL_EXPR -> resolveImplicitThisMethodCall(expr).map(ResolvedMethodCall::returnType);
             default -> Optional.empty();
         };
     }
@@ -180,6 +181,26 @@ public class TypeUtils {
         }
 
         return resolveMethodCall(receiverType.get().asClass(), callExpr.get("name"), argTypes);
+    }
+
+    public Optional<ResolvedMethodCall> resolveImplicitThisMethodCall(JmmNode callExpr) {
+        IMPLICIT_THIS_CALL_EXPR.check(callExpr);
+
+        var argTypes = new ArrayList<JmmType>();
+        for (int i = 0; i < callExpr.getNumChildren(); i++) {
+            var argType = tryGetExprType(callExpr.getChild(i));
+            if (argType.isEmpty()) {
+                return Optional.empty();
+            }
+
+            argTypes.add(argType.get());
+        }
+
+        var receiverType = isStaticMethodContext(callExpr)
+                ? JmmClassType.ofStaticReference(table.getFullyQualifiedName(), false)
+                : JmmClassType.ofInstance(table.getFullyQualifiedName(), false);
+
+        return resolveMethodCall(receiverType, callExpr.get("name"), argTypes);
     }
 
     public boolean isAssignable(JmmType targetType, JmmType valueType) {

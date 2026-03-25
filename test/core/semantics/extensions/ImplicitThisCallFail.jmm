@@ -1,0 +1,11 @@
+package core.semantics.extensions;
+
+class ImplicitThisCallFail {
+    int compute() {
+        return sum(true, 2);
+    }
+
+    int sum(int a, int b) {
+        return a + b;
+    }
+}

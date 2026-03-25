@@ -1,11 +1,15 @@
 package pt.up.fe.comp2026.analysis;
 
+import pt.up.fe.comp.jmm.analysis.table.MethodSymbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.type.JmmType;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2026.ast.AccessType;
 import pt.up.fe.comp2026.ast.TypeUtils;
 import pt.up.fe.comp2026.jmm.ast.JmmKind;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Validates entity access, assignments and arithmetic/logical expressions.
@@ -25,6 +29,9 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
         addVisit(JmmKind.THIS_EXPR, this::visitThisExpr);
         addVisit(JmmKind.IF_STMT, this::visitIfStmt);
         addVisit(JmmKind.WHILE_STMT, this::visitWhileStmt);
+        addVisit(JmmKind.DO_WHILE_STMT, this::visitDoWhileStmt);
+        addVisit(JmmKind.FOR_STMT, this::visitForStmt);
+        addVisit(JmmKind.FOR_HEADER_ASSIGN, this::visitForHeaderAssign);
         addVisit(JmmKind.ASSIGN_STMT, this::visitAssignStmt);
         addVisit(JmmKind.ARRAY_ASSIGN_STMT, this::visitArrayAssignStmt);
         addVisit(JmmKind.RETURN_STMT, this::visitReturnStmt);
@@ -32,6 +39,7 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
         addVisit(JmmKind.NOT_EXPR, this::visitNotExpr);
         addVisit(JmmKind.UNARY_EXPR, this::visitUnaryExpr);
         addVisit(JmmKind.METHOD_CALL_EXPR, this::visitMethodCallExpr);
+        addVisit(JmmKind.IMPLICIT_THIS_CALL_EXPR, this::visitImplicitThisCallExpr);
         addVisit(JmmKind.FIELD_ACCESS_EXPR, this::visitFieldAccessExpr);
         addVisit(JmmKind.ARRAY_ACCESS_EXPR, this::visitArrayAccessExpr);
         addVisit(JmmKind.NEW_INT_ARRAY_EXPR, this::visitNewIntArrayExpr);
@@ -109,36 +117,38 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
         return null;
     }
 
+    private Void visitDoWhileStmt(JmmNode doWhileStmt, SymbolTable ignored) {
+        var conditions = doWhileStmt.getChildren(JmmKind.EXPR);
+        if (!conditions.isEmpty()) {
+            validateBooleanCondition(conditions.getFirst(), "DO-WHILE");
+        }
+
+        return null;
+    }
+
+    private Void visitForStmt(JmmNode forStmt, SymbolTable ignored) {
+        var conditions = forStmt.getChildren(JmmKind.EXPR);
+        if (!conditions.isEmpty()) {
+            validateBooleanCondition(conditions.getFirst(), "FOR");
+        }
+
+        return null;
+    }
+
+    private Void visitForHeaderAssign(JmmNode forHeaderAssign, SymbolTable ignored) {
+        var targetName = forHeaderAssign.get("var");
+
+        if (forHeaderAssign.getNumChildren() == 1) {
+            validateSimpleAssignment(forHeaderAssign, targetName, forHeaderAssign.getChild(0));
+            return null;
+        }
+
+        validateIndexedAssignment(forHeaderAssign, targetName);
+        return null;
+    }
+
     private Void visitAssignStmt(JmmNode assignStmt, SymbolTable ignored) {
-        var targetName = assignStmt.get("var");
-        var target = types.resolveIdentifier(assignStmt, targetName);
-
-        if (target.isEmpty()) {
-            addReport(newError(assignStmt, "Identifier '" + targetName + "' is not declared"));
-            return null;
-        }
-
-        if (target.get().accessType() == AccessType.IMPORT) {
-            addReport(newError(assignStmt, "Cannot assign to imported class '" + targetName + "'"));
-            return null;
-        }
-
-        if (target.get().accessType() == AccessType.FIELD && types.isStaticMethodContext(assignStmt)) {
-            addReport(newError(assignStmt, "Field '" + targetName + "' cannot be assigned inside a static method"));
-            return null;
-        }
-
-        var exprType = types.getExprType(assignStmt.getChild(0));
-        if (exprType == null) {
-            return null;
-        }
-
-        if (!types.isAssignable(target.get().type(), exprType)) {
-            addReport(newError(assignStmt,
-                    "Cannot assign expression of type '" + exprType.print() + "' to '" + targetName +
-                            "' of type '" + target.get().type().print() + "'"));
-        }
-
+        validateSimpleAssignment(assignStmt, assignStmt.get("var"), assignStmt.getChild(0));
         return null;
     }
 
@@ -204,40 +214,7 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
     }
 
     private Void visitArrayAssignStmt(JmmNode arrayAssignStmt, SymbolTable ignored) {
-        var targetName = arrayAssignStmt.get("var");
-        var target = types.resolveIdentifier(arrayAssignStmt, targetName);
-
-        if (target.isEmpty()) {
-            addReport(newError(arrayAssignStmt, "Identifier '" + targetName + "' is not declared"));
-            return null;
-        }
-
-        if (target.get().accessType() == AccessType.IMPORT) {
-            addReport(newError(arrayAssignStmt, "Cannot assign to imported class '" + targetName + "'"));
-            return null;
-        }
-
-        if (target.get().accessType() == AccessType.FIELD && types.isStaticMethodContext(arrayAssignStmt)) {
-            addReport(newError(arrayAssignStmt, "Field '" + targetName + "' cannot be assigned inside a static method"));
-            return null;
-        }
-
-        var indexedType = getIndexedType(arrayAssignStmt, target.get().type(), targetName);
-        if (indexedType == null) {
-            return null;
-        }
-
-        var valueType = types.getExprType(arrayAssignStmt.getChild(arrayAssignStmt.getNumChildren() - 1));
-        if (valueType == null) {
-            return null;
-        }
-
-        if (!types.isAssignable(indexedType, valueType)) {
-            addReport(newError(arrayAssignStmt,
-                    "Cannot assign expression of type '" + valueType.print() + "' to array slot of type '" +
-                            indexedType.print() + "'"));
-        }
-
+        validateIndexedAssignment(arrayAssignStmt, arrayAssignStmt.get("var"));
         return null;
     }
 
@@ -273,6 +250,11 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
 
         if (!receiverType.isClass()) {
             addReport(newError(methodCallExpr, "Method calls require a class receiver"));
+            return null;
+        }
+
+        if (isCurrentClass(receiverType)) {
+            validateCurrentClassMethodCall(methodCallExpr, 1, receiverType.asClass().staticRef());
             return null;
         }
 
@@ -326,6 +308,16 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
                 addReport(newError(methodCallExpr, "Imported class '" + receiverClassType.fullyQualifiedName() + "' not found or has no symbol table"));
             }
         }
+
+        return null;
+    }
+
+    private Void visitImplicitThisCallExpr(JmmNode implicitThisCallExpr, SymbolTable ignored) {
+        validateCurrentClassMethodCall(
+                implicitThisCallExpr,
+                0,
+                types.isStaticMethodContext(implicitThisCallExpr)
+        );
 
         return null;
     }
@@ -395,6 +387,186 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
         }
 
         return null;
+    }
+
+    private void validateSimpleAssignment(JmmNode assignmentNode, String targetName, JmmNode valueExpr) {
+        var target = resolveAssignmentTarget(assignmentNode, targetName);
+        if (target == null) {
+            return;
+        }
+
+        var exprType = types.getExprType(valueExpr);
+        if (exprType == null) {
+            return;
+        }
+
+        if (!types.isAssignable(target.type(), exprType)) {
+            addReport(newError(assignmentNode,
+                    "Cannot assign expression of type '" + exprType.print() + "' to '" + targetName +
+                            "' of type '" + target.type().print() + "'"));
+        }
+    }
+
+    private void validateIndexedAssignment(JmmNode assignmentNode, String targetName) {
+        var target = resolveAssignmentTarget(assignmentNode, targetName);
+        if (target == null) {
+            return;
+        }
+
+        var indexedType = getIndexedType(assignmentNode, target.type(), targetName);
+        if (indexedType == null) {
+            return;
+        }
+
+        var valueType = types.getExprType(assignmentNode.getChild(assignmentNode.getNumChildren() - 1));
+        if (valueType == null) {
+            return;
+        }
+
+        if (!types.isAssignable(indexedType, valueType)) {
+            addReport(newError(assignmentNode,
+                    "Cannot assign expression of type '" + valueType.print() + "' to array slot of type '" +
+                            indexedType.print() + "'"));
+        }
+    }
+
+    private TypeUtils.ResolvedIdentifier resolveAssignmentTarget(JmmNode assignmentNode, String targetName) {
+        var target = types.resolveIdentifier(assignmentNode, targetName);
+
+        if (target.isEmpty()) {
+            addReport(newError(assignmentNode, "Identifier '" + targetName + "' is not declared"));
+            return null;
+        }
+
+        if (target.get().accessType() == AccessType.IMPORT) {
+            addReport(newError(assignmentNode, "Cannot assign to imported class '" + targetName + "'"));
+            return null;
+        }
+
+        if (target.get().accessType() == AccessType.FIELD && types.isStaticMethodContext(assignmentNode)) {
+            addReport(newError(assignmentNode, "Field '" + targetName + "' cannot be assigned inside a static method"));
+            return null;
+        }
+
+        return target.get();
+    }
+
+    private void validateCurrentClassMethodCall(JmmNode callExpr, int firstArgIndex, boolean requireStatic) {
+        var argTypesOpt = getArgumentTypes(callExpr, firstArgIndex);
+        if (argTypesOpt.isEmpty()) {
+            return;
+        }
+
+        var methodName = callExpr.get("name");
+        var allMethods = getCurrentAndInheritedMethods(methodName);
+
+        if (findMatchingMethod(allMethods, argTypesOpt.get(), requireStatic) != null) {
+            return;
+        }
+
+        if (requireStatic && findMatchingMethod(allMethods, argTypesOpt.get(), false) != null) {
+            addReport(newError(callExpr,
+                    "Method '" + methodName + "' is not static and cannot be called from a static context"));
+            return;
+        }
+
+        if (allMethods.isEmpty()) {
+            addReport(newError(callExpr,
+                    "Method '" + methodName + "' does not exist in class '" + table.getClassName() + "'"));
+            return;
+        }
+
+        var visibleMethods = requireStatic
+                ? allMethods.stream().filter(MethodSymbol::isStatic).toList()
+                : allMethods;
+
+        if (visibleMethods.isEmpty()) {
+            addReport(newError(callExpr,
+                    "Method '" + methodName + "' is not static and cannot be called from a static context"));
+            return;
+        }
+
+        var argCount = argTypesOpt.get().size();
+        var anyWithSameCount = visibleMethods.stream().anyMatch(method -> method.parameters().size() == argCount);
+        if (!anyWithSameCount) {
+            addReport(newError(callExpr,
+                    "Wrong number of arguments for method '" + methodName + "' in class '" + table.getClassName() + "'"));
+            return;
+        }
+
+        addReport(newError(callExpr,
+                "Wrong argument types for method '" + methodName + "' in class '" + table.getClassName() + "'"));
+    }
+
+    private List<MethodSymbol> getCurrentAndInheritedMethods(String methodName) {
+        var methods = new ArrayList<MethodSymbol>(table.getMethods(methodName));
+
+        var visitedSupers = new java.util.HashSet<String>();
+        var superQualifiedName = table.getSuperFullyQualifiedName();
+        while (superQualifiedName != null && visitedSupers.add(superQualifiedName)) {
+            var superTableOpt = table.getImportedSymbolTable(superQualifiedName);
+            if (superTableOpt.isEmpty()) {
+                break;
+            }
+
+            var superTable = superTableOpt.get();
+            methods.addAll(superTable.getMethods(methodName));
+            superQualifiedName = superTable.getSuperFullyQualifiedName();
+        }
+
+        return methods;
+    }
+
+    private MethodSymbol findMatchingMethod(List<MethodSymbol> methods, List<JmmType> argTypes, boolean requireStatic) {
+        for (var method : methods) {
+            if (requireStatic && !method.isStatic()) {
+                continue;
+            }
+
+            if (method.parameters().size() != argTypes.size()) {
+                continue;
+            }
+
+            var matches = true;
+            for (int i = 0; i < argTypes.size(); i++) {
+                if (!types.isAssignable(method.parameters().get(i).type(), argTypes.get(i))) {
+                    matches = false;
+                    break;
+                }
+            }
+
+            if (matches) {
+                return method;
+            }
+        }
+
+        return null;
+    }
+
+    private java.util.Optional<List<JmmType>> getArgumentTypes(JmmNode callExpr, int firstArgIndex) {
+        var argTypes = new ArrayList<JmmType>();
+
+        for (int i = firstArgIndex; i < callExpr.getNumChildren(); i++) {
+            var argType = types.tryGetExprType(callExpr.getChild(i));
+            if (argType.isEmpty()) {
+                addReport(newError(callExpr, "Cannot determine type of argument " + (i - firstArgIndex + 1)));
+                return java.util.Optional.empty();
+            }
+
+            argTypes.add(argType.get());
+        }
+
+        return java.util.Optional.of(argTypes);
+    }
+
+    private boolean isCurrentClass(JmmType receiverType) {
+        if (!receiverType.isClass()) {
+            return false;
+        }
+
+        var receiverClass = receiverType.asClass();
+        return receiverClass.fullyQualifiedName().equals(table.getFullyQualifiedName())
+                || receiverClass.name().equals(table.getClassName());
     }
 
     private boolean isBoolean(JmmType type) {

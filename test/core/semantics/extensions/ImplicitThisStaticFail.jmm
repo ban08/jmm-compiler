@@ -1,0 +1,11 @@
+package core.semantics.extensions;
+
+class ImplicitThisStaticFail {
+    static int compute() {
+        return sum();
+    }
+
+    int sum() {
+        return 1;
+    }
+}

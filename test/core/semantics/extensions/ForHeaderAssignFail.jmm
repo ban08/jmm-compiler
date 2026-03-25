@@ -1,0 +1,13 @@
+package core.semantics.extensions;
+
+class ForHeaderAssignFail {
+    int compute() {
+        int i;
+        i = 0;
+
+        for (i = true; i < 2; i = i + 1) {
+        }
+
+        return i;
+    }
+}
