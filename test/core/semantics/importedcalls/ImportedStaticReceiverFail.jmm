@@ -1,0 +1,9 @@
+package core.semantics.importedcalls;
+
+import java.util.ArrayList;
+
+class ImportedStaticReceiverFail {
+    int compute() {
+        return ArrayList.size();
+    }
+}

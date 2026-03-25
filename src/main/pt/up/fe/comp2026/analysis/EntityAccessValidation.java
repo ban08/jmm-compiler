@@ -128,62 +128,70 @@ public class EntityAccessValidation extends SemanticValidationPass {
             return null;
         }
 
+        var receiverClassType = receiverType.asClass();
         var resolvedOpt = types.resolveMethodCall(methodCallExpr);
         if (resolvedOpt.isEmpty()) {
-            var receiverClassType = receiverType.asClass();
             var importedTableOpt = table.getImportedSymbolTable(receiverClassType.fullyQualifiedName());
             if (importedTableOpt.isPresent()) {
-                var importedTable = importedTableOpt.get();
-                var methodName = methodCallExpr.get("name");
-                var methods = importedTable.getMethods(methodName);
-                if (methods.isEmpty()) {
-                    addReport(newError(methodCallExpr, "Method '" + methodName + "' does not exist in imported class '" + receiverClassType.fullyQualifiedName() + "'"));
-                } else {
-                    var argTypes = new java.util.ArrayList<pt.up.fe.comp.jmm.analysis.table.type.JmmType>();
-                    for (int i = 1; i < methodCallExpr.getNumChildren(); i++) {
-                        var argType = types.tryGetExprType(methodCallExpr.getChild(i));
-                        if (argType.isEmpty()) {
-                            addReport(newError(methodCallExpr, "Cannot determine type of argument " + i));
-                            return null;
-                        }
-                        argTypes.add(argType.get());
-                    }
-
-                    var foundMatching = false;
-                    for (var method : methods) {
-                        if (method.parameters().size() != argTypes.size()) {
-                            continue;
-                        }
-
-                        var allTypesMatch = true;
-                        for (int i = 0; i < argTypes.size(); i++) {
-                            if (!types.isAssignable(method.parameters().get(i).type(), argTypes.get(i))) {
-                                allTypesMatch = false;
-                                break;
-                            }
-                        }
-
-                        if (allTypesMatch) {
-                            foundMatching = true;
-                            break;
-                        }
-                    }
-
-                    if (!foundMatching) {
-                        var anyWithSameCount = methods.stream().anyMatch(m -> m.parameters().size() == argTypes.size());
-                        if (!anyWithSameCount) {
-                            addReport(newError(methodCallExpr, "Wrong number of arguments for method '" + methodName + "' in imported class '" + receiverClassType.fullyQualifiedName() + "'"));
-                        } else {
-                            addReport(newError(methodCallExpr, "Wrong argument types for method '" + methodName + "' in imported class '" + receiverClassType.fullyQualifiedName() + "'"));
-                        }
-                    }
-                }
+                validateImportedMethodCall(methodCallExpr, receiverClassType);
             } else {
                 addReport(newError(methodCallExpr, "Imported class '" + receiverClassType.fullyQualifiedName() + "' not found or has no symbol table"));
             }
         }
 
         return null;
+    }
+
+    private void validateImportedMethodCall(JmmNode methodCallExpr, pt.up.fe.comp.jmm.analysis.table.type.impls.JmmClassType receiverClassType) {
+        var methodName = methodCallExpr.get("name");
+        var methods = table.getImportedSymbolTable(receiverClassType.fullyQualifiedName())
+                .orElseThrow()
+                .getMethods(methodName);
+
+        if (methods.isEmpty()) {
+            addReport(newError(methodCallExpr,
+                    "Method '" + methodName + "' does not exist in imported class '" +
+                            receiverClassType.fullyQualifiedName() + "'"));
+            return;
+        }
+
+        var argTypesOpt = getArgumentTypes(methodCallExpr, 1);
+        if (argTypesOpt.isEmpty()) {
+            return;
+        }
+
+        var argTypes = argTypesOpt.get();
+        var requireStatic = receiverClassType.staticRef();
+
+        if (requireStatic && findMatchingMethod(methods, argTypes, false) != null) {
+            addReport(newError(methodCallExpr,
+                    "Method '" + methodName + "' is not static and cannot be called from a static context"));
+            return;
+        }
+
+        var visibleMethods = requireStatic
+                ? methods.stream().filter(method -> method.isStatic()).toList()
+                : methods;
+
+        if (visibleMethods.isEmpty()) {
+            addReport(newError(methodCallExpr,
+                    "Method '" + methodName + "' is not static and cannot be called from a static context"));
+            return;
+        }
+
+        var anyWithSameCount = visibleMethods.stream()
+                .anyMatch(method -> method.parameters().size() == argTypes.size());
+
+        if (!anyWithSameCount) {
+            addReport(newError(methodCallExpr,
+                    "Wrong number of arguments for method '" + methodName + "' in imported class '" +
+                            receiverClassType.fullyQualifiedName() + "'"));
+            return;
+        }
+
+        addReport(newError(methodCallExpr,
+                "Wrong argument types for method '" + methodName + "' in imported class '" +
+                        receiverClassType.fullyQualifiedName() + "'"));
     }
 
     private Void visitImplicitThisCallExpr(JmmNode implicitThisCallExpr, SymbolTable ignored) {
