@@ -58,12 +58,14 @@ public class JmmSymbolTableBuilder {
         var packagePathList = packageDecl.getObjectAsList("path", String.class);
         var packagePath = String.join(".", packagePathList);
 
-        // Process imports (with dedup)
+        // Process imports (with dedup) and validate that each imported class exists.
         var importSet = new LinkedHashSet<String>();
         for (var importDecl : root.getChildren(IMPORT_DECL)) {
             var importPath = importDecl.getObjectAsList("path", String.class);
             var importFqn = String.join(".", importPath);
-            importSet.add(importFqn);
+            if (importSet.add(importFqn)) {
+                validateImport(importDecl, importFqn);
+            }
         }
         imports.addAll(importSet);
 
@@ -133,6 +135,12 @@ public class JmmSymbolTableBuilder {
         // Not found - report error
         reports.add(newError(contextNode, "Class '" + simpleName + "' is not imported"));
         return simpleName;
+    }
+
+    private void validateImport(JmmNode importDecl, String importFqn) {
+        if (importer.getSymbolTableOf(importFqn).isEmpty()) {
+            reports.add(newError(importDecl, "Imported class '" + importFqn + "' does not exist"));
+        }
     }
 
     /**
