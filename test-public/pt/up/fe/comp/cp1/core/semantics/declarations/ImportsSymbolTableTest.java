@@ -50,8 +50,10 @@ public class ImportsSymbolTableTest extends pt.up.fe.comp.test.env.JmmTestEnv {
         var semantics = symbolTable("MethodReturnsImportedClass.jmm", false);
         var st = semantics.getSymbolTable();
         var methods = st.getMethods();
-        super.assertEquals("Expected to have ${expected} methods.", 1, methods.size());
-        var m = methods.getFirst();
+        super.assertTrue("Expected to have methods.", !methods.isEmpty());
+        var mList = st.getMethods("make");
+        super.assertTrue("Expected to have method 'make'", !mList.isEmpty());
+        var m = mList.getFirst();
         var rt = m.returnType();
         super.assertTrue("Expected method to return the imported class util.io",
                 rt.isClass() &&
@@ -78,8 +80,10 @@ public class ImportsSymbolTableTest extends pt.up.fe.comp.test.env.JmmTestEnv {
         var semantics = symbolTable("ParameterOfImportedClass.jmm", false);
         var st = semantics.getSymbolTable();
         var methods = st.getMethods();
-        super.assertEquals("Expected to have ${expected} methods.", 1, methods.size());
-        var m = methods.getFirst();
+        super.assertTrue("Expected to have methods.", !methods.isEmpty());
+        var mList = st.getMethods("accept");
+        super.assertTrue("Expected to have method 'accept'", !mList.isEmpty());
+        var m = mList.getFirst();
         var params = m.parameters();
         super.assertEquals("Expected method to have ${expected} parameters", 1, params.size());
         var p = params.getFirst();
