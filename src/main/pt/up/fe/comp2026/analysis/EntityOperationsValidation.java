@@ -438,8 +438,8 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
             return null;
         }
 
-        if (target.get().accessType() == AccessType.IMPORT) {
-            addReport(newError(assignmentNode, "Cannot assign to imported class '" + targetName + "'"));
+        if (target.get().accessType() == AccessType.IMPORT || target.get().accessType() == AccessType.CLASS) {
+            addReport(newError(assignmentNode, "Cannot assign to class name '" + targetName + "'"));
             return null;
         }
 

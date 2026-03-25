@@ -8,5 +8,6 @@ public enum AccessType {
     PARAM,
     LOCAL,
     FIELD,
+    CLASS,
     IMPORT;
 }

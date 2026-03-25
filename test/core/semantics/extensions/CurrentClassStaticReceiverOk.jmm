@@ -1,0 +1,11 @@
+package core.semantics.extensions;
+
+class CurrentClassStaticReceiverOk {
+    static int compute() {
+        return CurrentClassStaticReceiverOk.sum();
+    }
+
+    static int sum() {
+        return 1;
+    }
+}

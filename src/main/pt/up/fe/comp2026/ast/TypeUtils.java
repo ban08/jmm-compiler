@@ -146,6 +146,12 @@ public class TypeUtils {
             return Optional.of(new ResolvedIdentifier(name, field.get().type(), AccessType.FIELD));
         }
 
+        if (name.equals(table.getClassName())) {
+            return Optional.of(new ResolvedIdentifier(name,
+                    JmmClassType.ofStaticReference(table.getFullyQualifiedName(), false),
+                    AccessType.CLASS));
+        }
+
         var importedClass = table.getImportedFullyQualifiedName(name);
         if (importedClass.isPresent() && table.getImportedSymbolTable(importedClass.get()).isPresent()) {
             return Optional.of(new ResolvedIdentifier(name,

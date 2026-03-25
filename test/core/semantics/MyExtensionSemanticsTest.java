@@ -24,6 +24,12 @@ public class MyExtensionSemanticsTest extends JmmTestEnv {
     }
 
     @Test
+    public void currentClassStaticReceiverCalls() {
+        semantics("CurrentClassStaticReceiverOk.jmm", false);
+        semantics("CurrentClassStaticReceiverFail.jmm", true);
+    }
+
+    @Test
     public void loopConditions() {
         semantics("LoopConditionsOk.jmm", false);
         semantics("DoWhileConditionFail.jmm", true);
