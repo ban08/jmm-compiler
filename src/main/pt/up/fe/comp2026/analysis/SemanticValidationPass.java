@@ -209,13 +209,11 @@ public abstract class SemanticValidationPass extends AnalysisVisitorWithTable {
         }
 
         var receiverClass = receiverType.asClass();
-        return receiverClass.fullyQualifiedName().equals(table.getFullyQualifiedName())
-                || receiverClass.name().equals(table.getClassName());
+        return receiverClass.fullyQualifiedName().equals(table.getFullyQualifiedName());
     }
 
     protected boolean isCurrentClass(JmmClassType classType) {
-        return classType.fullyQualifiedName().equals(table.getFullyQualifiedName())
-                || classType.name().equals(table.getClassName());
+        return classType.fullyQualifiedName().equals(table.getFullyQualifiedName());
     }
 
     protected boolean hasLoadableConstructorOwner(JmmClassType classType) {

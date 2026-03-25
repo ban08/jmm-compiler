@@ -408,8 +408,7 @@ public class TypeUtils {
     }
 
     private boolean isCurrentClass(JmmClassType classType) {
-        return sameClass(classType.fullyQualifiedName(), table.getFullyQualifiedName())
-                || classType.name().equals(table.getClassName());
+        return classType.fullyQualifiedName().equals(table.getFullyQualifiedName());
     }
 
     private boolean sameClass(JmmClassType left, JmmClassType right) {
@@ -417,16 +416,7 @@ public class TypeUtils {
     }
 
     private boolean sameClass(String left, String right) {
-        if (left.equals(right)) {
-            return true;
-        }
-
-        return simpleName(left).equals(simpleName(right));
-    }
-
-    private String simpleName(String className) {
-        var lastDot = className.lastIndexOf('.');
-        return lastDot == -1 ? className : className.substring(lastDot + 1);
+        return left.equals(right);
     }
 
     private boolean isJavaAssignable(String targetClass, String valueClass) {
