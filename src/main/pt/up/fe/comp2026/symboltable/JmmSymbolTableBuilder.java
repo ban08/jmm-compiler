@@ -61,12 +61,26 @@ public class JmmSymbolTableBuilder {
 
         // Process imports (with dedup) and validate that each imported class exists.
         var importSet = new LinkedHashSet<String>();
+        var importNamesToFqn = new HashMap<String, String>();
         for (var importDecl : root.getChildren(IMPORT_DECL)) {
             var importPath = importDecl.getObjectAsList("path", String.class);
             var importFqn = String.join(".", importPath);
-            if (importSet.add(importFqn)) {
-                validateImport(importDecl, importFqn);
+
+            if (importSet.contains(importFqn)) {
+                continue;
             }
+
+            var importName = importPath.getLast();
+            var previousImport = importNamesToFqn.putIfAbsent(importName, importFqn);
+            if (previousImport != null && !previousImport.equals(importFqn)) {
+                reports.add(newError(importDecl,
+                        "Imported class '" + importFqn + "' conflicts with previously imported class '" +
+                                previousImport + "'"));
+                continue;
+            }
+
+            importSet.add(importFqn);
+            validateImport(importDecl, importFqn);
         }
         imports.addAll(importSet);
 
