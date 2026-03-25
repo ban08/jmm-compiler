@@ -23,12 +23,15 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
         addVisit(JmmKind.VAR_REF_EXPR, this::visitVarRefExpr);
         addVisit(JmmKind.THIS_EXPR, this::visitThisExpr);
         addVisit(JmmKind.ASSIGN_STMT, this::visitAssignStmt);
+        addVisit(JmmKind.ARRAY_ASSIGN_STMT, this::visitArrayAssignStmt);
         addVisit(JmmKind.BINARY_EXPR, this::visitBinaryExpr);
         addVisit(JmmKind.NOT_EXPR, this::visitNotExpr);
         addVisit(JmmKind.UNARY_EXPR, this::visitUnaryExpr);
         addVisit(JmmKind.METHOD_CALL_EXPR, this::visitMethodCallExpr);
         addVisit(JmmKind.FIELD_ACCESS_EXPR, this::visitFieldAccessExpr);
+        addVisit(JmmKind.ARRAY_ACCESS_EXPR, this::visitArrayAccessExpr);
         addVisit(JmmKind.NEW_INT_ARRAY_EXPR, this::visitNewIntArrayExpr);
+        addVisit(JmmKind.ARRAY_INITIALIZER_EXPR, this::visitArrayInitializerExpr);
         addVisit(JmmKind.LENGTH_EXPR, this::visitLengthExpr);
         addVisit(JmmKind.IF_STMT, this::visitIfStmt);
         addVisit(JmmKind.WHILE_STMT, this::visitWhileStmt);
@@ -139,6 +142,44 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
         return null;
     }
 
+    private Void visitArrayAssignStmt(JmmNode arrayAssignStmt, SymbolTable ignored) {
+        var targetName = arrayAssignStmt.get("var");
+        var target = types.resolveIdentifier(arrayAssignStmt, targetName);
+
+        if (target.isEmpty()) {
+            addReport(newError(arrayAssignStmt, "Identifier '" + targetName + "' is not declared"));
+            return null;
+        }
+
+        if (target.get().accessType() == AccessType.IMPORT) {
+            addReport(newError(arrayAssignStmt, "Cannot assign to imported class '" + targetName + "'"));
+            return null;
+        }
+
+        if (target.get().accessType() == AccessType.FIELD && types.isStaticMethodContext(arrayAssignStmt)) {
+            addReport(newError(arrayAssignStmt, "Field '" + targetName + "' cannot be assigned inside a static method"));
+            return null;
+        }
+
+        var indexedType = getIndexedType(arrayAssignStmt, target.get().type(), targetName);
+        if (indexedType == null) {
+            return null;
+        }
+
+        var valueType = types.getExprType(arrayAssignStmt.getChild(arrayAssignStmt.getNumChildren() - 1));
+        if (valueType == null) {
+            return null;
+        }
+
+        if (!types.isAssignable(indexedType, valueType)) {
+            addReport(newError(arrayAssignStmt,
+                    "Cannot assign expression of type '" + valueType.print() + "' to array slot of type '" +
+                            indexedType.print() + "'"));
+        }
+
+        return null;
+    }
+
     private Void visitNotExpr(JmmNode notExpr, SymbolTable ignored) {
         var exprType = types.getExprType(notExpr.getChild(0));
         if (exprType != null && !isBoolean(exprType)) {
@@ -228,6 +269,21 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
         return null;
     }
 
+    private Void visitArrayAccessExpr(JmmNode arrayAccessExpr, SymbolTable ignored) {
+        var receiverType = types.getExprType(arrayAccessExpr.getChild(0));
+        if (receiverType != null && !receiverType.isArray()) {
+            addReport(newError(arrayAccessExpr, "Array access requires an array receiver"));
+            return null;
+        }
+
+        var indexType = types.getExprType(arrayAccessExpr.getChild(1));
+        if (indexType != null && !isInt(indexType)) {
+            addReport(newError(arrayAccessExpr, "Array index expression must have type 'int'"));
+        }
+
+        return null;
+    }
+
     private Void visitFieldAccessExpr(JmmNode fieldAccessExpr, SymbolTable ignored) {
         var receiverType = types.getExprType(fieldAccessExpr.getChild(0));
         if (receiverType == null) {
@@ -249,9 +305,23 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
     }
 
     private Void visitNewIntArrayExpr(JmmNode newArrayExpr, SymbolTable ignored) {
-        var sizeType = types.getExprType(newArrayExpr.getChild(0));
-        if (sizeType != null && !isInt(sizeType)) {
-            addReport(newError(newArrayExpr, "Array size expression must have type 'int'"));
+        for (int i = 0; i < newArrayExpr.getNumChildren(); i++) {
+            var sizeType = types.getExprType(newArrayExpr.getChild(i));
+            if (sizeType != null && !isInt(sizeType)) {
+                addReport(newError(newArrayExpr.getChild(i), "Array size expression must have type 'int'"));
+            }
+        }
+
+        return null;
+    }
+
+    private Void visitArrayInitializerExpr(JmmNode arrayInitializerExpr, SymbolTable ignored) {
+        for (int i = 0; i < arrayInitializerExpr.getNumChildren(); i++) {
+            var elementType = types.getExprType(arrayInitializerExpr.getChild(i));
+            if (elementType != null && !isInt(elementType)) {
+                addReport(newError(arrayInitializerExpr.getChild(i),
+                        "Array initializer elements must have type 'int'"));
+            }
         }
 
         return null;
@@ -335,5 +405,27 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
 
     private boolean isAssignableEntity(JmmNode expr) {
         return JmmKind.VAR_REF_EXPR.check(expr) || JmmKind.ARRAY_ACCESS_EXPR.check(expr);
+    }
+
+    private JmmType getIndexedType(JmmNode arrayAssignStmt, JmmType baseType, String targetName) {
+        var currentType = baseType;
+        var lastIndex = arrayAssignStmt.getNumChildren() - 1;
+
+        for (int i = 0; i < lastIndex; i++) {
+            var indexType = types.getExprType(arrayAssignStmt.getChild(i));
+            if (indexType != null && !isInt(indexType)) {
+                addReport(newError(arrayAssignStmt.getChild(i), "Array index expression must have type 'int'"));
+            }
+
+            if (!currentType.isArray()) {
+                addReport(newError(arrayAssignStmt,
+                        "Identifier '" + targetName + "' does not have enough array dimensions for this store"));
+                return null;
+            }
+
+            currentType = currentType.asArray().itemType();
+        }
+
+        return currentType;
     }
 }

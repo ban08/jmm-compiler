@@ -43,7 +43,6 @@ importDecl
     : IMPORT path += ID ('.' path += ID)* ';'
     ;
 
-//package is mandatory
 packageDecl
     : PACKAGE path += ID ('.' path +=ID)* ';'
     ;
@@ -63,12 +62,12 @@ param
     : typeNode = type name = ID
     ;
 
-type locals[boolean isArray=false]
-    : name = INT ('[' ']' {$isArray=true;})?
-    | name = BOOLEAN
+type locals[boolean isArray=false, int arrayDepth=0]
+    : name = INT ('[' ']' {$isArray=true; $arrayDepth++;})*
+    | name = BOOLEAN ('[' ']' {$isArray=true; $arrayDepth++;})*
     | name = VOID
-    | name = STRING ('[' ']' {$isArray=true;})?
-    | name = ID ('[' ']' {$isArray=true;})?
+    | name = STRING ('[' ']' {$isArray=true; $arrayDepth++;})*
+    | name = ID ('[' ']' {$isArray=true; $arrayDepth++;})*
     ;
 
 methodDecl locals[boolean isStatic=false]
@@ -85,7 +84,7 @@ stmt
     | FOR '(' (initId=ID '=' initExpr=expr)? ';' (condition=expr)? ';' (stepId=ID '=' stepExpr=expr)? ')' body=stmt #ForStmt
     | expr ';' #ExprStmt
     | var = ID '=' expr ';' #AssignStmt
-    | var = ID '[' expr ']' '=' expr ';' #ArrayAssignStmt
+    | var = ID ('[' expr ']')+ '=' expr ';' #ArrayAssignStmt
     | RETURN expr? ';' #ReturnStmt
     ;
 
@@ -97,7 +96,8 @@ expr
     | expr '[' expr ']' #ArrayAccessExpr
     | '!' expr #NotExpr
     | op=('++' | '--' | '+' | '-') expr #UnaryExpr
-    | NEW INT '[' expr ']' #NewIntArrayExpr
+    | NEW INT ('[' expr ']')+ #NewIntArrayExpr
+    | NEW INT '[' ']' '{' (expr (',' expr)*)? '}' #ArrayInitializerExpr
     | NEW name=(ID | STRING) '(' ')' #NewExpr
     | expr op=('*' | '/' | '%') expr #BinaryExpr
     | expr op=('+' | '-') expr #BinaryExpr

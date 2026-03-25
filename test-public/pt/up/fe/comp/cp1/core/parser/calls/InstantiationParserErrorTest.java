@@ -5,6 +5,7 @@ import org.junit.Test;
 import pt.up.fe.comp.test.env.JmmTestEnv;
 
 import static pt.up.fe.comp.cp1.core.parser.RulesNames.CLASS;
+import static pt.up.fe.comp.cp1.core.parser.RulesNames.EXPRESSION;
 
 public class InstantiationParserErrorTest extends JmmTestEnv {
 
