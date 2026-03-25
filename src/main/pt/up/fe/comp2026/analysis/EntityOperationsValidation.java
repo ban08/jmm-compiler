@@ -18,12 +18,16 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
 
     @Override
     protected void buildVisitor() {
+        addVisit(JmmKind.METHOD_DECL, this::visitMethodDecl);
         addVisit(JmmKind.TYPE, this::visitType);
         addVisit(JmmKind.NEW_EXPR, this::visitNewExpr);
         addVisit(JmmKind.VAR_REF_EXPR, this::visitVarRefExpr);
         addVisit(JmmKind.THIS_EXPR, this::visitThisExpr);
+        addVisit(JmmKind.IF_STMT, this::visitIfStmt);
+        addVisit(JmmKind.WHILE_STMT, this::visitWhileStmt);
         addVisit(JmmKind.ASSIGN_STMT, this::visitAssignStmt);
         addVisit(JmmKind.ARRAY_ASSIGN_STMT, this::visitArrayAssignStmt);
+        addVisit(JmmKind.RETURN_STMT, this::visitReturnStmt);
         addVisit(JmmKind.BINARY_EXPR, this::visitBinaryExpr);
         addVisit(JmmKind.NOT_EXPR, this::visitNotExpr);
         addVisit(JmmKind.UNARY_EXPR, this::visitUnaryExpr);
@@ -34,6 +38,22 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
         addVisit(JmmKind.ARRAY_INITIALIZER_EXPR, this::visitArrayInitializerExpr);
         addVisit(JmmKind.LENGTH_EXPR, this::visitLengthExpr);
         setDefaultVisit((node, st) -> null);
+    }
+
+    private Void visitMethodDecl(JmmNode methodDecl, SymbolTable ignored) {
+        var methodOpt = types.getEnclosingMethod(methodDecl);
+        if (methodOpt.isEmpty()) {
+            return null;
+        }
+
+        var method = methodOpt.get();
+        if (!TypeUtils.voidType().equals(method.returnType())
+                && methodDecl.getDescendants(JmmKind.RETURN_STMT).isEmpty()) {
+            addReport(newError(methodDecl,
+                    "Method '" + method.name() + "' must contain a return statement"));
+        }
+
+        return null;
     }
 
     private Void visitType(JmmNode typeNode, SymbolTable ignored) {
@@ -79,6 +99,16 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
         return null;
     }
 
+    private Void visitIfStmt(JmmNode ifStmt, SymbolTable ignored) {
+        validateBooleanCondition(ifStmt.getChild(0), "IF");
+        return null;
+    }
+
+    private Void visitWhileStmt(JmmNode whileStmt, SymbolTable ignored) {
+        validateBooleanCondition(whileStmt.getChild(0), "WHILE");
+        return null;
+    }
+
     private Void visitAssignStmt(JmmNode assignStmt, SymbolTable ignored) {
         var targetName = assignStmt.get("var");
         var target = types.resolveIdentifier(assignStmt, targetName);
@@ -107,6 +137,41 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
             addReport(newError(assignStmt,
                     "Cannot assign expression of type '" + exprType.print() + "' to '" + targetName +
                             "' of type '" + target.get().type().print() + "'"));
+        }
+
+        return null;
+    }
+
+    private Void visitReturnStmt(JmmNode returnStmt, SymbolTable ignored) {
+        var methodOpt = types.getEnclosingMethod(returnStmt);
+        if (methodOpt.isEmpty()) {
+            return null;
+        }
+
+        var method = methodOpt.get();
+        var hasExpression = returnStmt.getNumChildren() > 0;
+
+        if (TypeUtils.voidType().equals(method.returnType())) {
+            if (hasExpression) {
+                addReport(newError(returnStmt,
+                        "Void method '" + method.name() + "' cannot return a value"));
+            }
+
+            return null;
+        }
+
+        if (!hasExpression) {
+            addReport(newError(returnStmt,
+                    "Method '" + method.name() + "' must return an expression of type '" +
+                            method.returnType().print() + "'"));
+            return null;
+        }
+
+        var exprType = types.getExprType(returnStmt.getChild(0));
+        if (exprType != null && !types.isAssignable(method.returnType(), exprType)) {
+            addReport(newError(returnStmt,
+                    "Method '" + method.name() + "' returns '" + exprType.print() +
+                            "' but expected '" + method.returnType().print() + "'"));
         }
 
         return null;
@@ -334,6 +399,14 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
 
     private boolean isBoolean(JmmType type) {
         return TypeUtils.booleanType().equals(type);
+    }
+
+    private void validateBooleanCondition(JmmNode condition, String statementName) {
+        var conditionType = types.getExprType(condition);
+        if (conditionType != null && !isBoolean(conditionType)) {
+            addReport(newError(condition,
+                    statementName + " condition must have type 'boolean'"));
+        }
     }
 
     private boolean isInt(JmmType type) {
