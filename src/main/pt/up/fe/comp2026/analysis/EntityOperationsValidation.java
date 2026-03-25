@@ -3,11 +3,15 @@ package pt.up.fe.comp2026.analysis;
 import pt.up.fe.comp.jmm.analysis.table.MethodSymbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.type.JmmType;
+import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmArrayType;
+import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmClassType;
+import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmPrimitiveType;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2026.ast.AccessType;
 import pt.up.fe.comp2026.ast.TypeUtils;
 import pt.up.fe.comp2026.jmm.ast.JmmKind;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,8 +82,62 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
         var className = newExpr.get("name");
         if (!types.isKnownTypeName(className)) {
             addReport(newError(newExpr, "Class '" + className + "' is not imported"));
+            return null;
         }
 
+        var argTypes = new ArrayList<JmmType>();
+        for (var argExpr : newExpr.getChildren(JmmKind.EXPR)) {
+            var argType = types.tryGetExprType(argExpr);
+            if (argType.isEmpty()) {
+                return null;
+            }
+
+            argTypes.add(argType.get());
+        }
+
+        if (argTypes.isEmpty()) {
+            return null;
+        }
+
+        var newTypeOpt = types.tryGetExprType(newExpr);
+        if (newTypeOpt.isEmpty() || !newTypeOpt.get().isClass()) {
+            return null;
+        }
+
+        var classType = newTypeOpt.get().asClass();
+        if (isCurrentClass(classType)) {
+            addReport(newError(newExpr,
+                    "Class '" + className + "' does not support constructors with arguments"));
+            return null;
+        }
+
+        if (!hasLoadableConstructorOwner(classType)) {
+            return null;
+        }
+
+        var constructors = getPublicConstructors(classType.fullyQualifiedName());
+        if (constructors.isEmpty()) {
+            addReport(newError(newExpr,
+                    "Class '" + className + "' does not define a public constructor"));
+            return null;
+        }
+
+        if (hasMatchingConstructor(constructors, argTypes)) {
+            return null;
+        }
+
+        var anyWithSameCount = constructors.stream()
+                .anyMatch(constructor -> !constructor.isVarArgs()
+                        && constructor.getParameterCount() == argTypes.size());
+
+        if (!anyWithSameCount) {
+            addReport(newError(newExpr,
+                    "Wrong number of arguments for constructor of class '" + className + "'"));
+            return null;
+        }
+
+        addReport(newError(newExpr,
+                "Wrong argument types for constructor of class '" + className + "'"));
         return null;
     }
 
@@ -567,6 +625,77 @@ public class EntityOperationsValidation extends AnalysisVisitorWithTable {
         var receiverClass = receiverType.asClass();
         return receiverClass.fullyQualifiedName().equals(table.getFullyQualifiedName())
                 || receiverClass.name().equals(table.getClassName());
+    }
+
+    private boolean isCurrentClass(JmmClassType classType) {
+        return classType.fullyQualifiedName().equals(table.getFullyQualifiedName())
+                || classType.name().equals(table.getClassName());
+    }
+
+    private boolean hasLoadableConstructorOwner(JmmClassType classType) {
+        try {
+            Class.forName(classType.fullyQualifiedName());
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    private List<Constructor<?>> getPublicConstructors(String fullyQualifiedName) {
+        try {
+            return List.of(Class.forName(fullyQualifiedName).getConstructors());
+        } catch (ClassNotFoundException e) {
+            return List.of();
+        }
+    }
+
+    private boolean hasMatchingConstructor(List<Constructor<?>> constructors, List<JmmType> argTypes) {
+        for (var constructor : constructors) {
+            if (constructor.isVarArgs()) {
+                continue;
+            }
+
+            var parameterTypes = constructor.getParameterTypes();
+            if (parameterTypes.length != argTypes.size()) {
+                continue;
+            }
+
+            var matches = true;
+            for (int i = 0; i < parameterTypes.length; i++) {
+                var parameterType = toJmmType(parameterTypes[i]);
+                if (parameterType == null || !types.isAssignable(parameterType, argTypes.get(i))) {
+                    matches = false;
+                    break;
+                }
+            }
+
+            if (matches) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private JmmType toJmmType(Class<?> javaType) {
+        if (javaType == void.class) {
+            return JmmPrimitiveType.VOID;
+        }
+
+        if (javaType == boolean.class) {
+            return JmmPrimitiveType.BOOLEAN;
+        }
+
+        if (javaType == int.class) {
+            return JmmPrimitiveType.INT;
+        }
+
+        if (javaType.isArray()) {
+            var itemType = toJmmType(javaType.getComponentType());
+            return itemType == null ? null : JmmArrayType.of(itemType);
+        }
+
+        return JmmClassType.ofInstance(javaType.getName(), true);
     }
 
     private boolean isBoolean(JmmType type) {

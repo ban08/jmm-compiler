@@ -105,7 +105,7 @@ expr
     | op=('++' | '--' | '+' | '-') expr #UnaryExpr
     | NEW INT ('[' expr ']')+ #NewIntArrayExpr
     | NEW INT '[' ']' '{' (expr (',' expr)*)? '}' #ArrayInitializerExpr
-    | NEW name=(ID | STRING) '(' ')' #NewExpr
+    | NEW name=(ID | STRING) '(' (expr (',' expr)*)? ')' #NewExpr
     | expr op=('*' | '/' | '%') expr #BinaryExpr
     | expr op=('+' | '-') expr #BinaryExpr
     | expr op=('<' | '>' | '<=' | '>=') expr #BinaryExpr
