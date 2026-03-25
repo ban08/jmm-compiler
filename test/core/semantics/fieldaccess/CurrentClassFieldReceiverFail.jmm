@@ -1,0 +1,9 @@
+package core.semantics.fieldaccess;
+
+class CurrentClassFieldReceiverFail {
+    int field;
+
+    int compute() {
+        return CurrentClassFieldReceiverFail.field;
+    }
+}

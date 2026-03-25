@@ -215,6 +215,12 @@ public class EntityAccessValidation extends SemanticValidationPass {
             return null;
         }
 
+        if (receiverType.asClass().staticRef()) {
+            addReport(newError(fieldAccessExpr,
+                    "Field '" + fieldAccessExpr.get("name") + "' requires an instance receiver"));
+            return null;
+        }
+
         if (types.resolveFieldAccessType(fieldAccessExpr).isEmpty()) {
             addReport(newError(fieldAccessExpr,
                     "Field '" + fieldAccessExpr.get("name") + "' is not available on receiver '" +

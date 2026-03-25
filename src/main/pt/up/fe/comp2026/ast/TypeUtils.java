@@ -295,6 +295,10 @@ public class TypeUtils {
         var fieldName = fieldAccessExpr.get("name");
         var receiverClass = receiverType.get().asClass();
 
+        if (receiverClass.staticRef()) {
+            return Optional.empty();
+        }
+
         if (isCurrentClass(receiverClass)) {
             var localField = table.getField(fieldName);
             if (localField.isPresent()) {

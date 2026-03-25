@@ -1,0 +1,11 @@
+package core.semantics.fieldaccess;
+
+import java.awt.Point;
+
+class ImportedFieldReceiverOk {
+    int compute() {
+        Point p;
+        p = new Point();
+        return p.x;
+    }
+}
