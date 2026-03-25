@@ -1,0 +1,11 @@
+package core.semantics.stringid;
+
+import java.lang.String;
+
+class ExplicitStringImportOk {
+    int compute() {
+        String s;
+        s = new String();
+        return s.compareTo(new String());
+    }
+}

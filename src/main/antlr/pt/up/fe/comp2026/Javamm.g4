@@ -26,8 +26,6 @@ FOR : 'for' ;
 TRUE : 'true' ;
 FALSE : 'false' ;
 THIS : 'this' ;
-STRING : 'String' ;
-
 INTEGER : '0' | [1-9][0-9]* ;
 ID : [a-zA-Z_$][a-zA-Z0-9_$]* ;
 
@@ -67,7 +65,6 @@ type locals[boolean isArray=false, int arrayDepth=0]
     : name = INT ('[' ']' {$isArray=true; $arrayDepth++;})*
     | name = BOOLEAN ('[' ']' {$isArray=true; $arrayDepth++;})*
     | name = VOID
-    | name = STRING ('[' ']' {$isArray=true; $arrayDepth++;})*
     | name = ID ('[' ']' {$isArray=true; $arrayDepth++;})*
     ;
 
@@ -105,7 +102,7 @@ expr
     | op=('++' | '--' | '+' | '-') expr #UnaryExpr
     | NEW INT ('[' expr ']')+ #NewIntArrayExpr
     | NEW INT '[' ']' '{' (expr (',' expr)*)? '}' #ArrayInitializerExpr
-    | NEW name=(ID | STRING) '(' (expr (',' expr)*)? ')' #NewExpr
+    | NEW name=ID '(' (expr (',' expr)*)? ')' #NewExpr
     | expr op=('*' | '/' | '%') expr #BinaryExpr
     | expr op=('+' | '-') expr #BinaryExpr
     | expr op=('<' | '>' | '<=' | '>=') expr #BinaryExpr
