@@ -221,21 +221,21 @@ public class JmmSymbolTableBuilder {
     }
 
     /**
-     * Build the list of class-level fields from varDecl children of classDecl.
+     * Build the list of class-level fields from fieldDecl children of classDecl.
      */
     private List<Symbol> buildFields(JmmNode classDecl) {
         var fields = new ArrayList<Symbol>();
         var fieldNames = new HashSet<String>();
-        for (var varDecl : classDecl.getChildren(VAR_DECL)) {
-            var fieldName = varDecl.get(JmmAttributes.VAR_DECL.NAME);
+        for (var fieldDecl : classDecl.getChildren(FIELD_DECL)) {
+            var fieldName = fieldDecl.get("name");
 
             if (!fieldNames.add(fieldName)) {
-                reports.add(newError(varDecl,
+                reports.add(newError(fieldDecl,
                         "Duplicate field '" + fieldName + "' in class '" + className + "'"));
                 continue;
             }
 
-            var typeNode = varDecl.getObject("typeNode", JmmNode.class);
+            var typeNode = fieldDecl.getObject("typeNode", JmmNode.class);
             var type = convertType(typeNode);
             fields.add(new Symbol(type, fieldName));
         }

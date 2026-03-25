@@ -49,12 +49,16 @@ packageDecl
 classDecl
     : CLASS name=ID (EXTENDS superName=ID)?
         '{'
-        (varDecl | methodDecl)*
+        (fieldDecl | methodDecl)*
         '}'
     ;
 
-varDecl
+fieldDecl
     : typeNode = type name=ID ('=' expr)? ';'
+    ;
+
+varDecl
+    : typeNode = type name=ID ';'
     ;
 
 param

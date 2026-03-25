@@ -58,13 +58,13 @@ public class DeclarationSemanticsValidation extends SemanticValidationPass {
             return null;
         }
 
-        if (!JmmKind.VAR_DECL.check(parent)) {
+        if (!JmmKind.VAR_DECL.check(parent) && !JmmKind.FIELD_DECL.check(parent)) {
             return null;
         }
 
-        var declarationKind = JmmKind.CLASS_DECL.check(parent.getParent()) ? "Field" : "Local variable";
+        var declarationKind = JmmKind.FIELD_DECL.check(parent) ? "Field" : "Local variable";
         addReport(newError(typeNode,
-                declarationKind + " '" + parent.get(JmmAttributes.VAR_DECL.NAME) + "' cannot have type 'void'"));
+                declarationKind + " '" + parent.get("name") + "' cannot have type 'void'"));
 
         return null;
     }

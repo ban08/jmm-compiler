@@ -15,27 +15,23 @@ public class FieldInitializerValidation extends AnalysisVisitorWithTable {
 
     @Override
     protected void buildVisitor() {
-        addVisit(JmmKind.VAR_DECL, this::visitVarDecl);
+        addVisit(JmmKind.FIELD_DECL, this::visitFieldDecl);
         setDefaultVisit((node, st) -> null);
     }
 
-    private Void visitVarDecl(JmmNode varDecl, SymbolTable ignored) {
-        if (!JmmKind.CLASS_DECL.check(varDecl.getParent())) {
-            return null;
-        }
-
-        var initializerExprs = varDecl.getChildren(JmmKind.EXPR);
+    private Void visitFieldDecl(JmmNode fieldDecl, SymbolTable ignored) {
+        var initializerExprs = fieldDecl.getChildren(JmmKind.EXPR);
         if (initializerExprs.isEmpty()) {
             return null;
         }
 
-        var declaredType = types.convertType(varDecl.getObject("typeNode", JmmNode.class));
+        var declaredType = types.convertType(fieldDecl.getObject("typeNode", JmmNode.class));
         var initializerType = types.getExprType(initializerExprs.getFirst());
 
         if (initializerType != null && !types.isAssignable(declaredType, initializerType)) {
             addReport(newError(
-                    varDecl,
-                    "Initializer of field '" + varDecl.get("name") + "' has incompatible type '" +
+                    fieldDecl,
+                    "Initializer of field '" + fieldDecl.get("name") + "' has incompatible type '" +
                             initializerType.print() + "' (expected '" + declaredType.print() + "')"));
         }
 
