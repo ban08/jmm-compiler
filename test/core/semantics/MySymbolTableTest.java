@@ -24,4 +24,10 @@ public class MySymbolTableTest extends JmmTestEnv {
         var mainMethodsList = st.getMethods("main");
         assertTrue("Expected to encounter main method", !mainMethodsList.isEmpty());
     }
+
+    @Test
+    public void duplicateFieldName() {
+        symbolTable("DuplicateFieldName.jmm", true);
+        symbolTable("DuplicateFieldNameOk.jmm", false);
+    }
 }

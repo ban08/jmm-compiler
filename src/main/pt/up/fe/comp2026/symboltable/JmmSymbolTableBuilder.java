@@ -225,8 +225,16 @@ public class JmmSymbolTableBuilder {
      */
     private List<Symbol> buildFields(JmmNode classDecl) {
         var fields = new ArrayList<Symbol>();
+        var fieldNames = new HashSet<String>();
         for (var varDecl : classDecl.getChildren(VAR_DECL)) {
             var fieldName = varDecl.get(JmmAttributes.VAR_DECL.NAME);
+
+            if (!fieldNames.add(fieldName)) {
+                reports.add(newError(varDecl,
+                        "Duplicate field '" + fieldName + "' in class '" + className + "'"));
+                continue;
+            }
+
             var typeNode = varDecl.getObject("typeNode", JmmNode.class);
             var type = convertType(typeNode);
             fields.add(new Symbol(type, fieldName));

@@ -1,0 +1,6 @@
+package core.semantics.symboltable;
+
+class DuplicateFieldName {
+    int a;
+    boolean a;
+}
