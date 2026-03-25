@@ -21,6 +21,8 @@ NEW : 'new' ;
 IF : 'if' ;
 ELSE : 'else' ;
 WHILE : 'while' ;
+DO : 'do' ;
+FOR : 'for' ;
 TRUE : 'true' ;
 FALSE : 'false' ;
 THIS : 'this' ;
@@ -76,10 +78,17 @@ methodDecl locals[boolean isStatic=false]
         '{' varDecl* stmt* '}'
     ;
 
+forHeaderAssign
+    : var = ID '=' expr
+    | var = ID ('[' expr ']')+ '=' expr
+    ;
+
 stmt
     : '{' stmt* '}' #CompoundStmt
     | IF '(' expr ')' stmt (ELSE stmt)? #IfStmt
     | WHILE '(' expr ')' stmt #WhileStmt
+    | DO stmt WHILE '(' expr ')' ';' #DoWhileStmt
+    | FOR '(' forHeaderAssign? ';' expr? ';' forHeaderAssign? ')' stmt #ForStmt
     | expr ';' #ExprStmt
     | var = ID '=' expr ';' #AssignStmt
     | var = ID ('[' expr ']')+ '=' expr ';' #ArrayAssignStmt
@@ -103,6 +112,7 @@ expr
     | expr op=('==' | '!=') expr #BinaryExpr
     | expr op='&&' expr #BinaryExpr
     | expr op='||' expr #BinaryExpr
+    | name=ID '(' (expr (',' expr)*)? ')' #ImplicitThisCallExpr
     | value=INTEGER #IntegerLiteral
     | value=TRUE #BooleanLiteral
     | value=FALSE #BooleanLiteral
