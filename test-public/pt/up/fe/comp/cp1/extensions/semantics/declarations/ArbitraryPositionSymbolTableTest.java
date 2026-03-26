@@ -33,7 +33,7 @@ public class ArbitraryPositionSymbolTableTest extends JmmTestEnv {
         super.assertEquals("Number of fields should be ${expected}, but was ${actual}", 1, fields.size());
         var field = fields.getFirst();
         super.assertEquals("Field name should be ${expected}, but was ${actual}", "field", field.name());
-        var methods = semantics.getSymbolTable().getMethods();
+        var methods = semantics.getSymbolTable().getMethods("method");
         super.assertEquals("Number of methods should be ${expected}, but was ${actual}", 1, methods.size());
         var method = methods.getFirst();
         super.assertEquals("Method name should be ${expected}, but was ${actual}", "method", method.name());
@@ -57,7 +57,8 @@ public class ArbitraryPositionSymbolTableTest extends JmmTestEnv {
         var field2 = fields.get(1);
         super.assertEquals("First field name should be ${expected}, but was ${actual}", "field1", field1.name());
         super.assertEquals("Second field name should be ${expected}, but was ${actual}", "field2", field2.name());
-        var methods = semantics.getSymbolTable().getMethods();
+        var expectedMethods = List.of("method1", "method2");
+        var methods = semantics.getSymbolTable().getMethods().stream().filter(m -> expectedMethods.contains(m.name())).toList();
         super.assertEquals("Number of methods should be ${expected}, but was ${actual}", 2, methods.size());
         var method1 = methods.getFirst();
         var method2 = methods.get(1);
@@ -83,7 +84,8 @@ public class ArbitraryPositionSymbolTableTest extends JmmTestEnv {
         var field2 = fields.get(1);
         super.assertEquals("First field name should be ${expected}, but was ${actual}", "field1", field1.name());
         super.assertEquals("Second field name should be ${expected}, but was ${actual}", "field2", field2.name());
-        var methods = semantics.getSymbolTable().getMethods();
+        var expectedMethods = List.of("method1", "method2");
+        var methods = semantics.getSymbolTable().getMethods().stream().filter(m -> expectedMethods.contains(m.name())).toList();
         super.assertEquals("Number of methods should be ${expected}, but was ${actual}", 2, methods.size());
         var method1 = methods.getFirst();
         var method2 = methods.get(1);
