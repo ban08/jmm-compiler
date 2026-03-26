@@ -12,6 +12,7 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2026.symboltable.JmmSymbolTable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -144,6 +145,11 @@ public class TypeUtils {
         var field = table.getField(name);
         if (field.isPresent()) {
             return Optional.of(new ResolvedIdentifier(name, field.get().type(), AccessType.FIELD));
+        }
+
+        var inheritedField = findFieldInHierarchy(table.getSuperFullyQualifiedName(), name);
+        if (inheritedField.isPresent()) {
+            return Optional.of(new ResolvedIdentifier(name, inheritedField.get().type(), AccessType.FIELD));
         }
 
         if (name.equals(table.getClassName())) {
@@ -305,18 +311,11 @@ public class TypeUtils {
                 return Optional.of(localField.get().type());
             }
 
-            var superQualifiedName = table.getSuperFullyQualifiedName();
-            if (superQualifiedName == null) {
-                return Optional.empty();
-            }
-
-            return table.getImportedSymbolTable(superQualifiedName)
-                    .flatMap(symbolTable -> symbolTable.getField(fieldName))
+            return findFieldInHierarchy(table.getSuperFullyQualifiedName(), fieldName)
                     .map(Symbol::type);
         }
 
-        return table.getImportedSymbolTable(receiverClass.fullyQualifiedName())
-                .flatMap(symbolTable -> symbolTable.getField(fieldName))
+        return findFieldInHierarchy(receiverClass.fullyQualifiedName(), fieldName)
                 .map(Symbol::type);
     }
 
@@ -421,6 +420,29 @@ public class TypeUtils {
 
     private boolean sameClass(String left, String right) {
         return left.equals(right);
+    }
+
+    // Imported symbol tables expose only the fields declared in that class, so we
+    // need to walk the superclass chain ourselves to resolve inherited fields.
+    private Optional<Symbol> findFieldInHierarchy(String classQualifiedName, String fieldName) {
+        var visited = new HashSet<String>();
+        var currentClass = classQualifiedName;
+
+        while (currentClass != null && visited.add(currentClass)) {
+            var symbolTable = table.getImportedSymbolTable(currentClass);
+            if (symbolTable.isEmpty()) {
+                return Optional.empty();
+            }
+
+            var field = symbolTable.get().getField(fieldName);
+            if (field.isPresent()) {
+                return field;
+            }
+
+            currentClass = symbolTable.get().getSuperFullyQualifiedName();
+        }
+
+        return Optional.empty();
     }
 
     private boolean isJavaAssignable(String targetClass, String valueClass) {

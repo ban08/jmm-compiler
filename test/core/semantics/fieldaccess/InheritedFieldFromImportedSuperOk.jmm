@@ -1,0 +1,9 @@
+package core.semantics.fieldaccess;
+
+import core.semantics.imports.ImportedFieldChild;
+
+class InheritedFieldFromImportedSuperOk extends ImportedFieldChild {
+    public int foo() {
+        return inheritedField;
+    }
+}

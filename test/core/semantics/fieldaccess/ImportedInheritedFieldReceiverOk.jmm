@@ -1,0 +1,11 @@
+package core.semantics.fieldaccess;
+
+import core.semantics.imports.ImportedFieldChild;
+
+class ImportedInheritedFieldReceiverOk {
+    public int foo() {
+        ImportedFieldChild child;
+        child = new ImportedFieldChild();
+        return child.inheritedField;
+    }
+}

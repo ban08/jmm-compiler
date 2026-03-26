@@ -22,4 +22,10 @@ public class MyFieldAccessSemanticsTest extends JmmTestEnv {
         semantics("ImportedFieldReceiverOk.jmm", false);
         semantics("ImportedFieldReceiverFail.jmm", true);
     }
+
+    @Test
+    public void inheritedImportedFields() {
+        semantics("ImportedInheritedFieldReceiverOk.jmm", false);
+        semantics("InheritedFieldFromImportedSuperOk.jmm", false);
+    }
 }
