@@ -1,0 +1,4 @@
+package parser.stringid;
+class Demo {
+    int String;
+}

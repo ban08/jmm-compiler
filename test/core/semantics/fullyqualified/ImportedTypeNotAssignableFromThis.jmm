@@ -1,0 +1,8 @@
+package p;
+import java.util.Date;
+class Date {
+    void foo() {
+        Date value;
+        value = this;
+    }
+}

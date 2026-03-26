@@ -2,29 +2,19 @@
 package core.parser;
 
 import org.junit.Test;
-import pt.up.fe.comp.TestUtils;
-import pt.up.fe.comp.jmm.ast.Kind;
 import pt.up.fe.comp.test.env.JmmTestEnv;
-import pt.up.fe.comp2026.jmm.ast.JmmKind;
-
-import static pt.up.fe.comp.cp1.core.parser.RulesNames.*;
 
 public class MyParserTest extends JmmTestEnv {
+    private static final String BASE_PATH = "core/parser/";
+    private static final String RESOURCES_LOCATION = "test";
 
 
     public MyParserTest() {
-        super("", "");
+        super(BASE_PATH, RESOURCES_LOCATION);
     }
 
     @Test
     public void testHelloWorld() {
-        var res = parseSnippet("""  
-                package hello.world;
-                import util.ioPlus;
-                class HelloWorld {
-                    void main() {
-                        ioPlus.printHelloWorld();
-                    }
-                }""");
+        parseResource("HelloWorld.jmm");
     }
 }

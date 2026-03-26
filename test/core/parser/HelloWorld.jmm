@@ -1,0 +1,7 @@
+package hello.world;
+import util.ioPlus;
+class HelloWorld {
+    void main() {
+        ioPlus.printHelloWorld();
+    }
+}

@@ -1,0 +1,7 @@
+package p;
+import java.util.Date;
+class Date {
+    void foo() {
+        new Date().after(new Date());
+    }
+}

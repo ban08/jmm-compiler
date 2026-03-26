@@ -4,27 +4,20 @@ import org.junit.Test;
 import pt.up.fe.comp.test.env.JmmTestEnv;
 
 public class MyStringIdentifierParserTest extends JmmTestEnv {
+    private static final String BASE_PATH = "core/parser/stringid/";
+    private static final String RESOURCES_LOCATION = "test";
 
     public MyStringIdentifierParserTest() {
-        super("", "");
+        super(BASE_PATH, RESOURCES_LOCATION);
     }
 
     @Test
     public void stringCanAppearInImportPaths() {
-        parseSnippet("""
-                package parser.stringid;
-                import java.lang.String;
-                class Demo {}
-                """);
+        parseResource("StringInImportPath.jmm");
     }
 
     @Test
     public void stringCanBeUsedAsAnIdentifier() {
-        parseSnippet("""
-                package parser.stringid;
-                class Demo {
-                    int String;
-                }
-                """);
+        parseResource("StringIdentifierField.jmm");
     }
 }

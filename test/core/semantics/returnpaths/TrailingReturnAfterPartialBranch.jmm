@@ -1,0 +1,10 @@
+package p;
+class A {
+    int foo(boolean cond) {
+        if (cond) {
+            return 1;
+        }
+
+        return 2;
+    }
+}
