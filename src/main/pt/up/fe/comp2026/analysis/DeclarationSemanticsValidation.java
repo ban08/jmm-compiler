@@ -103,7 +103,7 @@ public class DeclarationSemanticsValidation extends SemanticValidationPass {
         }
 
         if (JmmKind.BOOLEAN_LITERAL.check(expr)) {
-            return Optional.of(Boolean.parseBoolean(expr.get("value")));
+            return Optional.of(Boolean.parseBoolean(expr.get(JmmAttributes.BOOLEAN_LITERAL.VALUE)));
         }
 
         if (JmmKind.NOT_EXPR.check(expr)) {
@@ -114,7 +114,7 @@ public class DeclarationSemanticsValidation extends SemanticValidationPass {
     }
 
     private Void visitType(JmmNode typeNode, SymbolTable ignored) {
-        var typeName = typeNode.get("name");
+        var typeName = typeNode.get(JmmAttributes.TYPE.NAME);
 
         if (!types.isKnownTypeName(typeName)) {
             addReport(newError(typeNode, "Type '" + typeName + "' is not available in the current compilation unit"));
@@ -147,7 +147,7 @@ public class DeclarationSemanticsValidation extends SemanticValidationPass {
 
         var declarationKind = JmmKind.FIELD_DECL.check(parent) ? "Field" : "Local variable";
         addReport(newError(typeNode,
-                declarationKind + " '" + parent.get("name") + "' cannot have type 'void'"));
+                declarationKind + " '" + getDeclarationName(parent) + "' cannot have type 'void'"));
 
         return null;
     }
@@ -202,5 +202,13 @@ public class DeclarationSemanticsValidation extends SemanticValidationPass {
         }
 
         return "Type '" + renderedType + "' is not supported; J-- only allows arrays of int";
+    }
+
+    private String getDeclarationName(JmmNode declarationNode) {
+        if (JmmKind.FIELD_DECL.check(declarationNode)) {
+            return declarationNode.get(JmmAttributes.FIELD_DECL.NAME);
+        }
+
+        return declarationNode.get(JmmAttributes.VAR_DECL.NAME);
     }
 }

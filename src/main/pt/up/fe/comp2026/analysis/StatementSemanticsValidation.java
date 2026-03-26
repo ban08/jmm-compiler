@@ -3,6 +3,7 @@ package pt.up.fe.comp2026.analysis;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2026.ast.TypeUtils;
+import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.comp2026.jmm.ast.JmmKind;
 
 public class StatementSemanticsValidation extends SemanticValidationPass {
@@ -53,7 +54,7 @@ public class StatementSemanticsValidation extends SemanticValidationPass {
     }
 
     private Void visitForHeaderAssign(JmmNode forHeaderAssign, SymbolTable ignored) {
-        var targetName = forHeaderAssign.get("var");
+        var targetName = forHeaderAssign.get(JmmAttributes.FOR_HEADER_ASSIGN.VAR);
 
         if (forHeaderAssign.getNumChildren() == 1) {
             validateSimpleAssignment(forHeaderAssign, targetName, forHeaderAssign.getChild(0));
@@ -65,12 +66,12 @@ public class StatementSemanticsValidation extends SemanticValidationPass {
     }
 
     private Void visitAssignStmt(JmmNode assignStmt, SymbolTable ignored) {
-        validateSimpleAssignment(assignStmt, assignStmt.get("var"), assignStmt.getChild(0));
+        validateSimpleAssignment(assignStmt, assignStmt.get(JmmAttributes.ASSIGN_STMT.VAR), assignStmt.getChild(0));
         return null;
     }
 
     private Void visitArrayAssignStmt(JmmNode arrayAssignStmt, SymbolTable ignored) {
-        validateIndexedAssignment(arrayAssignStmt, arrayAssignStmt.get("var"));
+        validateIndexedAssignment(arrayAssignStmt, arrayAssignStmt.get(JmmAttributes.ARRAY_ASSIGN_STMT.VAR));
         return null;
     }
 

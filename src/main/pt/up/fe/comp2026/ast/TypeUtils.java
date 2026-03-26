@@ -9,6 +9,7 @@ import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmArrayType;
 import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmClassType;
 import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmPrimitiveType;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.comp2026.symboltable.JmmSymbolTable;
 
 import java.util.ArrayList;
@@ -57,9 +58,9 @@ public class TypeUtils {
     public JmmType convertType(JmmNode typeNode) {
         TYPE.check(typeNode);
 
-        var name = typeNode.get("name");
-        var isArray = NodeUtils.getBooleanAttribute(typeNode, "isArray", "false");
-        var arrayDepth = NodeUtils.getIntegerAttribute(typeNode, "arrayDepth", isArray ? "1" : "0");
+        var name = typeNode.get(JmmAttributes.TYPE.NAME);
+        var isArray = NodeUtils.getBooleanAttribute(typeNode, JmmAttributes.TYPE.IS_ARRAY.getKey(), "false");
+        var arrayDepth = NodeUtils.getIntegerAttribute(typeNode, JmmAttributes.TYPE.ARRAY_DEPTH.getKey(), isArray ? "1" : "0");
 
         var primitive = JmmPrimitiveType.fromString(name);
         if (primitive.isPresent()) {
@@ -97,7 +98,7 @@ public class TypeUtils {
             case UNARY_EXPR -> Optional.of(intType());
             case NEW_INT_ARRAY_EXPR -> Optional.of(wrapArrayType(intType(), expr.getNumChildren()));
             case ARRAY_INITIALIZER_EXPR -> Optional.of(JmmArrayType.of(intType()));
-            case NEW_EXPR -> Optional.of(resolveClassType(expr.get("name"), false));
+            case NEW_EXPR -> Optional.of(resolveClassType(expr.get(JmmAttributes.NEW_EXPR.NAME), false));
             case BINARY_EXPR -> Optional.of(getBinExprType(expr));
             case LENGTH_EXPR -> Optional.of(intType());
             case FIELD_ACCESS_EXPR -> resolveFieldAccessType(expr);
@@ -111,9 +112,9 @@ public class TypeUtils {
     public Signature getMethodDeclSignature(JmmNode methodDecl) {
         METHOD_DECL.check(methodDecl);
 
-        var methodName = methodDecl.get("name");
+        var methodName = methodDecl.get(JmmAttributes.METHOD_DECL.NAME);
         var paramTypes = methodDecl.getChildren(PARAM).stream()
-                .map(param -> convertType(param.getObject("typeNode", JmmNode.class)))
+                .map(param -> convertType(param.getObject(JmmAttributes.PARAM.TYPE_NODE.getKey(), JmmNode.class)))
                 .toList();
 
         return new Signature(methodName, paramTypes);
@@ -192,7 +193,7 @@ public class TypeUtils {
             argTypes.add(argType.get());
         }
 
-        return resolveMethodCall(receiverType.get().asClass(), callExpr.get("name"), argTypes);
+        return resolveMethodCall(receiverType.get().asClass(), callExpr.get(JmmAttributes.METHOD_CALL_EXPR.NAME), argTypes);
     }
 
     public Optional<ResolvedMethodCall> resolveImplicitThisMethodCall(JmmNode callExpr) {
@@ -212,7 +213,7 @@ public class TypeUtils {
                 ? JmmClassType.ofStaticReference(table.getFullyQualifiedName(), false)
                 : JmmClassType.ofInstance(table.getFullyQualifiedName(), false);
 
-        return resolveMethodCall(receiverType, callExpr.get("name"), argTypes);
+        return resolveMethodCall(receiverType, callExpr.get(JmmAttributes.IMPLICIT_THIS_CALL_EXPR.NAME), argTypes);
     }
 
     public boolean isAssignable(JmmType targetType, JmmType valueType) {
@@ -272,7 +273,7 @@ public class TypeUtils {
     }
 
     private JmmType getBinExprType(JmmNode binaryExpr) {
-        var operator = binaryExpr.get("op");
+        var operator = binaryExpr.get(JmmAttributes.BINARY_EXPR.OP);
 
         return switch (operator) {
             case "+", "-", "*", "/", "%" -> intType();
@@ -298,7 +299,7 @@ public class TypeUtils {
             return Optional.empty();
         }
 
-        var fieldName = fieldAccessExpr.get("name");
+        var fieldName = fieldAccessExpr.get(JmmAttributes.FIELD_ACCESS_EXPR.NAME);
         var receiverClass = receiverType.get().asClass();
 
         if (receiverClass.staticRef()) {
@@ -320,7 +321,7 @@ public class TypeUtils {
     }
 
     private JmmType getVarExprType(JmmNode varRefExpr) {
-        return resolveIdentifier(varRefExpr, varRefExpr.get("name"))
+        return resolveIdentifier(varRefExpr, varRefExpr.get(JmmAttributes.VAR_REF_EXPR.NAME))
                 .map(ResolvedIdentifier::type)
                 .orElse(null);
     }

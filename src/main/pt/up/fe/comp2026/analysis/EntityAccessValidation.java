@@ -4,6 +4,7 @@ import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.type.JmmType;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2026.ast.AccessType;
+import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.comp2026.jmm.ast.JmmKind;
 
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public class EntityAccessValidation extends SemanticValidationPass {
     }
 
     private Void visitNewExpr(JmmNode newExpr, SymbolTable ignored) {
-        var className = newExpr.get("name");
+        var className = newExpr.get(JmmAttributes.NEW_EXPR.NAME);
         if (!types.isKnownTypeName(className)) {
             addReport(newError(newExpr, "Class '" + className + "' is not imported"));
             return null;
@@ -89,7 +90,7 @@ public class EntityAccessValidation extends SemanticValidationPass {
     }
 
     private Void visitVarRefExpr(JmmNode varRefExpr, SymbolTable ignored) {
-        var identifier = varRefExpr.get("name");
+        var identifier = varRefExpr.get(JmmAttributes.VAR_REF_EXPR.NAME);
         var resolved = types.resolveIdentifier(varRefExpr, identifier);
 
         if (resolved.isEmpty()) {
@@ -143,7 +144,7 @@ public class EntityAccessValidation extends SemanticValidationPass {
     }
 
     private void validateImportedMethodCall(JmmNode methodCallExpr, pt.up.fe.comp.jmm.analysis.table.type.impls.JmmClassType receiverClassType) {
-        var methodName = methodCallExpr.get("name");
+        var methodName = methodCallExpr.get(JmmAttributes.METHOD_CALL_EXPR.NAME);
         var methods = table.getImportedSymbolTable(receiverClassType.fullyQualifiedName())
                 .orElseThrow()
                 .getMethods(methodName);
@@ -217,13 +218,13 @@ public class EntityAccessValidation extends SemanticValidationPass {
 
         if (receiverType.asClass().staticRef()) {
             addReport(newError(fieldAccessExpr,
-                    "Field '" + fieldAccessExpr.get("name") + "' requires an instance receiver"));
+                    "Field '" + fieldAccessExpr.get(JmmAttributes.FIELD_ACCESS_EXPR.NAME) + "' requires an instance receiver"));
             return null;
         }
 
         if (types.resolveFieldAccessType(fieldAccessExpr).isEmpty()) {
             addReport(newError(fieldAccessExpr,
-                    "Field '" + fieldAccessExpr.get("name") + "' is not available on receiver '" +
+                    "Field '" + fieldAccessExpr.get(JmmAttributes.FIELD_ACCESS_EXPR.NAME) + "' is not available on receiver '" +
                             receiverType.print() + "'"));
         }
 

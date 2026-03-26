@@ -12,9 +12,7 @@ import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmClassType;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.Stage;
-import pt.up.fe.comp.jmm.utils.Attributes;
 import pt.up.fe.comp2026.ast.NodeUtils;
-import pt.up.fe.comp2026.ast.TypeUtils;
 import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.specs.util.SpecsCheck;
 
@@ -65,14 +63,14 @@ public class JmmSymbolTableBuilder {
     private SymbolTableBuilderResult buildInternal() {
 
         var packageDecl = root.getChildren(PACKAGE_DECL).getFirst();
-        var packagePathList = packageDecl.getObjectAsList("path", String.class);
+        var packagePathList = packageDecl.getObjectAsList(JmmAttributes.PACKAGE_DECL.PATH.getKey(), String.class);
         var packagePath = String.join(".", packagePathList);
 
         // Process imports (with dedup) and validate that each imported class exists.
         var importSet = new LinkedHashSet<String>();
         var importNamesToFqn = new HashMap<String, String>();
         for (var importDecl : root.getChildren(IMPORT_DECL)) {
-            var importPath = importDecl.getObjectAsList("path", String.class);
+            var importPath = importDecl.getObjectAsList(JmmAttributes.IMPORT_DECL.PATH.getKey(), String.class);
             var importFqn = String.join(".", importPath);
 
             if (importSet.contains(importFqn)) {
@@ -95,10 +93,10 @@ public class JmmSymbolTableBuilder {
         }
         imports.addAll(importSet);
 
-        var classDecl = root.getObject("classNode", JmmNode.class);
+        var classDecl = root.getObject(JmmAttributes.PROGRAM.CLASS_NODE.getKey(), JmmNode.class);
         SpecsCheck.checkArgument(CLASS_DECL.check(classDecl), () -> "Expected a class declaration: " + classDecl);
 
-        this.className = classDecl.get("name");
+        this.className = classDecl.get(JmmAttributes.CLASS_DECL.NAME);
         this.fullyQualifiedName = packagePath + "." + className;
 
         // Check if className is available
@@ -109,7 +107,7 @@ public class JmmSymbolTableBuilder {
 
         // Resolve super class
         String superQualifiedName = null;
-        var superNameOpt = classDecl.getOptional("superName");
+        var superNameOpt = classDecl.getOptional(JmmAttributes.CLASS_DECL.SUPER_NAME.getKey());
         if (superNameOpt.isPresent()) {
             var superName = superNameOpt.get();
 
@@ -173,9 +171,9 @@ public class JmmSymbolTableBuilder {
      * Convert a type AST node into a JmmType.
      */
     private JmmType convertType(JmmNode typeNode) {
-        var typeName = typeNode.get("name");
-        boolean isArray = NodeUtils.getBooleanAttribute(typeNode, "isArray", "false");
-        int arrayDepth = NodeUtils.getIntegerAttribute(typeNode, "arrayDepth", isArray ? "1" : "0");
+        var typeName = typeNode.get(JmmAttributes.TYPE.NAME);
+        boolean isArray = NodeUtils.getBooleanAttribute(typeNode, JmmAttributes.TYPE.IS_ARRAY.getKey(), "false");
+        int arrayDepth = NodeUtils.getIntegerAttribute(typeNode, JmmAttributes.TYPE.ARRAY_DEPTH.getKey(), isArray ? "1" : "0");
 
         // Check primitives
         var primitive = JmmPrimitiveType.fromString(typeName);
@@ -238,7 +236,7 @@ public class JmmSymbolTableBuilder {
         var fields = new ArrayList<Symbol>();
         var fieldNames = new HashSet<String>();
         for (var fieldDecl : classDecl.getChildren(FIELD_DECL)) {
-            var fieldName = fieldDecl.get("name");
+            var fieldName = fieldDecl.get(JmmAttributes.FIELD_DECL.NAME);
 
             if (!fieldNames.add(fieldName)) {
                 reports.add(newError(fieldDecl,
@@ -246,7 +244,7 @@ public class JmmSymbolTableBuilder {
                 continue;
             }
 
-            var typeNode = fieldDecl.getObject("typeNode", JmmNode.class);
+            var typeNode = fieldDecl.getObject(JmmAttributes.FIELD_DECL.TYPE_NODE.getKey(), JmmNode.class);
             var type = convertType(typeNode);
             fields.add(new Symbol(type, fieldName));
         }
@@ -288,10 +286,10 @@ public class JmmSymbolTableBuilder {
     }
 
     private MethodSymbol buildMethod(JmmNode method) {
-        var methodName = method.get("name");
+        var methodName = method.get(JmmAttributes.METHOD_DECL.NAME);
 
         // Get return type
-        var returnTypeNode = method.getObject("returnType", JmmNode.class);
+        var returnTypeNode = method.getObject(JmmAttributes.METHOD_DECL.RETURN_TYPE.getKey(), JmmNode.class);
         var returnType = convertType(returnTypeNode);
 
         // Get parameters
@@ -301,7 +299,7 @@ public class JmmSymbolTableBuilder {
 
         for (var paramNode : paramNodes) {
             var paramName = paramNode.get(JmmAttributes.PARAM.NAME);
-            var paramTypeNode = paramNode.getObject("typeNode", JmmNode.class);
+            var paramTypeNode = paramNode.getObject(JmmAttributes.PARAM.TYPE_NODE.getKey(), JmmNode.class);
             var paramType = convertType(paramTypeNode);
 
             // Check for duplicate parameter names
@@ -319,7 +317,7 @@ public class JmmSymbolTableBuilder {
 
         for (var varDecl : localVarNodes) {
             var localName = varDecl.get(JmmAttributes.VAR_DECL.NAME);
-            var localTypeNode = varDecl.getObject("typeNode", JmmNode.class);
+            var localTypeNode = varDecl.getObject(JmmAttributes.VAR_DECL.TYPE_NODE.getKey(), JmmNode.class);
             var localType = convertType(localTypeNode);
 
             // Check for duplicate local variable names
@@ -335,7 +333,7 @@ public class JmmSymbolTableBuilder {
             locals.add(new Symbol(localType, localName));
         }
 
-        var visibility = method.getOptional("visibility")
+        var visibility = method.getOptional(JmmAttributes.METHOD_DECL.VISIBILITY.getKey())
                 .map(Visibility::fromString)
                 .orElse(Visibility.PACKAGE_PROTECTED);
         var isStatic = method.getBoolean(JmmAttributes.METHOD_DECL.IS_STATIC, false);

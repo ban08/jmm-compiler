@@ -2,6 +2,7 @@ package pt.up.fe.comp2026.analysis;
 
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.comp2026.jmm.ast.JmmKind;
 
 /**
@@ -25,13 +26,13 @@ public class FieldInitializerValidation extends AnalysisVisitorWithTable {
             return null;
         }
 
-        var declaredType = types.convertType(fieldDecl.getObject("typeNode", JmmNode.class));
+        var declaredType = types.convertType(fieldDecl.getObject(JmmAttributes.FIELD_DECL.TYPE_NODE.getKey(), JmmNode.class));
         var initializerType = types.getExprType(initializerExprs.getFirst());
 
         if (initializerType != null && !types.isAssignable(declaredType, initializerType)) {
             addReport(newError(
                     fieldDecl,
-                    "Initializer of field '" + fieldDecl.get("name") + "' has incompatible type '" +
+                    "Initializer of field '" + fieldDecl.get(JmmAttributes.FIELD_DECL.NAME) + "' has incompatible type '" +
                             initializerType.print() + "' (expected '" + declaredType.print() + "')"));
         }
 

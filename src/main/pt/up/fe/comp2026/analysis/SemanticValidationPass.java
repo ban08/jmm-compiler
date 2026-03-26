@@ -9,6 +9,7 @@ import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmPrimitiveType;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2026.ast.AccessType;
 import pt.up.fe.comp2026.ast.TypeUtils;
+import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.comp2026.jmm.ast.JmmKind;
 
 import java.lang.reflect.Constructor;
@@ -80,7 +81,7 @@ public abstract class SemanticValidationPass extends AnalysisVisitorWithTable {
             return;
         }
 
-        var methodName = callExpr.get("name");
+        var methodName = getCallMethodName(callExpr);
         var allMethods = getCurrentAndInheritedMethods(methodName);
 
         if (findMatchingMethod(allMethods, argTypesOpt.get(), requireStatic) != null) {
@@ -135,6 +136,18 @@ public abstract class SemanticValidationPass extends AnalysisVisitorWithTable {
         }
 
         return Optional.of(argTypes);
+    }
+
+    protected String getCallMethodName(JmmNode callExpr) {
+        if (JmmKind.METHOD_CALL_EXPR.check(callExpr)) {
+            return callExpr.get(JmmAttributes.METHOD_CALL_EXPR.NAME);
+        }
+
+        if (JmmKind.IMPLICIT_THIS_CALL_EXPR.check(callExpr)) {
+            return callExpr.get(JmmAttributes.IMPLICIT_THIS_CALL_EXPR.NAME);
+        }
+
+        throw new IllegalArgumentException("Expected a method-call node, got: " + callExpr.getKind());
     }
 
     protected List<MethodSymbol> getCurrentAndInheritedMethods(String methodName) {

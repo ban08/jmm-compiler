@@ -2,6 +2,7 @@ package pt.up.fe.comp2026.analysis;
 
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.comp2026.jmm.ast.JmmKind;
 
 public class ExpressionSemanticsValidation extends SemanticValidationPass {
@@ -30,7 +31,7 @@ public class ExpressionSemanticsValidation extends SemanticValidationPass {
             return null;
         }
 
-        var operator = binaryExpr.get("op");
+        var operator = binaryExpr.get(JmmAttributes.BINARY_EXPR.OP);
         var valid = switch (operator) {
             case "+", "-", "*", "/", "%" -> isInt(leftType) && isInt(rightType);
             case "<", ">", "<=", ">=" -> isInt(leftType) && isInt(rightType);
@@ -60,10 +61,10 @@ public class ExpressionSemanticsValidation extends SemanticValidationPass {
     private Void visitUnaryExpr(JmmNode unaryExpr, SymbolTable ignored) {
         var exprType = types.getExprType(unaryExpr.getChild(0));
         if (exprType != null && !isInt(exprType)) {
-            addReport(newError(unaryExpr, "Operator '" + unaryExpr.get("op") + "' requires an integer operand"));
+            addReport(newError(unaryExpr, "Operator '" + unaryExpr.get(JmmAttributes.UNARY_EXPR.OP) + "' requires an integer operand"));
         }
 
-        var operator = unaryExpr.get("op");
+        var operator = unaryExpr.get(JmmAttributes.UNARY_EXPR.OP);
         if ((operator.equals("++") || operator.equals("--"))
                 && !isAssignableEntity(unaryExpr.getChild(0))) {
             addReport(newError(unaryExpr, "Operator '" + operator + "' requires a variable or array access"));
