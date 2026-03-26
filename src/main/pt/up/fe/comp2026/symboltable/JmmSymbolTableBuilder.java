@@ -49,6 +49,15 @@ public class JmmSymbolTableBuilder {
                 null);
     }
 
+    private static Report newWarn(JmmNode node, String message) {
+        return Report.newWarn(
+                Stage.SEMANTIC,
+                NodeUtils.getLine(node),
+                NodeUtils.getColumn(node),
+                message,
+                null);
+    }
+
     public static SymbolTableBuilderResult build(JmmNode root) {
         return new JmmSymbolTableBuilder(root).buildInternal();
     }
@@ -67,6 +76,8 @@ public class JmmSymbolTableBuilder {
             var importFqn = String.join(".", importPath);
 
             if (importSet.contains(importFqn)) {
+                reports.add(newWarn(importDecl,
+                        "Duplicate import '" + importFqn + "' ignored"));
                 continue;
             }
 
