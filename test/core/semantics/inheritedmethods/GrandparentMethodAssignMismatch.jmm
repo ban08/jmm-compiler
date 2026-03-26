@@ -1,0 +1,11 @@
+package core.semantics.inheritedmethods;
+
+import core.semantics.imports.ImportedGrandparentMethodsChild;
+
+class GrandparentMethodAssignMismatch extends ImportedGrandparentMethodsChild {
+    public int foo() {
+        int x;
+        x = this.inheritedBoolean();
+        return 0;
+    }
+}

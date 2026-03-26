@@ -1,0 +1,9 @@
+package core.semantics.inheritedmethods;
+
+import core.semantics.imports.ImportedGrandparentMethodsChild;
+
+class GrandparentMethodReturnOk extends ImportedGrandparentMethodsChild {
+    public boolean foo() {
+        return this.inheritedBoolean();
+    }
+}
