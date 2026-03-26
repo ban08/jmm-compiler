@@ -1,0 +1,5 @@
+package core.semantics.arrayspec;
+
+class StringArrayFieldFail {
+    String[] args;
+}

@@ -1,0 +1,7 @@
+package core.semantics.arrayspec;
+
+import java.util.Date;
+
+class ImportedObjectArrayFieldFail {
+    Date[] dates;
+}

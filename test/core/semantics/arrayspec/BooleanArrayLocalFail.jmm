@@ -1,0 +1,8 @@
+package core.semantics.arrayspec;
+
+class BooleanArrayLocalFail {
+    public int foo() {
+        boolean[] flags;
+        return 0;
+    }
+}

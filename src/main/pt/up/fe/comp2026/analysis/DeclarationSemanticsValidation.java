@@ -2,6 +2,7 @@ package pt.up.fe.comp2026.analysis;
 
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp2026.ast.NodeUtils;
 import pt.up.fe.comp2026.ast.TypeUtils;
 import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.comp2026.jmm.ast.JmmKind;
@@ -120,6 +121,11 @@ public class DeclarationSemanticsValidation extends SemanticValidationPass {
             return null;
         }
 
+        if (isArrayType(typeNode) && !isSupportedArrayType(typeNode)) {
+            addReport(newError(typeNode, unsupportedArrayTypeMessage(typeNode)));
+            return null;
+        }
+
         if (!TypeUtils.voidType().equals(types.convertType(typeNode))) {
             return null;
         }
@@ -144,5 +150,57 @@ public class DeclarationSemanticsValidation extends SemanticValidationPass {
                 declarationKind + " '" + parent.get("name") + "' cannot have type 'void'"));
 
         return null;
+    }
+
+    private boolean isArrayType(JmmNode typeNode) {
+        return NodeUtils.getBooleanAttribute(typeNode, JmmAttributes.TYPE.IS_ARRAY.getKey(), "false");
+    }
+
+    private int getArrayDepth(JmmNode typeNode) {
+        return NodeUtils.getIntegerAttribute(typeNode, JmmAttributes.TYPE.ARRAY_DEPTH.getKey(), "0");
+    }
+
+    private boolean isSupportedArrayType(JmmNode typeNode) {
+        var typeName = typeNode.get(JmmAttributes.TYPE.NAME);
+
+        if ("int".equals(typeName)) {
+            return true;
+        }
+
+        return "String".equals(typeName)
+                && getArrayDepth(typeNode) == 1
+                && isMainMethodParameter(typeNode);
+    }
+
+    private boolean isMainMethodParameter(JmmNode typeNode) {
+        var parent = typeNode.getParent();
+        if (parent == null || !JmmKind.PARAM.check(parent)) {
+            return false;
+        }
+
+        var methodDeclOpt = typeNode.getAncestor(JmmKind.METHOD_DECL);
+        if (methodDeclOpt.isEmpty()) {
+            return false;
+        }
+
+        var methodDecl = methodDeclOpt.get();
+        if (!"main".equals(methodDecl.get(JmmAttributes.METHOD_DECL.NAME))) {
+            return false;
+        }
+
+        var methodOpt = types.getEnclosingMethod(typeNode);
+        return methodOpt.isPresent()
+                && methodOpt.get().isStatic()
+                && TypeUtils.voidType().equals(methodOpt.get().returnType());
+    }
+
+    private String unsupportedArrayTypeMessage(JmmNode typeNode) {
+        var renderedType = typeNode.get(JmmAttributes.TYPE.NAME) + "[]".repeat(getArrayDepth(typeNode));
+
+        if ("String[]".equals(renderedType)) {
+            return "Type 'String[]' is only supported as the parameter of the static void main method";
+        }
+
+        return "Type '" + renderedType + "' is not supported; J-- only allows arrays of int";
     }
 }

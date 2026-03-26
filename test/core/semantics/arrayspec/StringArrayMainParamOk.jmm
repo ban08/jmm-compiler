@@ -1,0 +1,6 @@
+package core.semantics.arrayspec;
+
+class StringArrayMainParamOk {
+    public static void main(String[] args) {
+    }
+}
