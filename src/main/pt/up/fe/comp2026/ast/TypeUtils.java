@@ -153,17 +153,19 @@ public class TypeUtils {
             return Optional.of(new ResolvedIdentifier(name, inheritedField.get().type(), AccessType.FIELD));
         }
 
-        if (name.equals(table.getClassName())) {
-            return Optional.of(new ResolvedIdentifier(name,
-                    JmmClassType.ofStaticReference(table.getFullyQualifiedName(), false),
-                    AccessType.CLASS));
-        }
-
         var importedClass = table.getImportedFullyQualifiedName(name);
         if (importedClass.isPresent() && table.getImportedSymbolTable(importedClass.get()).isPresent()) {
             return Optional.of(new ResolvedIdentifier(name,
                     JmmClassType.ofStaticReference(importedClass.get(), true),
                     AccessType.IMPORT));
+        }
+
+        // Keep bare class-identifier lookup aligned with type/new resolution:
+        // explicit imports win over the current class when simple names collide.
+        if (name.equals(table.getClassName())) {
+            return Optional.of(new ResolvedIdentifier(name,
+                    JmmClassType.ofStaticReference(table.getFullyQualifiedName(), false),
+                    AccessType.CLASS));
         }
 
         var implicitClass = table.getImplicitImport(name);

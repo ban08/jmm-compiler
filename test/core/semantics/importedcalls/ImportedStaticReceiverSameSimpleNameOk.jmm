@@ -1,0 +1,9 @@
+package core.semantics.importedcalls;
+
+import java.lang.Math;
+
+class Math {
+    int compute() {
+        return Math.abs(1);
+    }
+}
