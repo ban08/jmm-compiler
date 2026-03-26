@@ -149,17 +149,16 @@ public class JmmSymbolTable extends AJmmSymbolTable {
     }
 
     public Optional<SymbolTable> getImportedSymbolTable(String className) {
+        var importedName = this.getImportedFullyQualifiedName(className);
+        if (importedName.isPresent()) {
+            return this.importer.getSymbolTableOf(importedName.get());
+        }
 
-        if (!this.imports.contains(className)) {
-            //then it is already fully qualified name and it is imported
-            return this.importer.getSymbolTableOf(className);
+        var directLookup = this.importer.getSymbolTableOf(className);
+        if (directLookup.isPresent()) {
+            return directLookup;
         }
-        //else, try to get fully qualified name
-        var fullyQualifiedName = this.getImportedFullyQualifiedName(className);
-        if (fullyQualifiedName.isPresent()) {
-            return this.importer.getSymbolTableOf(fullyQualifiedName.get());
-        }
-        //else, see if implicit import works
+
         return this.importer.tryImplicitImport(className);
     }
 
