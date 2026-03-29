@@ -58,17 +58,18 @@ public class TypeUtils {
     public JmmType convertType(JmmNode typeNode) {
         TYPE.check(typeNode);
 
-        var name = typeNode.get(JmmAttributes.TYPE.NAME);
-        var isArray = NodeUtils.getBooleanAttribute(typeNode, JmmAttributes.TYPE.IS_ARRAY.getKey(), "false");
-        var arrayDepth = NodeUtils.getIntegerAttribute(typeNode, JmmAttributes.TYPE.ARRAY_DEPTH.getKey(), isArray ? "1" : "0");
-
-        var primitive = JmmPrimitiveType.fromString(name);
-        if (primitive.isPresent()) {
-            return wrapArrayType(primitive.get(), arrayDepth);
+        if (ARRAY_TYPE.check(typeNode)) {
+            var elementType = typeNode.getObject(JmmAttributes.ARRAY_TYPE.ELEMENT_TYPE.getKey(), JmmNode.class);
+            return JmmArrayType.of(convertType(elementType));
         }
 
-        var classType = resolveClassType(name, false);
-        return wrapArrayType(classType, arrayDepth);
+        var name = typeNode.get(JmmAttributes.SIMPLE_TYPE.NAME);
+        var primitive = JmmPrimitiveType.fromString(name);
+        if (primitive.isPresent()) {
+            return primitive.get();
+        }
+
+        return resolveClassType(name, false);
     }
 
     public boolean isKnownTypeName(String name) {

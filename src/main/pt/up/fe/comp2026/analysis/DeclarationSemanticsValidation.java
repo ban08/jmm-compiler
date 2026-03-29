@@ -2,7 +2,6 @@ package pt.up.fe.comp2026.analysis;
 
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
-import pt.up.fe.comp2026.ast.NodeUtils;
 import pt.up.fe.comp2026.ast.TypeUtils;
 import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.comp2026.jmm.ast.JmmKind;
@@ -120,7 +119,11 @@ public class DeclarationSemanticsValidation extends SemanticValidationPass {
     }
 
     private Void visitType(JmmNode typeNode, SymbolTable ignored) {
-        var typeName = typeNode.get(JmmAttributes.TYPE.NAME);
+        if (!isOutermostTypeNode(typeNode)) {
+            return null;
+        }
+
+        var typeName = getBaseTypeName(typeNode);
 
         if (!types.isKnownTypeName(typeName)) {
             addReport(newError(typeNode, "Type '" + typeName + "' is not available in the current compilation unit"));
@@ -158,16 +161,37 @@ public class DeclarationSemanticsValidation extends SemanticValidationPass {
         return null;
     }
 
+    private boolean isOutermostTypeNode(JmmNode typeNode) {
+        var parent = typeNode.getParent();
+        return parent == null || !JmmKind.TYPE.check(parent);
+    }
+
     private boolean isArrayType(JmmNode typeNode) {
-        return NodeUtils.getBooleanAttribute(typeNode, JmmAttributes.TYPE.IS_ARRAY.getKey(), "false");
+        return JmmKind.ARRAY_TYPE.check(typeNode);
     }
 
     private int getArrayDepth(JmmNode typeNode) {
-        return NodeUtils.getIntegerAttribute(typeNode, JmmAttributes.TYPE.ARRAY_DEPTH.getKey(), "0");
+        if (!JmmKind.ARRAY_TYPE.check(typeNode)) {
+            return 0;
+        }
+
+        return 1 + getArrayDepth(typeNode.getObject(JmmAttributes.ARRAY_TYPE.ELEMENT_TYPE.getKey(), JmmNode.class));
+    }
+
+    private String getBaseTypeName(JmmNode typeNode) {
+        if (JmmKind.SIMPLE_TYPE.check(typeNode)) {
+            return typeNode.get(JmmAttributes.SIMPLE_TYPE.NAME);
+        }
+
+        if (JmmKind.ARRAY_TYPE.check(typeNode)) {
+            return getBaseTypeName(typeNode.getObject(JmmAttributes.ARRAY_TYPE.ELEMENT_TYPE.getKey(), JmmNode.class));
+        }
+
+        throw new IllegalArgumentException("Unexpected type node kind: " + typeNode.getKind());
     }
 
     private boolean isSupportedArrayType(JmmNode typeNode) {
-        var typeName = typeNode.get(JmmAttributes.TYPE.NAME);
+        var typeName = getBaseTypeName(typeNode);
 
         if ("int".equals(typeName)) {
             return true;
@@ -206,7 +230,7 @@ public class DeclarationSemanticsValidation extends SemanticValidationPass {
     }
 
     private String unsupportedArrayTypeMessage(JmmNode typeNode) {
-        var renderedType = typeNode.get(JmmAttributes.TYPE.NAME) + "[]".repeat(getArrayDepth(typeNode));
+        var renderedType = getBaseTypeName(typeNode) + "[]".repeat(getArrayDepth(typeNode));
 
         if ("String[]".equals(renderedType)) {
             return "Type 'String[]' is only supported as the parameter of the static void main method";

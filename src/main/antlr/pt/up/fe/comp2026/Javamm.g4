@@ -65,11 +65,12 @@ param
     : typeNode = type name = ID
     ;
 
-type locals[boolean isArray=false, int arrayDepth=0]
-    : name = INT ('[' ']' {$isArray=true; $arrayDepth++;})*
-    | name = BOOLEAN ('[' ']' {$isArray=true; $arrayDepth++;})*
-    | name = VOID
-    | name = ID ('[' ']' {$isArray=true; $arrayDepth++;})*
+type
+    : elementType=type '[' ']' #ArrayType
+    | name = INT #SimpleType
+    | name = BOOLEAN #SimpleType
+    | name = VOID #SimpleType
+    | name = ID #SimpleType
     ;
 
 methodDecl locals[boolean isStatic=false]

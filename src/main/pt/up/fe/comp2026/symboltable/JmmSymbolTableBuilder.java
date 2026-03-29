@@ -171,14 +171,17 @@ public class JmmSymbolTableBuilder {
      * Convert a type AST node into a JmmType.
      */
     private JmmType convertType(JmmNode typeNode) {
-        var typeName = typeNode.get(JmmAttributes.TYPE.NAME);
-        boolean isArray = NodeUtils.getBooleanAttribute(typeNode, JmmAttributes.TYPE.IS_ARRAY.getKey(), "false");
-        int arrayDepth = NodeUtils.getIntegerAttribute(typeNode, JmmAttributes.TYPE.ARRAY_DEPTH.getKey(), isArray ? "1" : "0");
+        if (ARRAY_TYPE.check(typeNode)) {
+            var elementType = typeNode.getObject(JmmAttributes.ARRAY_TYPE.ELEMENT_TYPE.getKey(), JmmNode.class);
+            return JmmArrayType.of(convertType(elementType));
+        }
+
+        var typeName = typeNode.get(JmmAttributes.SIMPLE_TYPE.NAME);
 
         // Check primitives
         var primitive = JmmPrimitiveType.fromString(typeName);
         if (primitive.isPresent()) {
-            return wrapArrayType(primitive.get(), arrayDepth);
+            return primitive.get();
         }
 
         // It's a class type - resolve it
@@ -196,37 +199,24 @@ public class JmmSymbolTableBuilder {
 
         if (importedFqn != null) {
             // Explicitly imported class
-            var classType = JmmClassType.ofInstance(importedFqn, true);
-            return wrapArrayType(classType, arrayDepth);
+            return JmmClassType.ofInstance(importedFqn, true);
         }
 
         // Check if it's the declared class itself
         if (typeName.equals(className)) {
-            var classType = JmmClassType.ofInstance(fullyQualifiedName, false);
-            return wrapArrayType(classType, arrayDepth);
+            return JmmClassType.ofInstance(fullyQualifiedName, false);
         }
 
         // Check implicit imports (java.lang.*)
         if (importer.isImplicitImport(typeName)) {
             var clazz = importer.loadImplicit(typeName);
             if (clazz.isPresent()) {
-                var classType = JmmClassType.ofInstance(clazz.get().getName(), true);
-                return wrapArrayType(classType, arrayDepth);
+                return JmmClassType.ofInstance(clazz.get().getName(), true);
             }
         }
 
         // Unknown class - treat as non-imported class type
-        var classType = JmmClassType.ofInstance(typeName, false);
-        return wrapArrayType(classType, arrayDepth);
-    }
-
-    private JmmType wrapArrayType(JmmType baseType, int arrayDepth) {
-        var currentType = baseType;
-        for (int i = 0; i < arrayDepth; i++) {
-            currentType = JmmArrayType.of(currentType);
-        }
-
-        return currentType;
+        return JmmClassType.ofInstance(typeName, false);
     }
 
     /**
