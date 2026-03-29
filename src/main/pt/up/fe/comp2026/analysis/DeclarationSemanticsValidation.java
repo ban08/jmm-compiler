@@ -67,14 +67,14 @@ public class DeclarationSemanticsValidation extends SemanticValidationPass {
 
         if (JmmKind.DO_WHILE_STMT.check(statement)) {
             var bodyStatements = statement.getChildren(JmmKind.STMT);
-            return !bodyStatements.isEmpty() && alwaysReturns(bodyStatements.getFirst());
+            return isStaticallyTrueLoop(statement)
+                    || (!bodyStatements.isEmpty() && alwaysReturns(bodyStatements.getFirst()));
         }
 
         if (JmmKind.WHILE_STMT.check(statement) || JmmKind.FOR_STMT.check(statement)) {
-            var bodyStatements = statement.getChildren(JmmKind.STMT);
-            return !bodyStatements.isEmpty()
-                    && isStaticallyTrueLoop(statement)
-                    && alwaysReturns(bodyStatements.getFirst());
+            // The current language has no break statement, so a statically-true loop
+            // cannot complete normally even if the body does not contain an explicit return.
+            return isStaticallyTrueLoop(statement);
         }
 
         return false;
@@ -92,6 +92,12 @@ public class DeclarationSemanticsValidation extends SemanticValidationPass {
 
         if (JmmKind.WHILE_STMT.check(loopStmt)) {
             return tryEvaluateBooleanConstant(loopStmt.getChild(0)).orElse(false);
+        }
+
+        if (JmmKind.DO_WHILE_STMT.check(loopStmt)) {
+            var conditions = loopStmt.getChildren(JmmKind.EXPR);
+            return !conditions.isEmpty()
+                    && tryEvaluateBooleanConstant(conditions.getFirst()).orElse(false);
         }
 
         return false;

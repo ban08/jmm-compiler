@@ -30,4 +30,9 @@ public class MyReturnPathSemanticsTest extends JmmTestEnv {
     public void onlyOneIfElseBranchReturningStillFails() {
         semantics("IfElseOneBranchMissingReturn.jmm", true);
     }
+
+    @Test
+    public void nonTerminatingLoopsSatisfyReturnRequirement() {
+        semantics("InfiniteLoopsDoNotNeedExplicitReturn.jmm", false);
+    }
 }

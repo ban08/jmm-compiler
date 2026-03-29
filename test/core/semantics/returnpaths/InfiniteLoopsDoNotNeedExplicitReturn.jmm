@@ -1,0 +1,14 @@
+package p;
+class A {
+    int whileForever() {
+        while (true) {}
+    }
+
+    int forForever() {
+        for (;;) {}
+    }
+
+    int doWhileForever() {
+        do {} while (true);
+    }
+}
