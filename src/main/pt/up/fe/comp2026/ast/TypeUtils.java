@@ -338,17 +338,7 @@ public class TypeUtils {
                 return Optional.of(new ResolvedMethodCall(receiverType, localMethod.get()));
             }
 
-            var superQualifiedName = table.getSuperFullyQualifiedName();
-            if (superQualifiedName == null) {
-                return Optional.empty();
-            }
-
-            var superTable = table.getImportedSymbolTable(superQualifiedName);
-            if (superTable.isEmpty()) {
-                return Optional.empty();
-            }
-
-            return findMatchingMethod(superTable.get().getMethods(methodName), argTypes, requireStatic)
+            return findMatchingMethodInHierarchy(table.getSuperFullyQualifiedName(), methodName, argTypes, requireStatic)
                     .map(method -> new ResolvedMethodCall(receiverType, method));
         }
 
@@ -382,6 +372,35 @@ public class TypeUtils {
             if (matches) {
                 return Optional.of(method);
             }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Walks the imported superclass chain and returns the first overload-compatible method.
+     * This keeps expression-type inference aligned with semantic validation, which already
+     * searches inherited methods recursively.
+     */
+    private Optional<MethodSymbol> findMatchingMethodInHierarchy(String classQualifiedName,
+                                                                 String methodName,
+                                                                 List<JmmType> argTypes,
+                                                                 boolean requireStatic) {
+        var visitedClasses = new HashSet<String>();
+        var currentClass = classQualifiedName;
+
+        while (currentClass != null && visitedClasses.add(currentClass)) {
+            var symbolTable = table.getImportedSymbolTable(currentClass);
+            if (symbolTable.isEmpty()) {
+                return Optional.empty();
+            }
+
+            var method = findMatchingMethod(symbolTable.get().getMethods(methodName), argTypes, requireStatic);
+            if (method.isPresent()) {
+                return method;
+            }
+
+            currentClass = symbolTable.get().getSuperFullyQualifiedName();
         }
 
         return Optional.empty();
