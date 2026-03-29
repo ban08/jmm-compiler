@@ -120,8 +120,7 @@ public class JmmSymbolTable extends AJmmSymbolTable {
 
     @Override
     public Optional<String> getImportedFullyQualifiedName(String simpleName) {
-        var dotName = "." + simpleName;
-        return imports.stream().filter(i -> i.equals(simpleName) || i.endsWith(dotName)).findFirst();
+        return ClassResolution.findImportedFullyQualifiedName(simpleName, imports);
     }
 
     @Override
@@ -166,8 +165,19 @@ public class JmmSymbolTable extends AJmmSymbolTable {
         return importer.isImplicitImport(className);
     }
 
+    public Optional<ClassResolution.ResolvedClass> resolveClass(String className) {
+        return ClassResolution.resolve(className, imports, getSimpleClassName(), getFullyQualifiedName(), importer);
+    }
+
     public Optional<SymbolTable> getImplicitImport(String className) {
         return this.importer.tryImplicitImport(className);
+    }
+
+    private String getSimpleClassName() {
+        var separatorIndex = classQualifiedName.lastIndexOf('.');
+        return separatorIndex >= 0
+                ? classQualifiedName.substring(separatorIndex + 1)
+                : classQualifiedName;
     }
 
 }

@@ -74,11 +74,7 @@ public class TypeUtils {
 
     public boolean isKnownTypeName(String name) {
         return JmmPrimitiveType.fromString(name).isPresent()
-                || name.equals(table.getClassName())
-                || table.getImportedFullyQualifiedName(name)
-                .flatMap(table::getImportedSymbolTable)
-                .isPresent()
-                || table.getImplicitImport(name).isPresent();
+                || table.resolveClass(name).isPresent();
     }
 
     /**
@@ -154,29 +150,12 @@ public class TypeUtils {
             return Optional.of(new ResolvedIdentifier(name, inheritedField.get().type(), AccessType.FIELD));
         }
 
-        var importedClass = table.getImportedFullyQualifiedName(name);
-        if (importedClass.isPresent() && table.getImportedSymbolTable(importedClass.get()).isPresent()) {
-            return Optional.of(new ResolvedIdentifier(name,
-                    JmmClassType.ofStaticReference(importedClass.get(), true),
-                    AccessType.IMPORT));
-        }
-
-        // Keep bare class-identifier lookup aligned with type/new resolution:
-        // explicit imports win over the current class when simple names collide.
-        if (name.equals(table.getClassName())) {
-            return Optional.of(new ResolvedIdentifier(name,
-                    JmmClassType.ofStaticReference(table.getFullyQualifiedName(), false),
-                    AccessType.CLASS));
-        }
-
-        var implicitClass = table.getImplicitImport(name);
-        if (implicitClass.isPresent()) {
-            return Optional.of(new ResolvedIdentifier(name,
-                    JmmClassType.ofStaticReference(implicitClass.get().getFullyQualifiedName(), true),
-                    AccessType.IMPORT));
-        }
-
-        return Optional.empty();
+        return table.resolveClass(name)
+                .map(resolvedClass -> new ResolvedIdentifier(
+                        name,
+                        resolvedClass.asType(true),
+                        resolvedClass.imported() ? AccessType.IMPORT : AccessType.CLASS
+                ));
     }
 
     public Optional<ResolvedMethodCall> resolveMethodCall(JmmNode callExpr) {
@@ -407,30 +386,11 @@ public class TypeUtils {
     }
 
     private JmmClassType resolveClassType(String className, boolean staticReference) {
-        var importedFqn = table.getImportedFullyQualifiedName(className);
-        if (importedFqn.isPresent() && table.getImportedSymbolTable(importedFqn.get()).isPresent()) {
-            return staticReference
-                    ? JmmClassType.ofStaticReference(importedFqn.get(), true)
-                    : JmmClassType.ofInstance(importedFqn.get(), true);
-        }
-
-        if (className.equals(table.getClassName())) {
-            return staticReference
-                    ? JmmClassType.ofStaticReference(table.getFullyQualifiedName(), false)
-                    : JmmClassType.ofInstance(table.getFullyQualifiedName(), false);
-        }
-
-        var implicitImport = table.getImplicitImport(className);
-        if (implicitImport.isPresent()) {
-            var fullyQualifiedName = implicitImport.get().getFullyQualifiedName();
-            return staticReference
-                    ? JmmClassType.ofStaticReference(fullyQualifiedName, true)
-                    : JmmClassType.ofInstance(fullyQualifiedName, true);
-        }
-
-        return staticReference
-                ? JmmClassType.ofStaticReference(className, false)
-                : JmmClassType.ofInstance(className, false);
+        return table.resolveClass(className)
+                .map(resolvedClass -> resolvedClass.asType(staticReference))
+                .orElseGet(() -> staticReference
+                        ? JmmClassType.ofStaticReference(className, false)
+                        : JmmClassType.ofInstance(className, false));
     }
 
     private boolean isCurrentClass(JmmClassType classType) {

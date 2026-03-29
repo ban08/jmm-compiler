@@ -135,28 +135,11 @@ public class JmmSymbolTableBuilder {
      * Checks: explicit imports, implicit imports (java.lang), declared class.
      */
     private String resolveClassName(String simpleName, JmmNode contextNode) {
-        // Check explicit imports
-        var dotName = "." + simpleName;
-        for (var imp : imports) {
-            if (imp.equals(simpleName) || imp.endsWith(dotName)) {
-                return imp;
-            }
+        var resolvedClass = ClassResolution.resolve(simpleName, imports, className, fullyQualifiedName, importer);
+        if (resolvedClass.isPresent()) {
+            return resolvedClass.get().fullyQualifiedName();
         }
 
-        // Check if it's the declared class
-        if (simpleName.equals(className)) {
-            return fullyQualifiedName;
-        }
-
-        // Check implicit imports (java.lang.*)
-        if (importer.isImplicitImport(simpleName)) {
-            var clazz = importer.loadImplicit(simpleName);
-            if (clazz.isPresent()) {
-                return clazz.get().getName();
-            }
-        }
-
-        // Not found - report error
         reports.add(newError(contextNode, "Class '" + simpleName + "' is not imported"));
         return simpleName;
     }
@@ -184,39 +167,9 @@ public class JmmSymbolTableBuilder {
             return primitive.get();
         }
 
-        // It's a class type - resolve it
-        String resolvedFqn;
-
-        // Check explicit imports
-        var dotName = "." + typeName;
-        String importedFqn = null;
-        for (var imp : imports) {
-            if (imp.equals(typeName) || imp.endsWith(dotName)) {
-                importedFqn = imp;
-                break;
-            }
-        }
-
-        if (importedFqn != null) {
-            // Explicitly imported class
-            return JmmClassType.ofInstance(importedFqn, true);
-        }
-
-        // Check if it's the declared class itself
-        if (typeName.equals(className)) {
-            return JmmClassType.ofInstance(fullyQualifiedName, false);
-        }
-
-        // Check implicit imports (java.lang.*)
-        if (importer.isImplicitImport(typeName)) {
-            var clazz = importer.loadImplicit(typeName);
-            if (clazz.isPresent()) {
-                return JmmClassType.ofInstance(clazz.get().getName(), true);
-            }
-        }
-
-        // Unknown class - treat as non-imported class type
-        return JmmClassType.ofInstance(typeName, false);
+        return ClassResolution.resolve(typeName, imports, className, fullyQualifiedName, importer)
+                .map(resolvedClass -> resolvedClass.asType(false))
+                .orElseGet(() -> JmmClassType.ofInstance(typeName, false));
     }
 
     /**
