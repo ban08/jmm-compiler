@@ -1,0 +1,6 @@
+package core.semantics.arrayspec;
+
+class StringArrayMainSecondParamFail {
+    public static void main(int count, String[] args) {
+    }
+}

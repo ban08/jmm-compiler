@@ -189,9 +189,14 @@ public class DeclarationSemanticsValidation extends SemanticValidationPass {
         }
 
         var methodOpt = types.getEnclosingMethod(typeNode);
-        return methodOpt.isPresent()
-                && methodOpt.get().isStatic()
-                && TypeUtils.voidType().equals(methodOpt.get().returnType());
+        if (methodOpt.isEmpty()
+                || !methodOpt.get().isStatic()
+                || !TypeUtils.voidType().equals(methodOpt.get().returnType())) {
+            return false;
+        }
+
+        var params = methodDecl.getChildren(JmmKind.PARAM);
+        return params.size() == 1 && params.getFirst() == parent;
     }
 
     private String unsupportedArrayTypeMessage(JmmNode typeNode) {
