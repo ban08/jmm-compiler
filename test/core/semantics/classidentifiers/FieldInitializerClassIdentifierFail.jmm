@@ -1,0 +1,5 @@
+package core.semantics.classidentifiers;
+
+class FieldInitializerClassIdentifierFail {
+    String value = String;
+}

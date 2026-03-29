@@ -102,6 +102,12 @@ public class EntityAccessValidation extends SemanticValidationPass {
             addReport(newError(varRefExpr, "Field '" + identifier + "' cannot be accessed from a static method"));
         }
 
+        if ((resolved.get().accessType() == AccessType.CLASS || resolved.get().accessType() == AccessType.IMPORT)
+                && !types.isClassIdentifierReceiverContext(varRefExpr)) {
+            addReport(newError(varRefExpr,
+                    "Class identifier '" + identifier + "' cannot be used as a value expression"));
+        }
+
         return null;
     }
 

@@ -1,0 +1,7 @@
+package core.semantics.classidentifiers;
+
+class ReturnClassIdentifierFail {
+    public String foo() {
+        return String;
+    }
+}

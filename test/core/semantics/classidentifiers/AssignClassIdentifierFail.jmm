@@ -1,0 +1,9 @@
+package core.semantics.classidentifiers;
+
+class AssignClassIdentifierFail {
+    public String foo() {
+        String value;
+        value = String;
+        return value;
+    }
+}

@@ -303,9 +303,37 @@ public class TypeUtils {
     }
 
     private JmmType getVarExprType(JmmNode varRefExpr) {
-        return resolveIdentifier(varRefExpr, varRefExpr.get(JmmAttributes.VAR_REF_EXPR.NAME))
-                .map(ResolvedIdentifier::type)
-                .orElse(null);
+        var resolved = resolveIdentifier(varRefExpr, varRefExpr.get(JmmAttributes.VAR_REF_EXPR.NAME));
+        if (resolved.isEmpty()) {
+            return null;
+        }
+
+        var accessType = resolved.get().accessType();
+        if ((accessType == AccessType.CLASS || accessType == AccessType.IMPORT)
+                && !isClassIdentifierReceiverContext(varRefExpr)) {
+            return null;
+        }
+
+        return resolved.get().type();
+    }
+
+    public boolean isClassIdentifierReceiverContext(JmmNode varRefExpr) {
+        if (!VAR_REF_EXPR.check(varRefExpr)) {
+            return false;
+        }
+
+        var parent = varRefExpr.getParent();
+        if (parent == null) {
+            return false;
+        }
+
+        if ((METHOD_CALL_EXPR.check(parent) || FIELD_ACCESS_EXPR.check(parent))
+                && parent.getNumChildren() > 0
+                && parent.getChild(0) == varRefExpr) {
+            return true;
+        }
+
+        return false;
     }
 
     private Optional<ResolvedMethodCall> resolveMethodCall(JmmClassType receiverType, String methodName, List<JmmType> argTypes) {
