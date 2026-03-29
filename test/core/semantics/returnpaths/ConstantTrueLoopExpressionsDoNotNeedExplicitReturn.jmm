@@ -1,0 +1,14 @@
+package p;
+class A {
+    int whileRelational() {
+        while (1 < 2) {}
+    }
+
+    int forRelational() {
+        for (; (1 + 2) == 3; ) {}
+    }
+
+    int doWhileRelational() {
+        do {} while (!(2 > 3));
+    }
+}

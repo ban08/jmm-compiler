@@ -115,6 +115,143 @@ public class DeclarationSemanticsValidation extends SemanticValidationPass {
             return tryEvaluateBooleanConstant(expr.getChild(0)).map(value -> !value);
         }
 
+        if (JmmKind.BINARY_EXPR.check(expr)) {
+            var operator = expr.get(JmmAttributes.BINARY_EXPR.OP);
+            var leftExpr = expr.getChild(0);
+            var rightExpr = expr.getChild(1);
+
+            return switch (operator) {
+                case "&&" -> tryEvaluateLogicalAnd(leftExpr, rightExpr);
+                case "||" -> tryEvaluateLogicalOr(leftExpr, rightExpr);
+                case "<", ">", "<=", ">=" -> tryEvaluateComparison(leftExpr, rightExpr, operator);
+                case "==", "!=" -> tryEvaluateEquality(leftExpr, rightExpr, operator);
+                default -> Optional.empty();
+            };
+        }
+
+        return Optional.empty();
+    }
+
+    private Optional<Integer> tryEvaluateIntConstant(JmmNode expr) {
+        if (JmmKind.PAREN_EXPR.check(expr)) {
+            return tryEvaluateIntConstant(expr.getChild(0));
+        }
+
+        if (JmmKind.INTEGER_LITERAL.check(expr)) {
+            return Optional.of(Integer.parseInt(expr.get("value")));
+        }
+
+        if (JmmKind.UNARY_EXPR.check(expr)) {
+            var operator = expr.get(JmmAttributes.UNARY_EXPR.OP);
+            var operand = tryEvaluateIntConstant(expr.getChild(0));
+
+            return switch (operator) {
+                case "+" -> operand;
+                case "-" -> operand.map(value -> -value);
+                default -> Optional.empty();
+            };
+        }
+
+        if (!JmmKind.BINARY_EXPR.check(expr)) {
+            return Optional.empty();
+        }
+
+        var operator = expr.get(JmmAttributes.BINARY_EXPR.OP);
+        var left = tryEvaluateIntConstant(expr.getChild(0));
+        var right = tryEvaluateIntConstant(expr.getChild(1));
+
+        if (left.isEmpty() || right.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return switch (operator) {
+            case "+" -> Optional.of(left.get() + right.get());
+            case "-" -> Optional.of(left.get() - right.get());
+            case "*" -> Optional.of(left.get() * right.get());
+            case "/" -> right.get() == 0 ? Optional.empty() : Optional.of(left.get() / right.get());
+            case "%" -> right.get() == 0 ? Optional.empty() : Optional.of(left.get() % right.get());
+            default -> Optional.empty();
+        };
+    }
+
+    private Optional<Boolean> tryEvaluateLogicalAnd(JmmNode leftExpr, JmmNode rightExpr) {
+        var left = tryEvaluateBooleanConstant(leftExpr);
+        if (left.isPresent() && !left.get()) {
+            return Optional.of(false);
+        }
+
+        var right = tryEvaluateBooleanConstant(rightExpr);
+        if (right.isPresent() && !right.get()) {
+            return Optional.of(false);
+        }
+
+        if (left.isPresent() && left.get()) {
+            return right;
+        }
+
+        if (right.isPresent() && right.get()) {
+            return left;
+        }
+
+        return Optional.empty();
+    }
+
+    private Optional<Boolean> tryEvaluateLogicalOr(JmmNode leftExpr, JmmNode rightExpr) {
+        var left = tryEvaluateBooleanConstant(leftExpr);
+        if (left.isPresent() && left.get()) {
+            return Optional.of(true);
+        }
+
+        var right = tryEvaluateBooleanConstant(rightExpr);
+        if (right.isPresent() && right.get()) {
+            return Optional.of(true);
+        }
+
+        if (left.isPresent() && !left.get()) {
+            return right;
+        }
+
+        if (right.isPresent() && !right.get()) {
+            return left;
+        }
+
+        return Optional.empty();
+    }
+
+    private Optional<Boolean> tryEvaluateComparison(JmmNode leftExpr, JmmNode rightExpr, String operator) {
+        var left = tryEvaluateIntConstant(leftExpr);
+        var right = tryEvaluateIntConstant(rightExpr);
+
+        if (left.isEmpty() || right.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(switch (operator) {
+            case "<" -> left.get() < right.get();
+            case ">" -> left.get() > right.get();
+            case "<=" -> left.get() <= right.get();
+            case ">=" -> left.get() >= right.get();
+            default -> throw new IllegalArgumentException("Unexpected comparison operator '" + operator + "'");
+        });
+    }
+
+    private Optional<Boolean> tryEvaluateEquality(JmmNode leftExpr, JmmNode rightExpr, String operator) {
+        var leftBool = tryEvaluateBooleanConstant(leftExpr);
+        var rightBool = tryEvaluateBooleanConstant(rightExpr);
+        if (leftBool.isPresent() && rightBool.isPresent()) {
+            return Optional.of(operator.equals("==")
+                    ? leftBool.get().equals(rightBool.get())
+                    : !leftBool.get().equals(rightBool.get()));
+        }
+
+        var leftInt = tryEvaluateIntConstant(leftExpr);
+        var rightInt = tryEvaluateIntConstant(rightExpr);
+        if (leftInt.isPresent() && rightInt.isPresent()) {
+            return Optional.of(operator.equals("==")
+                    ? leftInt.get().equals(rightInt.get())
+                    : !leftInt.get().equals(rightInt.get()));
+        }
+
         return Optional.empty();
     }
 

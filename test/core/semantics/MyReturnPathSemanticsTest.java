@@ -35,4 +35,9 @@ public class MyReturnPathSemanticsTest extends JmmTestEnv {
     public void nonTerminatingLoopsSatisfyReturnRequirement() {
         semantics("InfiniteLoopsDoNotNeedExplicitReturn.jmm", false);
     }
+
+    @Test
+    public void constantTrueLoopExpressionsSatisfyReturnRequirement() {
+        semantics("ConstantTrueLoopExpressionsDoNotNeedExplicitReturn.jmm", false);
+    }
 }
