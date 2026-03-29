@@ -1,0 +1,11 @@
+package core.semantics.classidentifiers;
+
+import util.io;
+
+class AssignImportedClassIdentifierFail {
+    public io foo() {
+        io value;
+        value = io;
+        return value;
+    }
+}

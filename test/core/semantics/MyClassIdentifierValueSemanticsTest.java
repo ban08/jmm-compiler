@@ -15,6 +15,7 @@ public class MyClassIdentifierValueSemanticsTest extends JmmTestEnv {
     public void bareClassIdentifiersCannotBeUsedAsValues() {
         semantics("ReturnClassIdentifierFail.jmm", true);
         semantics("AssignClassIdentifierFail.jmm", true);
+        semantics("AssignImportedClassIdentifierFail.jmm", true);
         semantics("FieldInitializerClassIdentifierFail.jmm", true);
     }
 }
