@@ -75,6 +75,10 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                     return new JmmSemanticsResult(semanticsResult, reports);
                 }
 
+                if (analysisVisitor instanceof EntityAccessValidation) {
+                    EntityAccessNormalizer.normalizeResolvedImplicitThisCalls(rootNode, table);
+                }
+
             } catch (Exception e) {
                 reports.add(Report.newError(Stage.SEMANTIC,
                         -1,
