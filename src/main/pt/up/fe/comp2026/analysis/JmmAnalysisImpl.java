@@ -38,7 +38,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
     @Override
     public JmmSemanticsResult buildSymbolTable(JmmParserResult parserResult) {
         JmmNode rootNode = parserResult.rootNode();
-        var symbolTableBuilderResults = JmmSymbolTableBuilder.build(rootNode);
+        var symbolTableBuilderResults = JmmSymbolTableBuilder.build(rootNode, parserResult.config());
 
         SymbolTable table = symbolTableBuilderResults.table();
         List<Report> reports = symbolTableBuilderResults.reports();

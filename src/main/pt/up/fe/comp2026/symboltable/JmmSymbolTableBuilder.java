@@ -12,11 +12,14 @@ import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmClassType;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.Stage;
+import pt.up.fe.comp2026.CompilerConfig;
 import pt.up.fe.comp2026.ast.NodeUtils;
 import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.specs.util.SpecsCheck;
 
+import java.io.File;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static pt.up.fe.comp2026.jmm.ast.JmmKind.*;
 
@@ -30,12 +33,12 @@ public class JmmSymbolTableBuilder {
     private final List<String> imports;
     private final Map<String, String> declaredClasses;
 
-    private JmmSymbolTableBuilder(JmmNode root) {
+    private JmmSymbolTableBuilder(JmmNode root, Importer importer) {
         this.root = root;
         reports = new ArrayList<>();
         imports = new ArrayList<>();
         declaredClasses = new HashMap<>();
-        this.importer = Importer.fromThisClassPath();
+        this.importer = importer;
     }
 
     private static Report newError(JmmNode node, String message) {
@@ -57,7 +60,34 @@ public class JmmSymbolTableBuilder {
     }
 
     public static SymbolTableBuilderResult build(JmmNode root) {
-        return new JmmSymbolTableBuilder(root).buildInternal();
+        return build(root, Collections.emptyMap());
+    }
+
+    public static SymbolTableBuilderResult build(JmmNode root, Map<String, String> config) {
+        return new JmmSymbolTableBuilder(root, createImporter(config)).buildInternal();
+    }
+
+    private static Importer createImporter(Map<String, String> config) {
+        if (config == null) {
+            return Importer.fromThisClassPath();
+        }
+
+        var classpath = CompilerConfig.getClasspath(config);
+        if (classpath == null || classpath.isBlank() || ".".equals(classpath)) {
+            return Importer.fromThisClassPath();
+        }
+
+        var separatorRegex = Pattern.quote(File.pathSeparator);
+        var classpathEntries = Arrays.stream(classpath.split(separatorRegex))
+                .map(String::trim)
+                .filter(entry -> !entry.isEmpty())
+                .toList();
+
+        if (classpathEntries.isEmpty()) {
+            return Importer.fromThisClassPath();
+        }
+
+        return Importer.newFrom(classpathEntries);
     }
 
     private SymbolTableBuilderResult buildInternal() {
