@@ -224,22 +224,7 @@ public class TypeUtils {
 
         var targetClass = targetType.asClass();
         var valueClass = valueType.asClass();
-        if (sameClass(targetClass, valueClass)) {
-            return true;
-        }
-
-        if (isCurrentClass(targetClass)) {
-            return false;
-        }
-
-        if (isCurrentClass(valueClass)) {
-            var superQualifiedName = table.getSuperFullyQualifiedName();
-            return superQualifiedName != null
-                    && (sameClass(targetClass.fullyQualifiedName(), superQualifiedName)
-                    || isJavaAssignable(targetClass.fullyQualifiedName(), superQualifiedName));
-        }
-
-        return isJavaAssignable(targetClass.fullyQualifiedName(), valueClass.fullyQualifiedName());
+        return isClassAssignable(targetClass.fullyQualifiedName(), valueClass.fullyQualifiedName());
     }
 
     public boolean areComparable(JmmType leftType, JmmType rightType) {
@@ -433,6 +418,31 @@ public class TypeUtils {
         return left.equals(right);
     }
 
+    private boolean isClassAssignable(String targetClass, String valueClass) {
+        var visited = new HashSet<String>();
+        var currentClass = valueClass;
+
+        while (currentClass != null && visited.add(currentClass)) {
+            if (sameClass(targetClass, currentClass)) {
+                return true;
+            }
+
+            currentClass = getDirectSuperClass(currentClass);
+        }
+
+        return false;
+    }
+
+    private String getDirectSuperClass(String classQualifiedName) {
+        if (sameClass(classQualifiedName, table.getFullyQualifiedName())) {
+            return table.getSuperFullyQualifiedName();
+        }
+
+        return table.getImportedSymbolTable(classQualifiedName)
+                .map(SymbolTable::getSuperFullyQualifiedName)
+                .orElse(null);
+    }
+
     // Imported symbol tables expose only the fields declared in that class, so we
     // need to walk the superclass chain ourselves to resolve inherited fields.
     private Optional<Symbol> findFieldInHierarchy(String classQualifiedName, String fieldName) {
@@ -454,16 +464,6 @@ public class TypeUtils {
         }
 
         return Optional.empty();
-    }
-
-    private boolean isJavaAssignable(String targetClass, String valueClass) {
-        try {
-            var target = Class.forName(targetClass);
-            var value = Class.forName(valueClass);
-            return target.isAssignableFrom(value);
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
     }
 
     private JmmType wrapArrayType(JmmType baseType, int arrayDepth) {

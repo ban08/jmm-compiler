@@ -59,24 +59,26 @@ public class EntityAccessValidation extends SemanticValidationPass {
             return null;
         }
 
-        if (!hasLoadableConstructorOwner(classType)) {
+        var importedTableOpt = table.getImportedSymbolTable(classType.fullyQualifiedName());
+        if (importedTableOpt.isEmpty()) {
+            addReport(newError(newExpr,
+                    "Imported class '" + classType.fullyQualifiedName() + "' not found or has no symbol table"));
             return null;
         }
 
-        var constructors = getPublicConstructors(classType.fullyQualifiedName());
+        var constructors = importedTableOpt.get().getMethods("<init>");
         if (constructors.isEmpty()) {
             addReport(newError(newExpr,
                     "Class '" + className + "' does not define a public constructor"));
             return null;
         }
 
-        if (hasMatchingConstructor(constructors, argTypes)) {
+        if (findMatchingMethod(constructors, argTypes, false) != null) {
             return null;
         }
 
         var anyWithSameCount = constructors.stream()
-                .anyMatch(constructor -> !constructor.isVarArgs()
-                        && constructor.getParameterCount() == argTypes.size());
+                .anyMatch(constructor -> constructor.parameters().size() == argTypes.size());
 
         if (!anyWithSameCount) {
             addReport(newError(newExpr,

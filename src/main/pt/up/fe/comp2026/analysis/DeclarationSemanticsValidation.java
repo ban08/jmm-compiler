@@ -138,7 +138,7 @@ public class DeclarationSemanticsValidation extends SemanticValidationPass {
         }
 
         if (JmmKind.INTEGER_LITERAL.check(expr)) {
-            return Optional.of(Integer.parseInt(expr.get("value")));
+            return Optional.of(Integer.parseInt(expr.get(JmmAttributes.INTEGER_LITERAL.VALUE)));
         }
 
         if (JmmKind.UNARY_EXPR.check(expr)) {

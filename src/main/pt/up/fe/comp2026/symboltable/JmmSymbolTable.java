@@ -5,7 +5,6 @@ import pt.up.fe.comp.jmm.analysis.table.Signature;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.reflection.Importer;
-import pt.up.fe.specs.util.SpecsCheck;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,8 +20,6 @@ public class JmmSymbolTable extends AJmmSymbolTable {
 
     // TODO: Check if some uses of importNames can be replaced with getDeclaredClasses()
     private final Set<String> importNames;
-
-    private final Map<String, Object> attrs;
 
     public JmmSymbolTable(List<String> imports, String classQualifiedName,
                           String superQualifiedNameName, List<Symbol> fields,
@@ -48,7 +45,6 @@ public class JmmSymbolTable extends AJmmSymbolTable {
 //        this.params = params;
 //        this.locals = locals;
         this.importNames = calcImportNames(imports);
-        this.attrs = new HashMap<>();
     }
 
     private Set<String> calcImportNames(List<String> imports) {
@@ -126,25 +122,6 @@ public class JmmSymbolTable extends AJmmSymbolTable {
     @Override
     public String toString() {
         return print();
-    }
-
-    @Override
-    public Collection<String> getAttributes() {
-        return attrs.keySet();
-    }
-
-    @Override
-    public Object getObject(String attribute) {
-        var value = attrs.get(attribute);
-
-        SpecsCheck.checkNotNull(value, () -> "SymbolTable does not contain attribute '" + attribute + "'");
-
-        return value;
-    }
-
-    @Override
-    public Object putObject(String attribute, Object value) {
-        return attrs.put(attribute, value);
     }
 
     public Optional<SymbolTable> getImportedSymbolTable(String className) {
