@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp1.extensions.semantics.arrays.semanticanalysis.multidim;
+
+class AssignNewToMultiArrayFail {
+    int createArray() {
+        int[] a;
+        a = new int[100][200];
+        return 1;
+    }
+}

@@ -1,0 +1,8 @@
+package pt.up.fe.comp.cp1.extensions.semantics.arrays.semanticanalysis;
+
+class ArrayConstantStoreFail {
+    int accessArray(int[] arr, int elem) {
+        arr[true] = elem;
+        return elem;
+    }
+}

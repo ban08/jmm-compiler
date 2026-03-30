@@ -1,9 +1,9 @@
 package pt.up.fe.comp.cp1.extensions.semantics.arrays.semanticanalysis;
 
-class AssignNewToArrayOk {
-    int createArray() {
+class InitListIsEmptyOk {
+    int initArray(int n) {
         int[] a;
-        a = new int[100];
-        return 1;
+        a = new int[]{};
+        return n;
     }
 }

@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp1.extensions.semantics.arrays.semanticanalysis.multidim;
+
+class MultiSizeIsIntConstantOk {
+    int createArray() {
+        int[][][] a;
+        a = new int[2][16][44];
+        return 1;
+    }
+}

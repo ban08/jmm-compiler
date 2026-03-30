@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp1.extensions.semantics.arrays.semanticanalysis;
+
+class ArrayToArrayAssignmentFail1 {
+    int accessArray(int[] arr1) {
+        boolean[] arr2;
+        arr2 = arr1;
+        return 1;
+    }
+}

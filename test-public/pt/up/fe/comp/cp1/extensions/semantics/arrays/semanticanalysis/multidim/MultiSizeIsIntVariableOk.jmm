@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp1.extensions.semantics.arrays.semanticanalysis.multidim;
+
+class MultiSizeIsIntVariableOk {
+    int createArray(int c, int d) {
+        int[][][] a;
+        int b;
+        b = 100;
+        a = new int[b][c][d];
+        return 1;
+    }
+}

@@ -1,9 +1,9 @@
 package pt.up.fe.comp.cp1.extensions.semantics.arrays.semanticanalysis;
 
-class AssignNewToArrayOk {
+class SizeIsIntConstantOk {
     int createArray() {
         int[] a;
-        a = new int[100];
+        a = new int[2];
         return 1;
     }
 }

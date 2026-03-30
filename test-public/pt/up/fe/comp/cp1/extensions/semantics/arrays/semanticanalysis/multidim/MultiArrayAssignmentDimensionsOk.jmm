@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp1.extensions.semantics.arrays.semanticanalysis.multidim;
+
+class MultiArrayAssignmentDimensionsOk {
+    int createArray(int[][][][][] src) {
+        int[][][][][] dest;
+        dest = src;
+        return 1;
+    }
+}

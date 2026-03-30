@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp1.extensions.semantics.arrays.semanticanalysis.multidim;
+
+class MultiSizeIsIntVariableFail {
+    int createArray(int c, boolean d) {
+        int[][][] a;
+        int b;
+        b = 100;
+        a = new int[b][c][d];
+        return 1;
+    }
+}

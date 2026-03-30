@@ -1,0 +1,8 @@
+package pt.up.fe.comp.cp1.extensions.semantics.arrays.semanticanalysis;
+
+class ArrayExpressionStoreOk {
+    int accessArray(int[] arr, int elem, int n1, int n2, int n3) {
+        arr[n1 + n2 * n3] = elem;
+        return elem;
+    }
+}

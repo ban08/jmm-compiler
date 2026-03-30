@@ -1,0 +1,7 @@
+package pt.up.fe.comp.cp1.extensions.semantics.arrays.semanticanalysis.multidim;
+
+class MultiArrayReturnFail {
+    int methodA(int[][][] a) {
+        return a;
+    }
+}

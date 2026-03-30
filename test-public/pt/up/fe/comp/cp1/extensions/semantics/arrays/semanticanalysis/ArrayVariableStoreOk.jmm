@@ -1,0 +1,8 @@
+package pt.up.fe.comp.cp1.extensions.semantics.arrays.semanticanalysis;
+
+class ArrayVariableStoreOk {
+    int accessArray(int[] arr, int elem, int idx) {
+        arr[idx] = elem;
+        return elem;
+    }
+}

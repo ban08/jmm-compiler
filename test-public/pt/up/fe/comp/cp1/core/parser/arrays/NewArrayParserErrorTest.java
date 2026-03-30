@@ -15,13 +15,6 @@ public class NewArrayParserErrorTest extends JmmTestEnv {
     }
 
     @Test
-    public void testNewIntArrayWithoutSize() {
-        setDescription("Test that creating a new int array without a size is not parsed");
-        parseSnippetWithErrors("new int[]", EXPRESSION);
-        parseSnippet("new int[10]", EXPRESSION);
-    }
-
-    @Test
     public void testNewWithMalformattedBrackets() {
         setDescription("Test that creating a new int array with malformatted brackets is not parsed");
         parseSnippetWithErrors("new int[10", EXPRESSION);

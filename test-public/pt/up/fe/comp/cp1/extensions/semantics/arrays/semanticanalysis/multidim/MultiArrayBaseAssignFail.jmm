@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp1.extensions.semantics.arrays.semanticanalysis.multidim;
+
+class MultiArrayBaseAssignFail {
+    int createArray() {
+        int[][][] a;
+        int[][][] b;
+        a = new int[2][16][44];
+        b = a[1][4][8];
+        return b;
+    }
+}

@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp1.extensions.semantics.arrays.semanticanalysis;
+
+class ArrayVariableLoadOk {
+    int accessArray(int[] arr, int idx) {
+        int a;
+        a = arr[idx];
+        return a;
+    }
+}

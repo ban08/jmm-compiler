@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp1.extensions.semantics.arrays.semanticanalysis.multidim;
+
+class MultiSizeIsIntExpressionOk {
+    int createArray(int n1, int n2) {
+        int[][][] a;
+        a = new int[n1 + 2 * n2][n1 + 1][n2 / 4];
+        return 1;
+    }
+}

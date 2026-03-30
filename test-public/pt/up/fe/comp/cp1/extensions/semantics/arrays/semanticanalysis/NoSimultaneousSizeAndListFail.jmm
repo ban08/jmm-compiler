@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp1.extensions.semantics.arrays.semanticanalysis;
+
+class NoSimultaneousSizeAndListFail {
+    int accessArray() {
+        int[] arr1;
+        int[] arr2;
+        arr1 = new int[16];
+        arr2 = new int[3]{16, 44, 55};
+        return 1;
+    }
+}

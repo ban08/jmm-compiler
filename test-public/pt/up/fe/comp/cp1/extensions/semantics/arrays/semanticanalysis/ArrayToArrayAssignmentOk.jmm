@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp1.extensions.semantics.arrays.semanticanalysis;
+
+class ArrayToArrayAssignmentOk {
+    int accessArray(int[] arr1) {
+        int[] arr2;
+        arr2 = arr1;
+        return 1;
+    }
+}

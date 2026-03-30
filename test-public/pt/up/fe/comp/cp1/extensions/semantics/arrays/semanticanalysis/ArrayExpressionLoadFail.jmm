@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp1.extensions.semantics.arrays.semanticanalysis;
+
+class ArrayExpressionLoadFail {
+    int accessArray(int[] arr, boolean n1, boolean n2, boolean n3) {
+        int a;
+        a = arr[n1 && n2 && n3];
+        return a;
+    }
+}

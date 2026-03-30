@@ -49,7 +49,7 @@ public class DoWhileParserTest extends JmmTestEnv {
     @Test
     public void testNestedDoWhile() {
         setDescription("Test that nested do-while loops are parsed correctly");
-        parseSnippet("do { do { a(); } while (b); } while (c);", STATEMENT);
+        parseSnippet("do { do { a.foo(); } while (b); } while (c);", STATEMENT);
     }
 
 }

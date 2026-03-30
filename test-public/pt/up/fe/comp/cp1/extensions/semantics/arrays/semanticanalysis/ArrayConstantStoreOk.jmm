@@ -1,0 +1,8 @@
+package pt.up.fe.comp.cp1.extensions.semantics.arrays.semanticanalysis;
+
+class ArrayConstantStoreOk {
+    int accessArray(int[] arr, int elem) {
+        arr[12] = elem;
+        return elem;
+    }
+}

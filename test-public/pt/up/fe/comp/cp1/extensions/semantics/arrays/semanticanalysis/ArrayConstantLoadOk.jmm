@@ -1,9 +1,9 @@
 package pt.up.fe.comp.cp1.extensions.semantics.arrays.semanticanalysis;
 
-import java.util.Date;
-
-class ArrayReturnFail {
-    int methodA(int[] a) {
+class ArrayConstantLoadOk {
+    int accessArray(int[] arr) {
+        int a;
+        a = arr[12];
         return a;
     }
 }
