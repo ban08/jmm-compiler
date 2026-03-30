@@ -1,4 +1,4 @@
-package pt.up.fe.comp.cp1.extensions.semantics.statements;
+package pt.up.fe.comp.cp1.extensions.semantics.entitiesandops;
 
 import org.junit.Test;
 
