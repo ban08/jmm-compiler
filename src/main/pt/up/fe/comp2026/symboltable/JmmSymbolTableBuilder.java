@@ -186,7 +186,7 @@ public class JmmSymbolTableBuilder {
     private JmmType convertType(JmmNode typeNode) {
         if (ARRAY_TYPE.check(typeNode)) {
             var elementType = typeNode.getObject(JmmAttributes.ARRAY_TYPE.ELEMENT_TYPE.getKey(), JmmNode.class);
-            return JmmArrayType.of(convertType(elementType));
+            return extendArrayType(convertType(elementType), 1);
         }
 
         var typeName = typeNode.get(JmmAttributes.SIMPLE_TYPE.NAME);
@@ -200,6 +200,15 @@ public class JmmSymbolTableBuilder {
         return ClassResolution.resolve(typeName, imports, className, fullyQualifiedName, importer)
                 .map(resolvedClass -> resolvedClass.asType(false))
                 .orElseGet(() -> JmmClassType.ofInstance(typeName, false));
+    }
+
+    private JmmArrayType extendArrayType(JmmType baseType, int extraDimensions) {
+        if (baseType.isArray()) {
+            var arrayType = baseType.asArray();
+            return JmmArrayType.of(arrayType.itemType(), arrayType.dimension() + extraDimensions);
+        }
+
+        return JmmArrayType.of(baseType, extraDimensions);
     }
 
     /**

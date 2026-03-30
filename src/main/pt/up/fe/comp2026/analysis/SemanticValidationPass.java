@@ -256,7 +256,10 @@ public abstract class SemanticValidationPass extends AnalysisVisitorWithTable {
                 return null;
             }
 
-            currentType = currentType.asArray().itemType();
+            var arrayType = currentType.asArray();
+            currentType = arrayType.dimension() == 1
+                    ? arrayType.itemType()
+                    : JmmArrayType.of(arrayType.itemType(), arrayType.dimension() - 1);
         }
 
         return currentType;

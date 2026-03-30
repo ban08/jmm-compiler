@@ -148,6 +148,7 @@ tasks.register('generateKindAndAttributesSources') {
 }
 
 compileJava.dependsOn 'generateKindAndAttributesSources'
+compileJava.dependsOn 'compileLibsJmm'
 
 
 void createWebsiteApplicationTask(String name, @DelegatesTo(Task.class) Object... paths) {

@@ -43,10 +43,6 @@ public class EntityAccessValidation extends SemanticValidationPass {
             argTypes.add(argType.get());
         }
 
-        if (argTypes.isEmpty()) {
-            return null;
-        }
-
         var newTypeOpt = types.tryGetExprType(newExpr);
         if (newTypeOpt.isEmpty() || !newTypeOpt.get().isClass()) {
             return null;
@@ -54,8 +50,10 @@ public class EntityAccessValidation extends SemanticValidationPass {
 
         var classType = newTypeOpt.get().asClass();
         if (isCurrentClass(classType)) {
-            addReport(newError(newExpr,
-                    "Class '" + className + "' does not support constructors with arguments"));
+            if (!argTypes.isEmpty()) {
+                addReport(newError(newExpr,
+                        "Class '" + className + "' does not support constructors with arguments"));
+            }
             return null;
         }
 

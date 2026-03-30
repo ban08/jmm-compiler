@@ -89,10 +89,31 @@ public class ExpressionSemanticsValidation extends SemanticValidationPass {
     }
 
     private Void visitNewIntArrayExpr(JmmNode newArrayExpr, SymbolTable ignored) {
-        for (int i = 0; i < newArrayExpr.getNumChildren(); i++) {
-            var sizeType = types.getExprType(newArrayExpr.getChild(i));
+        var dimensions = newArrayExpr.getChildren(JmmKind.ARRAY_CREATION_DIM);
+        var sawUnsizedDimension = false;
+
+        for (int i = 0; i < dimensions.size(); i++) {
+            var dimension = dimensions.get(i);
+            var sizeExprs = dimension.getChildren(JmmKind.EXPR);
+
+            if (sizeExprs.isEmpty()) {
+                if (i == 0) {
+                    addReport(newError(dimension, "The first array dimension must specify a size"));
+                }
+
+                sawUnsizedDimension = true;
+                continue;
+            }
+
+            var sizeExpr = sizeExprs.getFirst();
+            var sizeType = types.getExprType(sizeExpr);
             if (sizeType != null && !isInt(sizeType)) {
-                addReport(newError(newArrayExpr.getChild(i), "Array size expression must have type 'int'"));
+                addReport(newError(sizeExpr, "Array size expression must have type 'int'"));
+            }
+
+            if (sawUnsizedDimension) {
+                addReport(newError(dimension,
+                        "Array dimensions with explicit sizes must come before unsized dimensions"));
             }
         }
 

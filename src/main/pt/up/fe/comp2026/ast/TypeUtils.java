@@ -60,7 +60,7 @@ public class TypeUtils {
 
         if (ARRAY_TYPE.check(typeNode)) {
             var elementType = typeNode.getObject(JmmAttributes.ARRAY_TYPE.ELEMENT_TYPE.getKey(), JmmNode.class);
-            return JmmArrayType.of(convertType(elementType));
+            return wrapArrayType(convertType(elementType), 1);
         }
 
         var name = typeNode.get(JmmAttributes.SIMPLE_TYPE.NAME);
@@ -93,7 +93,7 @@ public class TypeUtils {
             case THIS_EXPR -> Optional.of(JmmClassType.ofInstance(table.getFullyQualifiedName(), false));
             case NOT_EXPR -> Optional.of(booleanType());
             case UNARY_EXPR -> Optional.of(intType());
-            case NEW_INT_ARRAY_EXPR -> Optional.of(wrapArrayType(intType(), expr.getNumChildren()));
+            case NEW_INT_ARRAY_EXPR -> Optional.of(getNewIntArrayExprType(expr));
             case ARRAY_INITIALIZER_EXPR -> Optional.of(JmmArrayType.of(intType()));
             case NEW_EXPR -> Optional.of(resolveClassType(expr.get(JmmAttributes.NEW_EXPR.NAME), false));
             case BINARY_EXPR -> Optional.of(getBinExprType(expr));
@@ -255,7 +255,18 @@ public class TypeUtils {
             return Optional.empty();
         }
 
-        return Optional.of(arrayType.get().asArray().itemType());
+        var resolvedArray = arrayType.get().asArray();
+        if (resolvedArray.dimension() == 1) {
+            return Optional.of(resolvedArray.itemType());
+        }
+
+        return Optional.of(JmmArrayType.of(resolvedArray.itemType(), resolvedArray.dimension() - 1));
+    }
+
+    private JmmType getNewIntArrayExprType(JmmNode newArrayExpr) {
+        NEW_INT_ARRAY_EXPR.check(newArrayExpr);
+
+        return wrapArrayType(intType(), newArrayExpr.getChildren(ARRAY_CREATION_DIM).size());
     }
 
     public Optional<JmmType> resolveFieldAccessType(JmmNode fieldAccessExpr) {
@@ -467,11 +478,15 @@ public class TypeUtils {
     }
 
     private JmmType wrapArrayType(JmmType baseType, int arrayDepth) {
-        var currentType = baseType;
-        for (int i = 0; i < arrayDepth; i++) {
-            currentType = JmmArrayType.of(currentType);
+        if (arrayDepth <= 0) {
+            return baseType;
         }
 
-        return currentType;
+        if (baseType.isArray()) {
+            var arrayType = baseType.asArray();
+            return JmmArrayType.of(arrayType.itemType(), arrayType.dimension() + arrayDepth);
+        }
+
+        return JmmArrayType.of(baseType, arrayDepth);
     }
 }

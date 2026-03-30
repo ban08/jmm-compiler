@@ -65,6 +65,10 @@ param
     : typeNode = type name = ID
     ;
 
+arrayCreationDim
+    : '[' expr? ']'
+    ;
+
 type
     : elementType=type '[' ']' #ArrayType
     | name = INT #SimpleType
@@ -105,7 +109,7 @@ expr
     | expr '[' expr ']' #ArrayAccessExpr
     | '!' expr #NotExpr
     | op=('++' | '--' | '+' | '-') expr #UnaryExpr
-    | NEW INT ('[' expr ']')+ #NewIntArrayExpr
+    | NEW INT arrayCreationDim+ #NewIntArrayExpr
     | NEW INT '[' ']' '{' (expr (',' expr)*)? '}' #ArrayInitializerExpr
     | NEW name=ID '(' (expr (',' expr)*)? ')' #NewExpr
     | expr op=('*' | '/' | '%') expr #BinaryExpr
