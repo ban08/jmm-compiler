@@ -24,14 +24,14 @@ public class JmmOptimizationImpl implements JmmOptimization {
     }
 
     @Override
-    public JmmSemanticsResult optimize(JmmSemanticsResult semanticsResult) {
+    public JmmSemanticsResult transformAst(JmmSemanticsResult semanticsResult) {
 
         //TODO: Do your AST-based optimizations here
         return semanticsResult;
     }
 
     @Override
-    public OllirResult optimize(OllirResult ollirResult) {
+    public OllirResult transformOllir(OllirResult ollirResult) {
 
         if (ollirResult.config().getOrDefault("debug", "false").equals("true")) {
             System.out.println("OLLIR CODE:");

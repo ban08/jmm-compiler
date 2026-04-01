@@ -32,4 +32,5 @@ public class ImportsSemanticAnalysisTest extends pt.up.fe.comp.test.env.JmmTestE
         setDescription("Test that a field with a type that is implicitly imported (like Object) is accepted");
         semantics("FieldTypeIsImplicitlyImported.jmm", false);
     }
+    
 }

@@ -12,7 +12,7 @@ public class CompleteAppsParserTest extends JmmTestEnv {
 
 
     public CompleteAppsParserTest() {
-        super("pt/up/fe/comp/cp1/core/parser/integration/apps/", "test");
+        super("pt/up/fe/comp/cp1/core/parser/integration/apps/", "test-public");
     }
 
 
