@@ -4,6 +4,7 @@ import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.type.JmmType;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2026.ast.AccessType;
+import pt.up.fe.comp2026.ast.TypeUtils;
 import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.comp2026.jmm.ast.JmmKind;
 
@@ -71,14 +72,12 @@ public class EntityAccessValidation extends SemanticValidationPass {
             return null;
         }
 
-        if (findMatchingMethod(constructors, argTypes, false) != null) {
+        var constructorMatch = types.analyzeMethodCandidates(constructors, argTypes, false);
+        if (constructorMatch.matchingMethod().isPresent()) {
             return null;
         }
 
-        var anyWithSameCount = constructors.stream()
-                .anyMatch(constructor -> constructor.parameters().size() == argTypes.size());
-
-        if (!anyWithSameCount) {
+        if (!constructorMatch.hasSameArgumentCount()) {
             addReport(newError(newExpr,
                     "Wrong number of arguments for constructor of class '" + className + "'"));
             return null;
@@ -169,27 +168,25 @@ public class EntityAccessValidation extends SemanticValidationPass {
 
         var argTypes = argTypesOpt.get();
         var requireStatic = receiverClassType.staticRef();
+        var matchAnalysis = types.analyzeMethodCandidates(methods, argTypes, requireStatic);
 
-        if (requireStatic && findMatchingMethod(methods, argTypes, false) != null) {
+        if (matchAnalysis.matchingMethod().isPresent()) {
+            return;
+        }
+
+        if (matchAnalysis.hasStaticContextMismatch()) {
             addReport(newError(methodCallExpr,
                     "Method '" + methodName + "' is not static and cannot be called from a static context"));
             return;
         }
 
-        var visibleMethods = requireStatic
-                ? methods.stream().filter(method -> method.isStatic()).toList()
-                : methods;
-
-        if (visibleMethods.isEmpty()) {
+        if (!matchAnalysis.hasVisibleMethods()) {
             addReport(newError(methodCallExpr,
                     "Method '" + methodName + "' is not static and cannot be called from a static context"));
             return;
         }
 
-        var anyWithSameCount = visibleMethods.stream()
-                .anyMatch(method -> method.parameters().size() == argTypes.size());
-
-        if (!anyWithSameCount) {
+        if (!matchAnalysis.hasSameArgumentCount()) {
             addReport(newError(methodCallExpr,
                     "Wrong number of arguments for method '" + methodName + "' in imported class '" +
                             receiverClassType.fullyQualifiedName() + "'"));
@@ -212,37 +209,26 @@ public class EntityAccessValidation extends SemanticValidationPass {
     }
 
     private Void visitFieldAccessExpr(JmmNode fieldAccessExpr, SymbolTable ignored) {
-        var receiverType = types.getExprType(fieldAccessExpr.getChild(0));
-        if (receiverType == null) {
+        var fieldResolution = types.resolveFieldAccess(fieldAccessExpr);
+        if (fieldResolution.status() == TypeUtils.FieldAccessStatus.UNRESOLVED_RECEIVER) {
             return null;
         }
 
-        var fieldName = fieldAccessExpr.get(JmmAttributes.FIELD_ACCESS_EXPR.NAME);
-        if (receiverType.isArray()) {
-            if ("length".equals(fieldName)) {
-                return null;
-            }
-
-            addReport(newError(fieldAccessExpr,
-                    "Field '" + fieldName + "' is not available on receiver '" + receiverType.print() + "'"));
+        if (fieldResolution.status() == TypeUtils.FieldAccessStatus.RESOLVED) {
             return null;
         }
 
-        if (!receiverType.isClass()) {
-            addReport(newError(fieldAccessExpr, "Field access requires a class receiver"));
-            return null;
-        }
+        var fieldName = fieldResolution.fieldName();
+        var receiverType = fieldResolution.receiverType().orElseThrow();
 
-        if (receiverType.asClass().staticRef()) {
-            addReport(newError(fieldAccessExpr,
+        switch (fieldResolution.status()) {
+            case INVALID_RECEIVER -> addReport(newError(fieldAccessExpr, "Field access requires a class receiver"));
+            case REQUIRES_INSTANCE -> addReport(newError(fieldAccessExpr,
                     "Field '" + fieldName + "' requires an instance receiver"));
-            return null;
-        }
-
-        if (types.resolveFieldAccessType(fieldAccessExpr).isEmpty()) {
-            addReport(newError(fieldAccessExpr,
-                    "Field '" + fieldName + "' is not available on receiver '" +
-                            receiverType.print() + "'"));
+            case MISSING_FIELD -> addReport(newError(fieldAccessExpr,
+                    "Field '" + fieldName + "' is not available on receiver '" + receiverType.print() + "'"));
+            default -> {
+            }
         }
 
         return null;

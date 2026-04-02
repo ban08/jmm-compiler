@@ -1,6 +1,5 @@
 package pt.up.fe.comp2026.analysis;
 
-import pt.up.fe.comp.jmm.analysis.table.MethodSymbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.type.JmmType;
 import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmArrayType;
@@ -81,37 +80,35 @@ public abstract class SemanticValidationPass extends AnalysisVisitorWithTable {
         }
 
         var methodName = getCallMethodName(callExpr);
-        var allMethods = getCurrentAndInheritedMethods(methodName);
+        var matchAnalysis = types.analyzeMethodCandidates(
+                types.getCurrentAndInheritedMethods(methodName),
+                argTypesOpt.get(),
+                requireStatic
+        );
 
-        if (findMatchingMethod(allMethods, argTypesOpt.get(), requireStatic) != null) {
+        if (matchAnalysis.matchingMethod().isPresent()) {
             return;
         }
 
-        if (requireStatic && findMatchingMethod(allMethods, argTypesOpt.get(), false) != null) {
+        if (matchAnalysis.hasStaticContextMismatch()) {
             addReport(newError(callExpr,
                     "Method '" + methodName + "' is not static and cannot be called from a static context"));
             return;
         }
 
-        if (allMethods.isEmpty()) {
+        if (!matchAnalysis.hasMethods()) {
             addReport(newError(callExpr,
                     "Method '" + methodName + "' does not exist in class '" + table.getClassName() + "'"));
             return;
         }
 
-        var visibleMethods = requireStatic
-                ? allMethods.stream().filter(MethodSymbol::isStatic).toList()
-                : allMethods;
-
-        if (visibleMethods.isEmpty()) {
+        if (!matchAnalysis.hasVisibleMethods()) {
             addReport(newError(callExpr,
                     "Method '" + methodName + "' is not static and cannot be called from a static context"));
             return;
         }
 
-        var argCount = argTypesOpt.get().size();
-        var anyWithSameCount = visibleMethods.stream().anyMatch(method -> method.parameters().size() == argCount);
-        if (!anyWithSameCount) {
+        if (!matchAnalysis.hasSameArgumentCount()) {
             addReport(newError(callExpr,
                     "Wrong number of arguments for method '" + methodName + "' in class '" + table.getClassName() + "'"));
             return;
@@ -147,51 +144,6 @@ public abstract class SemanticValidationPass extends AnalysisVisitorWithTable {
         }
 
         throw new IllegalArgumentException("Expected a method-call node, got: " + callExpr.getKind());
-    }
-
-    protected List<MethodSymbol> getCurrentAndInheritedMethods(String methodName) {
-        var methods = new ArrayList<MethodSymbol>(table.getMethods(methodName));
-
-        var visitedSupers = new java.util.HashSet<String>();
-        var superQualifiedName = table.getSuperFullyQualifiedName();
-        while (superQualifiedName != null && visitedSupers.add(superQualifiedName)) {
-            var superTableOpt = table.getImportedSymbolTable(superQualifiedName);
-            if (superTableOpt.isEmpty()) {
-                break;
-            }
-
-            var superTable = superTableOpt.get();
-            methods.addAll(superTable.getMethods(methodName));
-            superQualifiedName = superTable.getSuperFullyQualifiedName();
-        }
-
-        return methods;
-    }
-
-    protected MethodSymbol findMatchingMethod(List<MethodSymbol> methods, List<JmmType> argTypes, boolean requireStatic) {
-        for (var method : methods) {
-            if (requireStatic && !method.isStatic()) {
-                continue;
-            }
-
-            if (method.parameters().size() != argTypes.size()) {
-                continue;
-            }
-
-            var matches = true;
-            for (int i = 0; i < argTypes.size(); i++) {
-                if (!types.isAssignable(method.parameters().get(i).type(), argTypes.get(i))) {
-                    matches = false;
-                    break;
-                }
-            }
-
-            if (matches) {
-                return method;
-            }
-        }
-
-        return null;
     }
 
     protected TypeUtils.ResolvedIdentifier resolveAssignmentTarget(JmmNode assignmentNode, String targetName) {

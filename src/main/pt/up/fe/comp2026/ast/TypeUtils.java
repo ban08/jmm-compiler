@@ -27,6 +27,47 @@ public class TypeUtils {
     public record ResolvedIdentifier(String name, JmmType type, AccessType accessType) {
     }
 
+    public record MethodMatchAnalysis(List<MethodSymbol> allMethods,
+                                      List<MethodSymbol> visibleMethods,
+                                      Optional<MethodSymbol> matchingMethod,
+                                      Optional<MethodSymbol> matchingIgnoringStatic,
+                                      int argumentCount) {
+        public MethodMatchAnalysis {
+            allMethods = List.copyOf(allMethods);
+            visibleMethods = List.copyOf(visibleMethods);
+        }
+
+        public boolean hasMethods() {
+            return !allMethods.isEmpty();
+        }
+
+        public boolean hasVisibleMethods() {
+            return !visibleMethods.isEmpty();
+        }
+
+        public boolean hasStaticContextMismatch() {
+            return matchingMethod.isEmpty() && matchingIgnoringStatic.isPresent();
+        }
+
+        public boolean hasSameArgumentCount() {
+            return visibleMethods.stream().anyMatch(method -> method.parameters().size() == argumentCount);
+        }
+    }
+
+    public enum FieldAccessStatus {
+        UNRESOLVED_RECEIVER,
+        INVALID_RECEIVER,
+        REQUIRES_INSTANCE,
+        MISSING_FIELD,
+        RESOLVED
+    }
+
+    public record FieldAccessResolution(String fieldName,
+                                        Optional<JmmType> receiverType,
+                                        Optional<JmmType> fieldType,
+                                        FieldAccessStatus status) {
+    }
+
     public record ResolvedMethodCall(JmmType receiverType, MethodSymbol method) {
         public JmmType returnType() {
             return method.returnType();
@@ -197,6 +238,25 @@ public class TypeUtils {
         return resolveMethodCall(receiverType, callExpr.get(JmmAttributes.IMPLICIT_THIS_CALL_EXPR.NAME), argTypes);
     }
 
+    public MethodMatchAnalysis analyzeMethodCandidates(List<MethodSymbol> methods, List<JmmType> argTypes, boolean requireStatic) {
+        var visibleMethods = requireStatic
+                ? methods.stream().filter(MethodSymbol::isStatic).toList()
+                : List.copyOf(methods);
+
+        var matchingMethod = findMatchingMethod(methods, argTypes, requireStatic);
+        var matchingIgnoringStatic = requireStatic
+                ? findMatchingMethod(methods, argTypes, false)
+                : matchingMethod;
+
+        return new MethodMatchAnalysis(
+                methods,
+                visibleMethods,
+                matchingMethod,
+                matchingIgnoringStatic,
+                argTypes.size()
+        );
+    }
+
     public boolean isAssignable(JmmType targetType, JmmType valueType) {
         if (targetType == null || valueType == null) {
             return false;
@@ -269,40 +329,52 @@ public class TypeUtils {
     }
 
     public Optional<JmmType> resolveFieldAccessType(JmmNode fieldAccessExpr) {
+        return resolveFieldAccess(fieldAccessExpr).fieldType();
+    }
+
+    public FieldAccessResolution resolveFieldAccess(JmmNode fieldAccessExpr) {
         FIELD_ACCESS_EXPR.check(fieldAccessExpr);
 
         var receiverType = tryGetExprType(fieldAccessExpr.getChild(0));
+        var fieldName = fieldAccessExpr.get(JmmAttributes.FIELD_ACCESS_EXPR.NAME);
         if (receiverType.isEmpty()) {
-            return Optional.empty();
+            return new FieldAccessResolution(fieldName, Optional.empty(), Optional.empty(), FieldAccessStatus.UNRESOLVED_RECEIVER);
         }
 
-        var fieldName = fieldAccessExpr.get(JmmAttributes.FIELD_ACCESS_EXPR.NAME);
         if (receiverType.get().isArray()) {
-            return "length".equals(fieldName) ? Optional.of(intType()) : Optional.empty();
+            Optional<JmmType> fieldType = "length".equals(fieldName)
+                    ? Optional.of(intType())
+                    : Optional.empty();
+            var status = fieldType.isPresent() ? FieldAccessStatus.RESOLVED : FieldAccessStatus.MISSING_FIELD;
+            return new FieldAccessResolution(fieldName, receiverType, fieldType, status);
         }
 
         if (!receiverType.get().isClass()) {
-            return Optional.empty();
+            return new FieldAccessResolution(fieldName, receiverType, Optional.empty(), FieldAccessStatus.INVALID_RECEIVER);
         }
 
         var receiverClass = receiverType.get().asClass();
 
         if (receiverClass.staticRef()) {
-            return Optional.empty();
+            return new FieldAccessResolution(fieldName, receiverType, Optional.empty(), FieldAccessStatus.REQUIRES_INSTANCE);
         }
 
+        Optional<JmmType> fieldType;
         if (isCurrentClass(receiverClass)) {
             var localField = table.getField(fieldName);
             if (localField.isPresent()) {
-                return Optional.of(localField.get().type());
+                fieldType = Optional.of(localField.get().type());
+            } else {
+                fieldType = findFieldInHierarchy(table.getSuperFullyQualifiedName(), fieldName)
+                        .map(symbol -> (JmmType) symbol.type());
             }
-
-            return findFieldInHierarchy(table.getSuperFullyQualifiedName(), fieldName)
-                    .map(Symbol::type);
+        } else {
+            fieldType = findFieldInHierarchy(receiverClass.fullyQualifiedName(), fieldName)
+                    .map(symbol -> (JmmType) symbol.type());
         }
 
-        return findFieldInHierarchy(receiverClass.fullyQualifiedName(), fieldName)
-                .map(Symbol::type);
+        var status = fieldType.isPresent() ? FieldAccessStatus.RESOLVED : FieldAccessStatus.MISSING_FIELD;
+        return new FieldAccessResolution(fieldName, receiverType, fieldType, status);
     }
 
     private JmmType getVarExprType(JmmNode varRefExpr) {
@@ -339,29 +411,26 @@ public class TypeUtils {
         return false;
     }
 
-    private Optional<ResolvedMethodCall> resolveMethodCall(JmmClassType receiverType, String methodName, List<JmmType> argTypes) {
-        var requireStatic = receiverType.staticRef();
+    public List<MethodSymbol> getCurrentAndInheritedMethods(String methodName) {
+        var methods = new ArrayList<MethodSymbol>(table.getMethods(methodName));
 
-        if (isCurrentClass(receiverType)) {
-            var localMethod = findMatchingMethod(table.getMethods(methodName), argTypes, requireStatic);
-            if (localMethod.isPresent()) {
-                return Optional.of(new ResolvedMethodCall(receiverType, localMethod.get()));
+        var visitedSupers = new HashSet<String>();
+        var superQualifiedName = table.getSuperFullyQualifiedName();
+        while (superQualifiedName != null && visitedSupers.add(superQualifiedName)) {
+            var superTableOpt = table.getImportedSymbolTable(superQualifiedName);
+            if (superTableOpt.isEmpty()) {
+                break;
             }
 
-            return findMatchingMethodInHierarchy(table.getSuperFullyQualifiedName(), methodName, argTypes, requireStatic)
-                    .map(method -> new ResolvedMethodCall(receiverType, method));
+            var superTable = superTableOpt.get();
+            methods.addAll(superTable.getMethods(methodName));
+            superQualifiedName = superTable.getSuperFullyQualifiedName();
         }
 
-        var importedTable = table.getImportedSymbolTable(receiverType.fullyQualifiedName());
-        if (importedTable.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return findMatchingMethod(importedTable.get().getMethods(methodName), argTypes, requireStatic)
-                .map(method -> new ResolvedMethodCall(receiverType, method));
+        return methods;
     }
 
-    private Optional<MethodSymbol> findMatchingMethod(List<MethodSymbol> methods, List<JmmType> argTypes, boolean requireStatic) {
+    public Optional<MethodSymbol> findMatchingMethod(List<MethodSymbol> methods, List<JmmType> argTypes, boolean requireStatic) {
         for (var method : methods) {
             if (requireStatic && !method.isStatic()) {
                 continue;
@@ -387,33 +456,23 @@ public class TypeUtils {
         return Optional.empty();
     }
 
-    /**
-     * Walks the imported superclass chain and returns the first overload-compatible method.
-     * This keeps expression-type inference aligned with semantic validation, which already
-     * searches inherited methods recursively.
-     */
-    private Optional<MethodSymbol> findMatchingMethodInHierarchy(String classQualifiedName,
-                                                                 String methodName,
-                                                                 List<JmmType> argTypes,
-                                                                 boolean requireStatic) {
-        var visitedClasses = new HashSet<String>();
-        var currentClass = classQualifiedName;
+    private Optional<ResolvedMethodCall> resolveMethodCall(JmmClassType receiverType, String methodName, List<JmmType> argTypes) {
+        var requireStatic = receiverType.staticRef();
 
-        while (currentClass != null && visitedClasses.add(currentClass)) {
-            var symbolTable = table.getImportedSymbolTable(currentClass);
-            if (symbolTable.isEmpty()) {
-                return Optional.empty();
-            }
-
-            var method = findMatchingMethod(symbolTable.get().getMethods(methodName), argTypes, requireStatic);
-            if (method.isPresent()) {
-                return method;
-            }
-
-            currentClass = symbolTable.get().getSuperFullyQualifiedName();
+        if (isCurrentClass(receiverType)) {
+            return analyzeMethodCandidates(getCurrentAndInheritedMethods(methodName), argTypes, requireStatic)
+                    .matchingMethod()
+                    .map(method -> new ResolvedMethodCall(receiverType, method));
         }
 
-        return Optional.empty();
+        var importedTable = table.getImportedSymbolTable(receiverType.fullyQualifiedName());
+        if (importedTable.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return analyzeMethodCandidates(importedTable.get().getMethods(methodName), argTypes, requireStatic)
+                .matchingMethod()
+                .map(method -> new ResolvedMethodCall(receiverType, method));
     }
 
     private JmmClassType resolveClassType(String className, boolean staticReference) {
