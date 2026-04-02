@@ -16,7 +16,7 @@ public class InstantiationParserTest extends JmmTestEnv {
 
     @Test
     public void testExprNewClass() {
-        parseSnippet("new Foo()", EXPRESSION);
+        parseSnippet("new Foo();", STATEMENT);
     }
     
 
@@ -27,7 +27,7 @@ public class InstantiationParserTest extends JmmTestEnv {
 
     @Test
     public void testInMethodCall() {
-        parseSnippet("a.foo(new Foo())", EXPRESSION);
+        parseSnippet("a.foo(new Foo());", STATEMENT);
     }
 
 }
