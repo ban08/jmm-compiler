@@ -106,9 +106,8 @@ tasks.register('buildGrammarSource') {
         ant.javac(
                 srcdir: "generated-src/antlr/",
                 destdir: layout.buildDirectory.dir("classes/java/main").get(),
-                classpath: sourceSets.main.runtimeClasspath.filter {
-                    it.name.contains("antlr") //todo check exactly the jar(?) dependency
-                }.asPath,
+                // Generated parser sources only need the ANTLR dependency.
+                classpath: configurations.antlr.asPath,
                 includeAntRuntime: false
         )
     }
