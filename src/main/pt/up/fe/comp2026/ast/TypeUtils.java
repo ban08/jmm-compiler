@@ -97,7 +97,6 @@ public class TypeUtils {
             case ARRAY_INITIALIZER_EXPR -> Optional.of(JmmArrayType.of(intType()));
             case NEW_EXPR -> Optional.of(resolveClassType(expr.get(JmmAttributes.NEW_EXPR.NAME), false));
             case BINARY_EXPR -> Optional.of(getBinExprType(expr));
-            case LENGTH_EXPR -> Optional.of(intType());
             case FIELD_ACCESS_EXPR -> resolveFieldAccessType(expr);
             case ARRAY_ACCESS_EXPR -> getArrayElementType(expr.getChild(0));
             case METHOD_CALL_EXPR -> resolveMethodCall(expr).map(ResolvedMethodCall::returnType);
@@ -273,11 +272,19 @@ public class TypeUtils {
         FIELD_ACCESS_EXPR.check(fieldAccessExpr);
 
         var receiverType = tryGetExprType(fieldAccessExpr.getChild(0));
-        if (receiverType.isEmpty() || !receiverType.get().isClass()) {
+        if (receiverType.isEmpty()) {
             return Optional.empty();
         }
 
         var fieldName = fieldAccessExpr.get(JmmAttributes.FIELD_ACCESS_EXPR.NAME);
+        if (receiverType.get().isArray()) {
+            return "length".equals(fieldName) ? Optional.of(intType()) : Optional.empty();
+        }
+
+        if (!receiverType.get().isClass()) {
+            return Optional.empty();
+        }
+
         var receiverClass = receiverType.get().asClass();
 
         if (receiverClass.staticRef()) {

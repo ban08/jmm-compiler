@@ -19,7 +19,6 @@ public class ExpressionSemanticsValidation extends SemanticValidationPass {
         addVisit(JmmKind.ARRAY_ACCESS_EXPR, this::visitArrayAccessExpr);
         addVisit(JmmKind.NEW_INT_ARRAY_EXPR, this::visitNewIntArrayExpr);
         addVisit(JmmKind.ARRAY_INITIALIZER_EXPR, this::visitArrayInitializerExpr);
-        addVisit(JmmKind.LENGTH_EXPR, this::visitLengthExpr);
         setDefaultVisit((node, st) -> null);
     }
 
@@ -127,15 +126,6 @@ public class ExpressionSemanticsValidation extends SemanticValidationPass {
                 addReport(newError(arrayInitializerExpr.getChild(i),
                         "Array initializer elements must have type 'int'"));
             }
-        }
-
-        return null;
-    }
-
-    private Void visitLengthExpr(JmmNode lengthExpr, SymbolTable ignored) {
-        var receiverType = types.getExprType(lengthExpr.getChild(0));
-        if (receiverType != null && !receiverType.isArray()) {
-            addReport(newError(lengthExpr, "Expression '.length' requires an array receiver"));
         }
 
         return null;

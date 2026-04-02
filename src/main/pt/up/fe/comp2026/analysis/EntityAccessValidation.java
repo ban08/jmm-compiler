@@ -217,6 +217,17 @@ public class EntityAccessValidation extends SemanticValidationPass {
             return null;
         }
 
+        var fieldName = fieldAccessExpr.get(JmmAttributes.FIELD_ACCESS_EXPR.NAME);
+        if (receiverType.isArray()) {
+            if ("length".equals(fieldName)) {
+                return null;
+            }
+
+            addReport(newError(fieldAccessExpr,
+                    "Field '" + fieldName + "' is not available on receiver '" + receiverType.print() + "'"));
+            return null;
+        }
+
         if (!receiverType.isClass()) {
             addReport(newError(fieldAccessExpr, "Field access requires a class receiver"));
             return null;
@@ -224,13 +235,13 @@ public class EntityAccessValidation extends SemanticValidationPass {
 
         if (receiverType.asClass().staticRef()) {
             addReport(newError(fieldAccessExpr,
-                    "Field '" + fieldAccessExpr.get(JmmAttributes.FIELD_ACCESS_EXPR.NAME) + "' requires an instance receiver"));
+                    "Field '" + fieldName + "' requires an instance receiver"));
             return null;
         }
 
         if (types.resolveFieldAccessType(fieldAccessExpr).isEmpty()) {
             addReport(newError(fieldAccessExpr,
-                    "Field '" + fieldAccessExpr.get(JmmAttributes.FIELD_ACCESS_EXPR.NAME) + "' is not available on receiver '" +
+                    "Field '" + fieldName + "' is not available on receiver '" +
                             receiverType.print() + "'"));
         }
 

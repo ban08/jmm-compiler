@@ -104,7 +104,6 @@ stmt
 
 expr
     : '(' expr ')' #ParenExpr
-    | expr '.' LENGTH #LengthExpr
     | expr '.' name=(ID | LENGTH) '(' (expr (',' expr)*)? ')' #MethodCallExpr
     | expr '.' name=(ID | LENGTH) #FieldAccessExpr
     | expr '[' expr ']' #ArrayAccessExpr

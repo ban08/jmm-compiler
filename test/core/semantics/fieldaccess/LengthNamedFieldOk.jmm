@@ -1,0 +1,13 @@
+package core.semantics.fieldaccess;
+
+class LengthNamedFieldOk {
+    int length;
+
+    int read(LengthNamedFieldOk other) {
+        return other.length;
+    }
+
+    int arrayLength(int[] values) {
+        return values.length;
+    }
+}

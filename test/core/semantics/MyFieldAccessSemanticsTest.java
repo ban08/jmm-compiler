@@ -28,4 +28,9 @@ public class MyFieldAccessSemanticsTest extends JmmTestEnv {
         semantics("ImportedInheritedFieldReceiverOk.jmm", false);
         semantics("InheritedFieldFromImportedSuperOk.jmm", false);
     }
+
+    @Test
+    public void lengthNamedFieldsRemainAccessible() {
+        semantics("LengthNamedFieldOk.jmm", false);
+    }
 }
