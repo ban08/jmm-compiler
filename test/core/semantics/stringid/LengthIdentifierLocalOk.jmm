@@ -1,0 +1,9 @@
+package core.semantics.stringid;
+
+class LengthIdentifierLocalOk {
+    public int compute() {
+        int length;
+        length = 1;
+        return length;
+    }
+}

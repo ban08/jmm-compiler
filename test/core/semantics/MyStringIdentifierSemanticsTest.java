@@ -15,4 +15,9 @@ public class MyStringIdentifierSemanticsTest extends JmmTestEnv {
     public void explicitStringImportsRemainValid() {
         semantics("ExplicitStringImportOk.jmm", false);
     }
+
+    @Test
+    public void lengthCanBeUsedAsALocalIdentifier() {
+        semantics("LengthIdentifierLocalOk.jmm", false);
+    }
 }

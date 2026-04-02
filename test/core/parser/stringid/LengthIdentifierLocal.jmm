@@ -1,0 +1,8 @@
+package parser.stringid;
+class Demo {
+    public int compute() {
+        int length;
+        length = 1;
+        return length;
+    }
+}

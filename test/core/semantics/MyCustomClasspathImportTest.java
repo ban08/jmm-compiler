@@ -28,13 +28,7 @@ public class MyCustomClasspathImportTest {
                 }
                 """);
 
-        var compiler = ToolProvider.getSystemJavaCompiler();
-        Assert.assertNotNull("Expected a JDK compiler to be available during tests", compiler);
-
-        var compileResult = compiler.run(null, null, null,
-                "-d", tempDir.toString(),
-                javaFile.toString());
-        Assert.assertEquals("Failed to compile helper class for custom classpath test", 0, compileResult);
+        compileHelpers(tempDir, javaFile);
 
         var config = new HashMap<String, String>();
         config.put("classpath", tempDir.toString());
@@ -185,6 +179,12 @@ public class MyCustomClasspathImportTest {
         Assert.assertNotNull("Expected a JDK compiler to be available during tests", compiler);
 
         var args = new ArrayList<String>();
+        // Keep helper compilations isolated from Gradle's full test runtime classpath.
+        // On Windows/JDK 21, inheriting that classpath can trigger noisy zipfs access
+        // warnings when javac closes unrelated JARs after the compilation finishes.
+        args.add("-proc:none");
+        args.add("-classpath");
+        args.add(outputDir.toString());
         args.add("-d");
         args.add(outputDir.toString());
         for (var javaFile : javaFiles) {

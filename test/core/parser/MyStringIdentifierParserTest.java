@@ -20,4 +20,9 @@ public class MyStringIdentifierParserTest extends JmmTestEnv {
     public void stringCanBeUsedAsAnIdentifier() {
         parseResource("StringIdentifierField.jmm");
     }
+
+    @Test
+    public void lengthCanBeUsedAsAnIdentifier() {
+        parseResource("LengthIdentifierLocal.jmm");
+    }
 }

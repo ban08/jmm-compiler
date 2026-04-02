@@ -26,6 +26,7 @@ FOR : 'for' ;
 TRUE : 'true' ;
 FALSE : 'false' ;
 THIS : 'this' ;
+LENGTH : 'length' ;
 INTEGER : '0' | [1-9][0-9]* ;
 ID : [a-zA-Z_$][a-zA-Z0-9_$]* ;
 
@@ -39,30 +40,30 @@ program
     ;
 
 importDecl
-    : IMPORT path += ID '.' path += ID ('.' path += ID)* ';'
+    : IMPORT path += (ID | LENGTH) '.' path += (ID | LENGTH) ('.' path += (ID | LENGTH))* ';'
     ;
 
 packageDecl
-    : PACKAGE path += ID ('.' path +=ID)* ';'
+    : PACKAGE path += (ID | LENGTH) ('.' path += (ID | LENGTH))* ';'
     ;
 
 classDecl
-    : CLASS name=ID (EXTENDS superName=ID)?
+    : CLASS name=(ID | LENGTH) (EXTENDS superName=(ID | LENGTH))?
         '{'
         (fieldDecl | methodDecl)*
         '}'
     ;
 
 fieldDecl
-    : typeNode = type name=ID ('=' expr)? ';'
+    : typeNode = type name=(ID | LENGTH) ('=' expr)? ';'
     ;
 
 varDecl
-    : typeNode = type name=ID ';'
+    : typeNode = type name=(ID | LENGTH) ';'
     ;
 
 param
-    : typeNode = type name = ID
+    : typeNode = type name = (ID | LENGTH)
     ;
 
 arrayCreationDim
@@ -74,19 +75,19 @@ type
     | name = INT #SimpleType
     | name = BOOLEAN #SimpleType
     | name = VOID #SimpleType
-    | name = ID #SimpleType
+    | name = (ID | LENGTH) #SimpleType
     ;
 
 methodDecl locals[boolean isStatic=false]
     : (visibility=(PUBLIC | PRIVATE | PROTECTED))? (STATIC {$isStatic=true;})?
-        returnType = type name=ID
+        returnType = type name=(ID | LENGTH)
         '(' (param (',' param)*)? ')'
         '{' varDecl* stmt* '}'
     ;
 
 forHeaderAssign
-    : var = ID '=' expr
-    | var = ID ('[' expr ']')+ '=' expr
+    : var = (ID | LENGTH) '=' expr
+    | var = (ID | LENGTH) ('[' expr ']')+ '=' expr
     ;
 
 stmt
@@ -96,32 +97,32 @@ stmt
     | DO stmt WHILE '(' expr ')' ';' #DoWhileStmt
     | FOR '(' forHeaderAssign? ';' expr? ';' forHeaderAssign? ')' stmt #ForStmt
     | expr ';' #ExprStmt
-    | var = ID '=' expr ';' #AssignStmt
-    | var = ID ('[' expr ']')+ '=' expr ';' #ArrayAssignStmt
+    | var = (ID | LENGTH) '=' expr ';' #AssignStmt
+    | var = (ID | LENGTH) ('[' expr ']')+ '=' expr ';' #ArrayAssignStmt
     | RETURN expr? ';' #ReturnStmt
     ;
 
 expr
     : '(' expr ')' #ParenExpr
-    | expr '.' 'length' #LengthExpr
-    | expr '.' name=ID '(' (expr (',' expr)*)? ')' #MethodCallExpr
-    | expr '.' name=ID #FieldAccessExpr
+    | expr '.' LENGTH #LengthExpr
+    | expr '.' name=(ID | LENGTH) '(' (expr (',' expr)*)? ')' #MethodCallExpr
+    | expr '.' name=(ID | LENGTH) #FieldAccessExpr
     | expr '[' expr ']' #ArrayAccessExpr
     | '!' expr #NotExpr
     | op=('++' | '--' | '+' | '-') expr #UnaryExpr
     | NEW INT arrayCreationDim+ #NewIntArrayExpr
     | NEW INT '[' ']' '{' (expr (',' expr)*)? '}' #ArrayInitializerExpr
-    | NEW name=ID '(' (expr (',' expr)*)? ')' #NewExpr
+    | NEW name=(ID | LENGTH) '(' (expr (',' expr)*)? ')' #NewExpr
     | expr op=('*' | '/' | '%') expr #BinaryExpr
     | expr op=('+' | '-') expr #BinaryExpr
     | expr op=('<' | '>' | '<=' | '>=') expr #BinaryExpr
     | expr op=('==' | '!=') expr #BinaryExpr
     | expr op='&&' expr #BinaryExpr
     | expr op='||' expr #BinaryExpr
-    | name=ID '(' (expr (',' expr)*)? ')' #ImplicitThisCallExpr
+    | name=(ID | LENGTH) '(' (expr (',' expr)*)? ')' #ImplicitThisCallExpr
     | value=INTEGER #IntegerLiteral
     | value=TRUE #BooleanLiteral
     | value=FALSE #BooleanLiteral
-    | name=ID #VarRefExpr
+    | name=(ID | LENGTH) #VarRefExpr
     | THIS #ThisExpr
     ;
