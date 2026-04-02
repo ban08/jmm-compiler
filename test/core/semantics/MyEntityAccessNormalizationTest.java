@@ -48,4 +48,37 @@ public class MyEntityAccessNormalizationTest extends JmmTestEnv {
         assertEquals("Expected the receiver to be the current class name", "ImplicitThisStaticOk",
                 methodCall.getChild(0).get(JmmAttributes.VAR_REF_EXPR.NAME));
     }
+
+    @Test
+    public void implicitStaticCallsFromInstanceMethodsAreNormalizedToClassReceiver() {
+        var semanticsResult = semantics("ImplicitStaticCallFromInstanceOk.jmm", false);
+        var root = semanticsResult.getRootNode();
+
+        assertTrue("Implicit-this calls should be normalized away",
+                root.getDescendants(JmmKind.IMPLICIT_THIS_CALL_EXPR).isEmpty());
+
+        var methodCalls = root.getDescendants(JmmKind.METHOD_CALL_EXPR);
+        assertEquals("Expected exactly one explicit method call after normalization", 1, methodCalls.size());
+
+        var methodCall = methodCalls.get(0);
+        assertTrue("Static implicit calls should normalize to a class-name receiver even in instance methods",
+                JmmKind.VAR_REF_EXPR.check(methodCall.getChild(0)));
+        assertEquals("Expected the receiver to be the current class name", "ImplicitStaticCallFromInstanceOk",
+                methodCall.getChild(0).get(JmmAttributes.VAR_REF_EXPR.NAME));
+    }
+
+    @Test
+    public void explicitThisStaticCallsAreNormalizedToClassReceiver() {
+        var semanticsResult = semantics("ExplicitThisStaticCallOk.jmm", false);
+        var root = semanticsResult.getRootNode();
+
+        var methodCalls = root.getDescendants(JmmKind.METHOD_CALL_EXPR);
+        assertEquals("Expected exactly one explicit method call after normalization", 1, methodCalls.size());
+
+        var methodCall = methodCalls.get(0);
+        assertTrue("Explicit static calls on 'this' should normalize to a class-name receiver",
+                JmmKind.VAR_REF_EXPR.check(methodCall.getChild(0)));
+        assertEquals("Expected the receiver to be the current class name", "ExplicitThisStaticCallOk",
+                methodCall.getChild(0).get(JmmAttributes.VAR_REF_EXPR.NAME));
+    }
 }

@@ -1,0 +1,11 @@
+package core.semantics.extensions;
+
+class ExplicitThisStaticCallOk {
+    int compute() {
+        return this.sum();
+    }
+
+    static int sum() {
+        return 1;
+    }
+}

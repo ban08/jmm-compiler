@@ -76,7 +76,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 }
 
                 if (analysisVisitor instanceof EntityAccessValidation) {
-                    EntityAccessNormalizer.normalizeResolvedImplicitThisCalls(rootNode, table);
+                    EntityAccessNormalizer.normalizeResolvedMethodCalls(rootNode, table);
                 }
 
             } catch (Exception e) {
