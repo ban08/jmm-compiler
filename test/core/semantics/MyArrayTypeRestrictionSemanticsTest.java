@@ -14,6 +14,7 @@ public class MyArrayTypeRestrictionSemanticsTest extends JmmTestEnv {
     @Test
     public void onlyIntArraysAndMainStringArgsAreAccepted() {
         semantics("StringArrayMainParamOk.jmm", false);
+        semantics("CurrentClassNamedStringMainParamFail.jmm", true);
         semantics("StringArrayMainExtraParamFail.jmm", true);
         semantics("StringArrayMainSecondParamFail.jmm", true);
         semantics("StringArrayFieldFail.jmm", true);

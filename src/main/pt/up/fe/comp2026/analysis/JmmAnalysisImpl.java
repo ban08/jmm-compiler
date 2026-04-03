@@ -27,7 +27,10 @@ public class JmmAnalysisImpl implements JmmAnalysis {
      */
     private List<AnalysisPass> buildPasses(SymbolTable table) {
         return List.of(
-                new DeclarationSemanticsValidation(table),
+                new TypeExistenceValidation(table),
+                new VoidTypeValidation(table),
+                new ArrayTypeValidation(table),
+                new ReturnPathValidation(table),
                 new FieldInitializerValidation(table),
                 new EntityAccessValidation(table),
                 new StatementSemanticsValidation(table),

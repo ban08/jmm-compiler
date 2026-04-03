@@ -5,15 +5,14 @@ import pt.up.fe.comp.jmm.analysis.table.Signature;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Visibility;
 import pt.up.fe.comp.jmm.analysis.table.reflection.Importer;
-import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmPrimitiveType;
 import pt.up.fe.comp.jmm.analysis.table.type.JmmType;
-import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmArrayType;
 import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmClassType;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2026.CompilerConfig;
 import pt.up.fe.comp2026.ast.NodeUtils;
+import pt.up.fe.comp2026.ast.TypeUtils;
 import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.specs.util.SpecsCheck;
 
@@ -191,31 +190,12 @@ public class JmmSymbolTableBuilder {
      * Convert a type AST node into a JmmType.
      */
     private JmmType convertType(JmmNode typeNode) {
-        if (ARRAY_TYPE.check(typeNode)) {
-            var elementType = typeNode.getObject(JmmAttributes.ARRAY_TYPE.ELEMENT_TYPE.getKey(), JmmNode.class);
-            return extendArrayType(convertType(elementType), 1);
-        }
-
-        var typeName = typeNode.get(JmmAttributes.SIMPLE_TYPE.NAME);
-
-        // Check primitives
-        var primitive = JmmPrimitiveType.fromString(typeName);
-        if (primitive.isPresent()) {
-            return primitive.get();
-        }
-
-        return ClassResolution.resolve(typeName, imports, className, fullyQualifiedName, importer)
-                .map(resolvedClass -> resolvedClass.asType(false))
-                .orElseGet(() -> JmmClassType.ofInstance(typeName, false));
+        return TypeUtils.convertType(typeNode, this::resolveDeclaredTypeClass);
     }
 
-    private JmmArrayType extendArrayType(JmmType baseType, int extraDimensions) {
-        if (baseType.isArray()) {
-            var arrayType = baseType.asArray();
-            return JmmArrayType.of(arrayType.itemType(), arrayType.dimension() + extraDimensions);
-        }
-
-        return JmmArrayType.of(baseType, extraDimensions);
+    private Optional<JmmClassType> resolveDeclaredTypeClass(String typeName) {
+        return ClassResolution.resolve(typeName, imports, className, fullyQualifiedName, importer)
+                .map(resolvedClass -> resolvedClass.asType(false));
     }
 
     /**

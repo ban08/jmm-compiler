@@ -1,9 +1,7 @@
 package pt.up.fe.comp2026.analysis;
 
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
-import pt.up.fe.comp.jmm.analysis.table.MethodSymbol;
 import pt.up.fe.comp.jmm.ast.JmmNode;
-import pt.up.fe.comp2026.analysis.attributes.MethodDeclAttributes;
 import pt.up.fe.comp2026.ast.TypeUtils;
 import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.comp2026.jmm.ast.JmmKind;
@@ -11,16 +9,15 @@ import pt.up.fe.comp2026.jmm.ast.JmmKind;
 import java.util.List;
 import java.util.Optional;
 
-public class DeclarationSemanticsValidation extends SemanticValidationPass {
+public class ReturnPathValidation extends SemanticValidationPass {
 
-    public DeclarationSemanticsValidation(SymbolTable table) {
+    public ReturnPathValidation(SymbolTable table) {
         super(table);
     }
 
     @Override
     protected void buildVisitor() {
         addVisit(JmmKind.METHOD_DECL, this::visitMethodDecl);
-        addVisit(JmmKind.TYPE, this::visitType);
         setDefaultVisit((node, st) -> null);
     }
 
@@ -255,146 +252,5 @@ public class DeclarationSemanticsValidation extends SemanticValidationPass {
         }
 
         return Optional.empty();
-    }
-
-    private Void visitType(JmmNode typeNode, SymbolTable ignored) {
-        if (!isOutermostTypeNode(typeNode)) {
-            return null;
-        }
-
-        var typeName = getBaseTypeName(typeNode);
-
-        if (!types.isKnownTypeName(typeName)) {
-            addReport(newError(typeNode, "Type '" + typeName + "' is not available in the current compilation unit"));
-            return null;
-        }
-
-        if (isArrayType(typeNode) && !isSupportedArrayType(typeNode)) {
-            addReport(newError(typeNode, unsupportedArrayTypeMessage(typeNode)));
-            return null;
-        }
-
-        if (!TypeUtils.voidType().equals(types.convertType(typeNode))) {
-            return null;
-        }
-
-        var parent = typeNode.getParent();
-        if (parent == null) {
-            return null;
-        }
-
-        if (JmmKind.PARAM.check(parent)) {
-            addReport(newError(typeNode,
-                    "Parameter '" + parent.get(JmmAttributes.PARAM.NAME) + "' cannot have type 'void'"));
-            return null;
-        }
-
-        if (!JmmKind.VAR_DECL.check(parent) && !JmmKind.FIELD_DECL.check(parent)) {
-            return null;
-        }
-
-        var declarationKind = JmmKind.FIELD_DECL.check(parent) ? "Field" : "Local variable";
-        addReport(newError(typeNode,
-                declarationKind + " '" + getDeclarationName(parent) + "' cannot have type 'void'"));
-
-        return null;
-    }
-
-    private boolean isOutermostTypeNode(JmmNode typeNode) {
-        var parent = typeNode.getParent();
-        return parent == null || !JmmKind.TYPE.check(parent);
-    }
-
-    private boolean isArrayType(JmmNode typeNode) {
-        return JmmKind.ARRAY_TYPE.check(typeNode);
-    }
-
-    private int getArrayDepth(JmmNode typeNode) {
-        if (!JmmKind.ARRAY_TYPE.check(typeNode)) {
-            return 0;
-        }
-
-        return 1 + getArrayDepth(typeNode.getObject(JmmAttributes.ARRAY_TYPE.ELEMENT_TYPE.getKey(), JmmNode.class));
-    }
-
-    private String getBaseTypeName(JmmNode typeNode) {
-        if (JmmKind.SIMPLE_TYPE.check(typeNode)) {
-            return typeNode.get(JmmAttributes.SIMPLE_TYPE.NAME);
-        }
-
-        if (JmmKind.ARRAY_TYPE.check(typeNode)) {
-            return getBaseTypeName(typeNode.getObject(JmmAttributes.ARRAY_TYPE.ELEMENT_TYPE.getKey(), JmmNode.class));
-        }
-
-        throw new IllegalArgumentException("Unexpected type node kind: " + typeNode.getKind());
-    }
-
-    private boolean isSupportedArrayType(JmmNode typeNode) {
-        var typeName = getBaseTypeName(typeNode);
-
-        if ("int".equals(typeName)) {
-            return true;
-        }
-
-        return "String".equals(typeName)
-                && getArrayDepth(typeNode) == 1
-                && isMainMethodParameter(typeNode);
-    }
-
-    private boolean isMainMethodParameter(JmmNode typeNode) {
-        var parent = typeNode.getParent();
-        if (parent == null || !JmmKind.PARAM.check(parent)) {
-            return false;
-        }
-
-        var methodDeclOpt = typeNode.getAncestor(JmmKind.METHOD_DECL);
-        if (methodDeclOpt.isEmpty()) {
-            return false;
-        }
-
-        var methodDecl = methodDeclOpt.get();
-        var methodOpt = types.getEnclosingMethod(typeNode);
-        if (methodOpt.isEmpty()) {
-            return false;
-        }
-
-        if (!isMainMethod(methodDecl, methodOpt.get())) {
-            return false;
-        }
-
-        var params = methodDecl.getChildren(JmmKind.PARAM);
-        return params.size() == 1 && params.getFirst() == parent;
-    }
-
-    private boolean isMainMethod(JmmNode methodDecl, MethodSymbol method) {
-        var cachedValue = MethodDeclAttributes.isMainMethod.getOptional(methodDecl);
-        if (cachedValue.isPresent()) {
-            return cachedValue.get();
-        }
-
-        var isMainMethod = "main".equals(methodDecl.get(JmmAttributes.METHOD_DECL.NAME))
-                && method.isStatic()
-                && TypeUtils.voidType().equals(method.returnType());
-        MethodDeclAttributes.isMainMethod.set(methodDecl, isMainMethod);
-
-        return isMainMethod;
-    }
-
-    private String unsupportedArrayTypeMessage(JmmNode typeNode) {
-        var renderedType = getBaseTypeName(typeNode) + "[]".repeat(getArrayDepth(typeNode));
-
-        if ("String[]".equals(renderedType)) {
-            return "Type 'String[]' is only supported as the parameter of the static void main method";
-        }
-
-        return "Type '" + renderedType + "' is not supported; J-- only allows arrays of int";
-    }
-
-    private String getDeclarationName(JmmNode declarationNode) {
-        if (JmmKind.FIELD_DECL.check(declarationNode)) {
-            return declarationNode.get(JmmAttributes.FIELD_DECL.NAME);
-        }
-
-        return declarationNode.get(JmmAttributes.VAR_DECL.NAME);
     }
 }

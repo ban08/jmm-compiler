@@ -86,6 +86,35 @@ public class MyCustomClasspathImportTest {
     }
 
     @Test
+    public void importedStringTypeCannotMasqueradeAsMainParameter() throws Exception {
+        var tempDir = Files.createTempDirectory("jmm-extra-classpath-string-main");
+        var packageDir = Files.createDirectories(tempDir.resolve("ext"));
+        var javaFile = packageDir.resolve("String.java");
+
+        Files.writeString(javaFile, """
+                package ext;
+
+                public class String {
+                }
+                """);
+
+        compileHelpers(tempDir, javaFile);
+
+        var code = """
+                package p;
+                import ext.String;
+                class A {
+                    public static void main(String[] args) {
+                    }
+                }
+                """;
+
+        var semanticsResult = analyze(code, tempDir);
+        Assert.assertTrue("Semantic analysis should reserve String[] in main for java.lang.String only",
+                semanticsResult.hasErrors());
+    }
+
+    @Test
     public void importedHierarchyFromCustomClasspathIsAssignableAndComparable() throws Exception {
         var tempDir = Files.createTempDirectory("jmm-extra-classpath-hierarchy");
         var packageDir = Files.createDirectories(tempDir.resolve("ext"));

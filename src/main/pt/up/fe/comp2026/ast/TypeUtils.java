@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static pt.up.fe.comp2026.jmm.ast.JmmKind.*;
 
@@ -99,11 +100,16 @@ public class TypeUtils {
     }
 
     public JmmType convertType(JmmNode typeNode) {
+        return convertType(typeNode,
+                className -> table.resolveClass(className).map(resolvedClass -> resolvedClass.asType(false)));
+    }
+
+    public static JmmType convertType(JmmNode typeNode, Function<String, Optional<JmmClassType>> classResolver) {
         TYPE.check(typeNode);
 
         if (ARRAY_TYPE.check(typeNode)) {
             var elementType = typeNode.getObject(JmmAttributes.ARRAY_TYPE.ELEMENT_TYPE.getKey(), JmmNode.class);
-            return wrapArrayType(convertType(elementType), 1);
+            return wrapArrayType(convertType(elementType, classResolver), 1);
         }
 
         var name = typeNode.get(JmmAttributes.SIMPLE_TYPE.NAME);
@@ -112,7 +118,9 @@ public class TypeUtils {
             return primitive.get();
         }
 
-        return resolveClassType(name, false);
+        return classResolver.apply(name)
+                .<JmmType>map(classType -> classType)
+                .orElseGet(() -> JmmClassType.ofInstance(name, false));
     }
 
     public boolean isKnownTypeName(String name) {
@@ -574,7 +582,7 @@ public class TypeUtils {
         return Optional.empty();
     }
 
-    private JmmType wrapArrayType(JmmType baseType, int arrayDepth) {
+    private static JmmType wrapArrayType(JmmType baseType, int arrayDepth) {
         if (arrayDepth <= 0) {
             return baseType;
         }
