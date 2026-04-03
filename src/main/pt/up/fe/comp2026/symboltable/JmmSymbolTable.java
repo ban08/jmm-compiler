@@ -18,7 +18,6 @@ public class JmmSymbolTable extends AJmmSymbolTable {
     private final Map<Signature, MethodSymbol> methods;
 
 
-    // TODO: Check if some uses of importNames can be replaced with getDeclaredClasses()
     private final Set<String> importNames;
 
     public JmmSymbolTable(List<String> imports, String classQualifiedName,
@@ -71,7 +70,7 @@ public class JmmSymbolTable extends AJmmSymbolTable {
      */
     public Set<String> getDeclaredClasses() {
         var declaredClasses = new HashSet<>(importNames);
-        declaredClasses.add(this.classQualifiedName);
+        declaredClasses.add(getSimpleClassName());
         return declaredClasses;
     }
 
