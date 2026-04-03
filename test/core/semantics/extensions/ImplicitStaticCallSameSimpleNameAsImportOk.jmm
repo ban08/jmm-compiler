@@ -1,0 +1,13 @@
+package core.semantics.extensions;
+
+import java.util.Date;
+
+class Date {
+    int compute() {
+        return sum();
+    }
+
+    static int sum() {
+        return 1;
+    }
+}

@@ -1,0 +1,13 @@
+package core.semantics.extensions;
+
+class InstanceStaticReceiverNormalizationOk {
+    static int sum() {
+        return 1;
+    }
+
+    int compute() {
+        InstanceStaticReceiverNormalizationOk self;
+        self = this;
+        return self.sum();
+    }
+}

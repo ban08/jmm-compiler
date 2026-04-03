@@ -21,12 +21,14 @@ public class MyExtensionSemanticsTest extends JmmTestEnv {
     public void staticImplicitThisCalls() {
         semantics("ImplicitThisStaticOk.jmm", false);
         semantics("ImplicitThisStaticFail.jmm", true);
+        semantics("ImplicitStaticCallSameSimpleNameAsImportOk.jmm", false);
     }
 
     @Test
     public void currentClassStaticReceiverCalls() {
         semantics("CurrentClassStaticReceiverOk.jmm", false);
         semantics("CurrentClassStaticReceiverFail.jmm", true);
+        semantics("InstanceStaticReceiverNormalizationOk.jmm", false);
     }
 
     @Test

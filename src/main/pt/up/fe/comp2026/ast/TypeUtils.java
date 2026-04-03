@@ -9,6 +9,7 @@ import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmArrayType;
 import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmClassType;
 import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmPrimitiveType;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp2026.analysis.attributes.ReceiverAttributes;
 import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.comp2026.symboltable.JmmSymbolTable;
 
@@ -167,6 +168,11 @@ public class TypeUtils {
     }
 
     public Optional<ResolvedIdentifier> resolveIdentifier(JmmNode context, String name) {
+        var normalizedClassReceiver = resolveNormalizedClassReceiver(context, name);
+        if (normalizedClassReceiver.isPresent()) {
+            return normalizedClassReceiver;
+        }
+
         var method = getEnclosingMethod(context);
         if (method.isPresent()) {
             var local = method.get().getLocalVariable(name);
@@ -196,6 +202,23 @@ public class TypeUtils {
                         resolvedClass.asType(true),
                         resolvedClass.imported() ? AccessType.IMPORT : AccessType.CLASS
                 ));
+    }
+
+    private Optional<ResolvedIdentifier> resolveNormalizedClassReceiver(JmmNode context, String name) {
+        if (!VAR_REF_EXPR.check(context)) {
+            return Optional.empty();
+        }
+
+        if (!context.hasAttribute(ReceiverAttributes.normalizedClassFqn.getName())) {
+            return Optional.empty();
+        }
+
+        var classFqn = ReceiverAttributes.normalizedClassFqn.get(context);
+        var imported = context.hasAttribute(ReceiverAttributes.normalizedClassImported.getName())
+                && ReceiverAttributes.normalizedClassImported.get(context);
+        var type = JmmClassType.ofStaticReference(classFqn, imported);
+        var accessType = imported ? AccessType.IMPORT : AccessType.CLASS;
+        return Optional.of(new ResolvedIdentifier(name, type, accessType));
     }
 
     public Optional<ResolvedMethodCall> resolveMethodCall(JmmNode callExpr) {
