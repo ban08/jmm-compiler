@@ -84,25 +84,8 @@ public class MyEntityAccessNormalizationTest extends JmmTestEnv {
     }
 
     @Test
-    public void normalizedStaticReceiversKeepCurrentClassIdentityWhenImportsShareTheSameSimpleName() {
-        var semanticsResult = semantics("ImplicitStaticCallSameSimpleNameAsImportOk.jmm", false);
-        var root = semanticsResult.getRootNode();
-
-        var methodCalls = root.getDescendants(JmmKind.METHOD_CALL_EXPR);
-        assertEquals("Expected exactly one explicit method call after normalization", 1, methodCalls.size());
-
-        var methodCall = methodCalls.get(0);
-        var resolvedCall = TypeUtils.with(semanticsResult.getSymbolTable()).resolveMethodCall(methodCall);
-
-        assertTrue("The normalized static call should still resolve after rewriting the receiver",
-                resolvedCall.isPresent());
-        assertTrue("The normalized call should still target a static method",
-                resolvedCall.get().method().isStatic());
-        assertEquals("Expected the normalized receiver to keep the current class fully qualified name",
-                "core.semantics.extensions.Date",
-                resolvedCall.get().receiverType().asClass().fullyQualifiedName());
-        assertTrue("Expected the normalized receiver to keep the current class, not the imported class",
-                !resolvedCall.get().receiverType().asClass().isImported());
+    public void importConflictsWithCurrentClassAreRejectedBeforeNormalization() {
+        semantics("ImplicitStaticCallSameSimpleNameAsImportOk.jmm", true);
     }
 
     @Test

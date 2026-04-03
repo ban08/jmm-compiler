@@ -1,0 +1,7 @@
+package core.semantics.symboltable;
+
+import java.util.Date;
+
+class Date {
+    int value;
+}

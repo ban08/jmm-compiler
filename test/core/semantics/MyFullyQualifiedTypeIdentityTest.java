@@ -12,12 +12,12 @@ public class MyFullyQualifiedTypeIdentityTest extends JmmTestEnv {
     }
 
     @Test
-    public void importedTypeWithSameSimpleNameAsCurrentClassIsNotAssignableFromThis() {
+    public void importedTypeWithSameSimpleNameAsCurrentClassIsRejected() {
         semantics("ImportedTypeNotAssignableFromThis.jmm", true);
     }
 
     @Test
-    public void importedReceiverWithSameSimpleNameAsCurrentClassUsesImportedMethods() {
-        semantics("ImportedReceiverUsesImportedMethods.jmm", false);
+    public void importedReceiverWithSameSimpleNameAsCurrentClassIsRejected() {
+        semantics("ImportedReceiverUsesImportedMethods.jmm", true);
     }
 }

@@ -96,6 +96,12 @@ public class JmmSymbolTableBuilder {
         var packagePathList = packageDecl.getObjectAsList(JmmAttributes.PACKAGE_DECL.PATH.getKey(), String.class);
         var packagePath = String.join(".", packagePathList);
 
+        var classDecl = root.getObject(JmmAttributes.PROGRAM.CLASS_NODE.getKey(), JmmNode.class);
+        SpecsCheck.checkArgument(CLASS_DECL.check(classDecl), () -> "Expected a class declaration: " + classDecl);
+
+        this.className = classDecl.get(JmmAttributes.CLASS_DECL.NAME);
+        this.fullyQualifiedName = packagePath + "." + className;
+
         // Process imports (with dedup) and validate that each imported class exists.
         var importSet = new LinkedHashSet<String>();
         var importNamesToFqn = new HashMap<String, String>();
@@ -110,6 +116,13 @@ public class JmmSymbolTableBuilder {
             }
 
             var importName = importPath.getLast();
+            if (importName.equals(className)) {
+                reports.add(newError(importDecl,
+                        "Imported class '" + importFqn + "' conflicts with current class '" +
+                                fullyQualifiedName + "'"));
+                continue;
+            }
+
             var previousImport = importNamesToFqn.putIfAbsent(importName, importFqn);
             if (previousImport != null && !previousImport.equals(importFqn)) {
                 reports.add(newError(importDecl,
@@ -122,12 +135,6 @@ public class JmmSymbolTableBuilder {
             validateImport(importDecl, importFqn);
         }
         imports.addAll(importSet);
-
-        var classDecl = root.getObject(JmmAttributes.PROGRAM.CLASS_NODE.getKey(), JmmNode.class);
-        SpecsCheck.checkArgument(CLASS_DECL.check(classDecl), () -> "Expected a class declaration: " + classDecl);
-
-        this.className = classDecl.get(JmmAttributes.CLASS_DECL.NAME);
-        this.fullyQualifiedName = packagePath + "." + className;
 
         // Check if className is available
         if (declaredClasses.containsKey(className)) {

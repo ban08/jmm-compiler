@@ -14,7 +14,7 @@ public class MyImportedCallsSemanticsTest extends JmmTestEnv {
     @Test
     public void importedStaticReceiverCalls() {
         semantics("ImportedStaticReceiverOk.jmm", false);
-        semantics("ImportedStaticReceiverSameSimpleNameOk.jmm", false);
+        semantics("ImportedStaticReceiverSameSimpleNameOk.jmm", true);
         semantics("ImportedStaticReceiverFail.jmm", true);
     }
 }

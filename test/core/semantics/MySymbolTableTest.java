@@ -39,6 +39,14 @@ public class MySymbolTableTest extends JmmTestEnv {
     }
 
     @Test
+    public void importWithSameSimpleNameAsCurrentClassProducesErrorAndIsIgnored() {
+        var result = symbolTable("ImportConflictsWithCurrentClass.jmm", true);
+
+        assertTrue("Expected the conflicting import to be ignored after reporting the error",
+                result.getSymbolTable().getImports().isEmpty());
+    }
+
+    @Test
     public void importedSymbolTableLookupAcceptsSimpleName() {
         var st = (JmmSymbolTable) symbolTable("Factorial.jmm", false).getSymbolTable();
 
