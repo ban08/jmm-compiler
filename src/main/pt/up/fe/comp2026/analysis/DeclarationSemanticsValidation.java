@@ -1,7 +1,9 @@
 package pt.up.fe.comp2026.analysis;
 
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
+import pt.up.fe.comp.jmm.analysis.table.MethodSymbol;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp2026.analysis.attributes.MethodDeclAttributes;
 import pt.up.fe.comp2026.ast.TypeUtils;
 import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.comp2026.jmm.ast.JmmKind;
@@ -351,19 +353,31 @@ public class DeclarationSemanticsValidation extends SemanticValidationPass {
         }
 
         var methodDecl = methodDeclOpt.get();
-        if (!"main".equals(methodDecl.get(JmmAttributes.METHOD_DECL.NAME))) {
+        var methodOpt = types.getEnclosingMethod(typeNode);
+        if (methodOpt.isEmpty()) {
             return false;
         }
 
-        var methodOpt = types.getEnclosingMethod(typeNode);
-        if (methodOpt.isEmpty()
-                || !methodOpt.get().isStatic()
-                || !TypeUtils.voidType().equals(methodOpt.get().returnType())) {
+        if (!isMainMethod(methodDecl, methodOpt.get())) {
             return false;
         }
 
         var params = methodDecl.getChildren(JmmKind.PARAM);
         return params.size() == 1 && params.getFirst() == parent;
+    }
+
+    private boolean isMainMethod(JmmNode methodDecl, MethodSymbol method) {
+        var cachedValue = MethodDeclAttributes.isMainMethod.getOptional(methodDecl);
+        if (cachedValue.isPresent()) {
+            return cachedValue.get();
+        }
+
+        var isMainMethod = "main".equals(methodDecl.get(JmmAttributes.METHOD_DECL.NAME))
+                && method.isStatic()
+                && TypeUtils.voidType().equals(method.returnType());
+        MethodDeclAttributes.isMainMethod.set(methodDecl, isMainMethod);
+
+        return isMainMethod;
     }
 
     private String unsupportedArrayTypeMessage(JmmNode typeNode) {

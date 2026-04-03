@@ -4,7 +4,7 @@ import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmClassType;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.JmmNodeImpl;
-import pt.up.fe.comp.jmm.ast.NodePosition;
+import pt.up.fe.comp2026.ast.NodeUtils;
 import pt.up.fe.comp2026.analysis.attributes.ReceiverAttributes;
 import pt.up.fe.comp2026.ast.TypeUtils;
 import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
@@ -57,13 +57,29 @@ final class EntityAccessNormalizer {
             }
 
             var receiver = methodCall.getChild(0);
+            if (!canSafelyRewriteStaticReceiver(receiver)) {
+                continue;
+            }
+
             receiver.replace(buildReceiver(receiver, resolvedCall.get().receiverType().asClass(), true));
         }
     }
 
+    /**
+     * Java evaluates the qualifier of a static call even if the resulting value is ignored.
+     * We can only rewrite the receiver away when that evaluation has no observable behavior.
+     */
+    private static boolean canSafelyRewriteStaticReceiver(JmmNode receiver) {
+        if (JmmKind.PAREN_EXPR.check(receiver)) {
+            return receiver.getNumChildren() == 1 && canSafelyRewriteStaticReceiver(receiver.getChild(0));
+        }
+
+        return JmmKind.VAR_REF_EXPR.check(receiver) || JmmKind.THIS_EXPR.check(receiver);
+    }
+
     private static JmmNode buildReceiver(JmmNode sourceNode, JmmClassType receiverType, boolean staticContext) {
         var receiver = new JmmNodeImpl(staticContext ? JmmKind.VAR_REF_EXPR : JmmKind.THIS_EXPR);
-        copySourceLocation(sourceNode, receiver);
+        NodeUtils.copyPositionAttributes(sourceNode, receiver);
 
         if (staticContext) {
             receiver.put(JmmAttributes.VAR_REF_EXPR.NAME, getSimpleClassName(receiverType.fullyQualifiedName()));
@@ -79,13 +95,5 @@ final class EntityAccessNormalizer {
         return separatorIndex >= 0
                 ? fullyQualifiedName.substring(separatorIndex + 1)
                 : fullyQualifiedName;
-    }
-
-    private static void copySourceLocation(JmmNode source, JmmNode target) {
-        for (var position : NodePosition.values()) {
-            if (source.hasAttribute(position)) {
-                target.putObject(position, source.getObject(position));
-            }
-        }
     }
 }

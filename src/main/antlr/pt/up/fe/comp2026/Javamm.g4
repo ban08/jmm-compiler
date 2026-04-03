@@ -26,7 +26,6 @@ FOR : 'for' ;
 TRUE : 'true' ;
 FALSE : 'false' ;
 THIS : 'this' ;
-LENGTH : 'length' ;
 INTEGER : '0' | [1-9][0-9]* ;
 ID : [a-zA-Z_$][a-zA-Z0-9_$]* ;
 
@@ -40,30 +39,30 @@ program
     ;
 
 importDecl
-    : IMPORT path += (ID | LENGTH) '.' path += (ID | LENGTH) ('.' path += (ID | LENGTH))* ';'
+    : IMPORT path += ID '.' path += ID ('.' path += ID)* ';'
     ;
 
 packageDecl
-    : PACKAGE path += (ID | LENGTH) ('.' path += (ID | LENGTH))* ';'
+    : PACKAGE path += ID ('.' path += ID)* ';'
     ;
 
 classDecl
-    : CLASS name=(ID | LENGTH) (EXTENDS superName=(ID | LENGTH))?
+    : CLASS name=ID (EXTENDS superName=ID)?
         '{'
         (fieldDecl | methodDecl)*
         '}'
     ;
 
 fieldDecl
-    : typeNode = type name=(ID | LENGTH) ('=' expr)? ';'
+    : typeNode = type name=ID ('=' expr)? ';'
     ;
 
 varDecl
-    : typeNode = type name=(ID | LENGTH) ';'
+    : typeNode = type name=ID ';'
     ;
 
 param
-    : typeNode = type name = (ID | LENGTH)
+    : typeNode = type name = ID
     ;
 
 arrayCreationDim
@@ -75,19 +74,21 @@ type
     | name = INT #SimpleType
     | name = BOOLEAN #SimpleType
     | name = VOID #SimpleType
-    | name = (ID | LENGTH) #SimpleType
+    // 'length' is not a Java keyword, so the lexer should keep treating it as a regular identifier.
+    // The special meaning of array.length belongs in semantic analysis, not in the grammar.
+    | name = ID #SimpleType
     ;
 
 methodDecl locals[boolean isStatic=false]
     : (visibility=(PUBLIC | PRIVATE | PROTECTED))? (STATIC {$isStatic=true;})?
-        returnType = type name=(ID | LENGTH)
+        returnType = type name=ID
         '(' (param (',' param)*)? ')'
         '{' varDecl* stmt* '}'
     ;
 
 forHeaderAssign
-    : var = (ID | LENGTH) '=' expr
-    | var = (ID | LENGTH) ('[' expr ']')+ '=' expr
+    : var = ID '=' expr
+    | var = ID ('[' expr ']')+ '=' expr
     ;
 
 stmt
@@ -97,31 +98,31 @@ stmt
     | DO stmt WHILE '(' expr ')' ';' #DoWhileStmt
     | FOR '(' forHeaderAssign? ';' expr? ';' forHeaderAssign? ')' stmt #ForStmt
     | expr ';' #ExprStmt
-    | var = (ID | LENGTH) '=' expr ';' #AssignStmt
-    | var = (ID | LENGTH) ('[' expr ']')+ '=' expr ';' #ArrayAssignStmt
+    | var = ID '=' expr ';' #AssignStmt
+    | var = ID ('[' expr ']')+ '=' expr ';' #ArrayAssignStmt
     | RETURN expr? ';' #ReturnStmt
     ;
 
 expr
     : '(' expr ')' #ParenExpr
-    | expr '.' name=(ID | LENGTH) '(' (expr (',' expr)*)? ')' #MethodCallExpr
-    | expr '.' name=(ID | LENGTH) #FieldAccessExpr
+    | expr '.' name=ID '(' (expr (',' expr)*)? ')' #MethodCallExpr
+    | expr '.' name=ID #FieldAccessExpr
     | expr '[' expr ']' #ArrayAccessExpr
     | '!' expr #NotExpr
     | op=('++' | '--' | '+' | '-') expr #UnaryExpr
     | NEW INT arrayCreationDim+ #NewIntArrayExpr
     | NEW INT '[' ']' '{' (expr (',' expr)*)? '}' #ArrayInitializerExpr
-    | NEW name=(ID | LENGTH) '(' (expr (',' expr)*)? ')' #NewExpr
+    | NEW name=ID '(' (expr (',' expr)*)? ')' #NewExpr
     | expr op=('*' | '/' | '%') expr #BinaryExpr
     | expr op=('+' | '-') expr #BinaryExpr
     | expr op=('<' | '>' | '<=' | '>=') expr #BinaryExpr
     | expr op=('==' | '!=') expr #BinaryExpr
     | expr op='&&' expr #BinaryExpr
     | expr op='||' expr #BinaryExpr
-    | name=(ID | LENGTH) '(' (expr (',' expr)*)? ')' #ImplicitThisCallExpr
+    | name=ID '(' (expr (',' expr)*)? ')' #ImplicitThisCallExpr
     | value=INTEGER #IntegerLiteral
     | value=TRUE #BooleanLiteral
     | value=FALSE #BooleanLiteral
-    | name=(ID | LENGTH) #VarRefExpr
+    | name=ID #VarRefExpr
     | THIS #ThisExpr
     ;

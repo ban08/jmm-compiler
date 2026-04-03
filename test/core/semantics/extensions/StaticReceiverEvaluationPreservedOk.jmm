@@ -1,0 +1,15 @@
+package core.semantics.extensions;
+
+class StaticReceiverEvaluationPreservedOk {
+    static int sum() {
+        return 1;
+    }
+
+    StaticReceiverEvaluationPreservedOk make() {
+        return this;
+    }
+
+    int compute() {
+        return make().sum();
+    }
+}

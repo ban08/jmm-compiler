@@ -109,4 +109,26 @@ public class MyEntityAccessNormalizationTest extends JmmTestEnv {
         assertTrue("The normalized receiver should be a static class reference",
                 resolvedCall.get().receiverType().asClass().staticRef());
     }
+
+    @Test
+    public void nonTrivialStaticReceiversKeepTheirEvaluationSubtree() {
+        var semanticsResult = semantics("StaticReceiverEvaluationPreservedOk.jmm", false);
+        var root = semanticsResult.getRootNode();
+
+        var methodCalls = root.getDescendants(JmmKind.METHOD_CALL_EXPR);
+        var staticCall = methodCalls.stream()
+                .filter(call -> "sum".equals(call.get(JmmAttributes.METHOD_CALL_EXPR.NAME)))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Expected to find the normalized static call to sum()"));
+
+        assertTrue("Receivers with observable evaluation should not be rewritten away",
+                JmmKind.METHOD_CALL_EXPR.check(staticCall.getChild(0)));
+        assertEquals("Expected the receiver subtree to remain the make() call",
+                "make",
+                staticCall.getChild(0).get(JmmAttributes.METHOD_CALL_EXPR.NAME));
+
+        var resolvedCall = TypeUtils.with(semanticsResult.getSymbolTable()).resolveMethodCall(staticCall);
+        assertTrue("The preserved receiver call should still resolve", resolvedCall.isPresent());
+        assertTrue("The resolved target should remain a static method", resolvedCall.get().method().isStatic());
+    }
 }

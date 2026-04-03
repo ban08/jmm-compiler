@@ -40,6 +40,6 @@ public class Attribute<T> {
     }
 
     public Optional<T> getOptional(JmmNode node) {
-        return Optional.ofNullable(this.get(node));
+        return node.getOptionalObject(this.name).map(this.clazz::cast);
     }
 }

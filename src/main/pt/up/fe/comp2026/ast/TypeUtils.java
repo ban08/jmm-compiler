@@ -9,6 +9,7 @@ import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmArrayType;
 import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmClassType;
 import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmPrimitiveType;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp2026.analysis.attributes.MethodDeclAttributes;
 import pt.up.fe.comp2026.analysis.attributes.ReceiverAttributes;
 import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.comp2026.symboltable.JmmSymbolTable;
@@ -150,12 +151,19 @@ public class TypeUtils {
     public Signature getMethodDeclSignature(JmmNode methodDecl) {
         METHOD_DECL.check(methodDecl);
 
+        var cachedSignature = MethodDeclAttributes.signature.getOptional(methodDecl);
+        if (cachedSignature.isPresent()) {
+            return cachedSignature.get();
+        }
+
         var methodName = methodDecl.get(JmmAttributes.METHOD_DECL.NAME);
         var paramTypes = methodDecl.getChildren(PARAM).stream()
                 .map(param -> convertType(param.getObject(JmmAttributes.PARAM.TYPE_NODE.getKey(), JmmNode.class)))
                 .toList();
 
-        return new Signature(methodName, paramTypes);
+        var signature = new Signature(methodName, paramTypes);
+        MethodDeclAttributes.signature.set(methodDecl, signature);
+        return signature;
     }
 
     public Optional<MethodSymbol> getEnclosingMethod(JmmNode node) {
