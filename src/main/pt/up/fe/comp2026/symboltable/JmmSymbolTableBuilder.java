@@ -283,10 +283,16 @@ public class JmmSymbolTableBuilder {
             var paramName = paramNode.get(JmmAttributes.PARAM.NAME);
             var paramTypeNode = paramNode.getObject(JmmAttributes.PARAM.TYPE_NODE.getKey(), JmmNode.class);
             var paramType = convertType(paramTypeNode);
+            var hasDuplicateName = false;
 
             // Check for duplicate parameter names
             if (!paramNames.add(paramName)) {
                 reports.add(newError(paramNode, "Duplicate parameter name '" + paramName + "' in method '" + methodName + "'"));
+                hasDuplicateName = true;
+            }
+
+            if (hasDuplicateName) {
+                continue;
             }
 
             params.add(new Symbol(paramType, paramName));
@@ -301,15 +307,22 @@ public class JmmSymbolTableBuilder {
             var localName = varDecl.get(JmmAttributes.VAR_DECL.NAME);
             var localTypeNode = varDecl.getObject(JmmAttributes.VAR_DECL.TYPE_NODE.getKey(), JmmNode.class);
             var localType = convertType(localTypeNode);
+            var hasConflictingDeclaration = false;
 
             // Check for duplicate local variable names
             if (!localNames.add(localName)) {
                 reports.add(newError(varDecl, "Duplicate local variable '" + localName + "' in method '" + methodName + "'"));
+                hasConflictingDeclaration = true;
             }
 
             // Check for parameter-local conflict
             if (paramNames.contains(localName)) {
                 reports.add(newError(varDecl, "Local variable '" + localName + "' conflicts with parameter in method '" + methodName + "'"));
+                hasConflictingDeclaration = true;
+            }
+
+            if (hasConflictingDeclaration) {
+                continue;
             }
 
             locals.add(new Symbol(localType, localName));
