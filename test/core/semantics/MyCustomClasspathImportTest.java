@@ -203,6 +203,116 @@ public class MyCustomClasspathImportTest {
                 semanticsResult.hasErrors());
     }
 
+    @Test
+    public void importedOverloadsPreferTheMostSpecificInheritedArgumentType() throws Exception {
+        var tempDir = Files.createTempDirectory("jmm-extra-classpath-overloads");
+        var packageDir = Files.createDirectories(tempDir.resolve("ext"));
+        var baseFile = packageDir.resolve("Base.java");
+        var childFile = packageDir.resolve("Child.java");
+        var factoryFile = packageDir.resolve("Factory.java");
+
+        Files.writeString(baseFile, """
+                package ext;
+
+                public class Base {
+                }
+                """);
+
+        Files.writeString(childFile, """
+                package ext;
+
+                public class Child extends Base {
+                }
+                """);
+
+        Files.writeString(factoryFile, """
+                package ext;
+
+                public class Factory {
+                    public Base pick(Base value) {
+                        return value;
+                    }
+
+                    public Child pick(Child value) {
+                        return value;
+                    }
+                }
+                """);
+
+        compileHelpers(tempDir, baseFile, childFile, factoryFile);
+
+        var code = """
+                package p;
+                import ext.Child;
+                import ext.Factory;
+                class A {
+                    public Child foo() {
+                        Factory factory;
+                        Child child;
+                        factory = new Factory();
+                        child = new Child();
+                        return factory.pick(child);
+                    }
+                }
+                """;
+
+        var semanticsResult = analyze(code, tempDir);
+        Assert.assertFalse("Semantic analysis should prefer the most specific imported overload for subclass arguments",
+                semanticsResult.hasErrors());
+    }
+
+    @Test
+    public void fieldInitializersKeepTheMostSpecificImportedOverloadType() throws Exception {
+        var tempDir = Files.createTempDirectory("jmm-extra-classpath-field-init-overloads");
+        var packageDir = Files.createDirectories(tempDir.resolve("ext"));
+        var baseFile = packageDir.resolve("Base.java");
+        var childFile = packageDir.resolve("Child.java");
+        var factoryFile = packageDir.resolve("Factory.java");
+
+        Files.writeString(baseFile, """
+                package ext;
+
+                public class Base {
+                }
+                """);
+
+        Files.writeString(childFile, """
+                package ext;
+
+                public class Child extends Base {
+                }
+                """);
+
+        Files.writeString(factoryFile, """
+                package ext;
+
+                public class Factory {
+                    public Base pick(Base value) {
+                        return value;
+                    }
+
+                    public Child pick(Child value) {
+                        return value;
+                    }
+                }
+                """);
+
+        compileHelpers(tempDir, baseFile, childFile, factoryFile);
+
+        var code = """
+                package p;
+                import ext.Child;
+                import ext.Factory;
+                class A {
+                    Child field = new Factory().pick(new Child());
+                }
+                """;
+
+        var semanticsResult = analyze(code, tempDir);
+        Assert.assertFalse("Field initializers should preserve the most specific imported overload return type",
+                semanticsResult.hasErrors());
+    }
+
     private static void compileHelpers(Path outputDir, Path... javaFiles) {
         var compiler = ToolProvider.getSystemJavaCompiler();
         Assert.assertNotNull("Expected a JDK compiler to be available during tests", compiler);

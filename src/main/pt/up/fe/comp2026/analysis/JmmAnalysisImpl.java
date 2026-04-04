@@ -25,7 +25,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
      * @param table
      * @return
      */
-    private List<AnalysisPass> buildPasses(SymbolTable table) {
+    protected List<AnalysisPass> buildPasses(SymbolTable table) {
         return List.of(
                 new TypeExistenceValidation(table),
                 new VoidTypeValidation(table),
@@ -89,7 +89,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                         "Problem while executing analysis pass '" + analysisVisitor.getClass() + "'",
                         e)
                 );
-                System.out.println("Exception: " + reports);
+                return new JmmSemanticsResult(semanticsResult, reports);
             }
 
         }

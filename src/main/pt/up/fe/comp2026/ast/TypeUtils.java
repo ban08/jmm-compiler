@@ -470,29 +470,61 @@ public class TypeUtils {
     }
 
     public Optional<MethodSymbol> findMatchingMethod(List<MethodSymbol> methods, List<JmmType> argTypes, boolean requireStatic) {
-        for (var method : methods) {
-            if (requireStatic && !method.isStatic()) {
-                continue;
-            }
+        var matchingMethods = methods.stream()
+                .filter(method -> !requireStatic || method.isStatic())
+                .filter(method -> method.parameters().size() == argTypes.size())
+                .filter(method -> matchesArguments(method, argTypes))
+                .toList();
 
-            if (method.parameters().size() != argTypes.size()) {
-                continue;
-            }
+        if (matchingMethods.isEmpty()) {
+            return Optional.empty();
+        }
 
-            var matches = true;
-            for (int i = 0; i < argTypes.size(); i++) {
-                if (!isAssignable(method.parameters().get(i).type(), argTypes.get(i))) {
-                    matches = false;
-                    break;
-                }
-            }
+        if (matchingMethods.size() == 1) {
+            return Optional.of(matchingMethods.getFirst());
+        }
 
-            if (matches) {
-                return Optional.of(method);
+        var mostSpecificMatches = matchingMethods.stream()
+                .filter(candidate -> matchingMethods.stream()
+                        .allMatch(other -> candidate == other || isMoreSpecific(candidate, other)))
+                .toList();
+
+        if (mostSpecificMatches.size() == 1) {
+            return Optional.of(mostSpecificMatches.getFirst());
+        }
+
+        // Keep a stable fallback for ambiguous matches, while still preferring
+        // more specific overloads whenever the hierarchy gives us a unique winner.
+        return Optional.of(matchingMethods.getFirst());
+    }
+
+    private boolean matchesArguments(MethodSymbol method, List<JmmType> argTypes) {
+        for (int i = 0; i < argTypes.size(); i++) {
+            if (!isAssignable(method.parameters().get(i).type(), argTypes.get(i))) {
+                return false;
             }
         }
 
-        return Optional.empty();
+        return true;
+    }
+
+    private boolean isMoreSpecific(MethodSymbol candidate, MethodSymbol other) {
+        var sawStrictlyMoreSpecificParameter = false;
+
+        for (int i = 0; i < candidate.parameters().size(); i++) {
+            var candidateType = candidate.parameters().get(i).type();
+            var otherType = other.parameters().get(i).type();
+
+            if (!isAssignable(otherType, candidateType)) {
+                return false;
+            }
+
+            if (!candidateType.equals(otherType)) {
+                sawStrictlyMoreSpecificParameter = true;
+            }
+        }
+
+        return sawStrictlyMoreSpecificParameter;
     }
 
     private Optional<ResolvedMethodCall> resolveMethodCall(JmmClassType receiverType, String methodName, List<JmmType> argTypes) {
