@@ -1,0 +1,6 @@
+package pt.up.fe.comp.cp2.extensions.ollir.declarations.jmm;
+
+class FieldInitializerBooleanLiteral {
+
+    boolean b = false;
+}

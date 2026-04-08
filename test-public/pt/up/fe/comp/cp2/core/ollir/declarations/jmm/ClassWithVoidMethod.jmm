@@ -1,0 +1,10 @@
+package pt.up.fe.comp.cp2.core.ollir.declarations.jmm;
+
+class ClassWithVoidMethod {
+
+    public void method() {
+
+    }
+
+
+}

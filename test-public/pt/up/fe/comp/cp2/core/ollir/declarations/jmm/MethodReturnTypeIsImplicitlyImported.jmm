@@ -1,0 +1,7 @@
+package pt.up.fe.comp.cp2.core.ollir.declarations.jmm;
+
+class MethodReturnTypeIsImplicitlyImported {
+    public Object make() {
+        return new Object();
+    }
+}

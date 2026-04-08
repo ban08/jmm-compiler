@@ -1,0 +1,5 @@
+package pt.up.fe.comp.cp2.core.ollir.declarations.jmm;
+
+class FieldTypeIsImplicitlyImported {
+    Object o;
+}

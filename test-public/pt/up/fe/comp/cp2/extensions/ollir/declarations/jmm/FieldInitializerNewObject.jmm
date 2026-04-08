@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp2.extensions.ollir.declarations.jmm;
+
+import examples.Quicksort;
+
+class FieldInitializerNewObject {
+
+    Quicksort a = new Quicksort();
+
+}

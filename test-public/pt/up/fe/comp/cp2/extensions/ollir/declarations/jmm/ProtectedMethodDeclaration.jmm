@@ -1,0 +1,8 @@
+package pt.up.fe.comp.cp2.extensions.ollir.declarations.jmm;
+
+class ProtectedMethodDeclaration {
+
+    protected int bar() {
+        return 0;
+    }
+}

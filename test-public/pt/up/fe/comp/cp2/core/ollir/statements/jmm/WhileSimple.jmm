@@ -1,0 +1,16 @@
+package pt.up.fe.comp.cp2.core.ollir.statements.jmm;
+
+class WhileSimple {
+
+    public int method(int limit) {
+        int i;
+        i = 0;
+
+        while (i < limit) {
+            i = i + 1;
+        }
+
+        return i;
+    }
+}
+

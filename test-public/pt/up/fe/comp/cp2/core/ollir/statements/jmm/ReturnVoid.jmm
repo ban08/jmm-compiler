@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp2.core.ollir.statements.jmm;
+
+class ReturnVoid {
+
+    public void method() {
+        return;
+    }
+}
+

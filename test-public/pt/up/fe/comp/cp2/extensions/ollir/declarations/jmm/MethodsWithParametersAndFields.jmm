@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp2.extensions.ollir.declarations.jmm;
+
+class MethodsWithParametersAndFields {
+    void add(int x) {
+    }
+
+    int count;
+
+    void reset() {
+    }
+}

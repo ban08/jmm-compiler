@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp2.core.ollir.declarations.jmm;
+
+class ClassWithMainMethod {
+
+
+    public static void main(String[] args) {
+    }
+
+}

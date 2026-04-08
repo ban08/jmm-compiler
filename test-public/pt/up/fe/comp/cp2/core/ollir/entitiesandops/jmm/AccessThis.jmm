@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp2.core.ollir.entitiesandops.jmm;
+
+class AccessThis {
+
+    public AccessThis method() {
+        return this;
+    }
+}
+

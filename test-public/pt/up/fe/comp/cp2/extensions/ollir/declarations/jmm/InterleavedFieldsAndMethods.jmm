@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp2.extensions.ollir.declarations.jmm;
+
+class InterleavedFieldsAndMethods {
+    int a;
+
+    void f1() {
+    }
+
+    int b;
+
+    void f2() {
+    }
+
+    String s;
+}

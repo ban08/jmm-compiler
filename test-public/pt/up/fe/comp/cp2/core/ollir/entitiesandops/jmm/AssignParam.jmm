@@ -1,0 +1,10 @@
+package pt.up.fe.comp.cp2.core.ollir.entitiesandops.jmm;
+
+class AssignParam {
+
+    public void method(int a) {
+
+        a = 0;
+    }
+}
+

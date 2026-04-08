@@ -1,0 +1,8 @@
+package pt.up.fe.comp.cp2.extensions.ollir.declarations.jmm;
+
+class MethodThenField {
+    void foo() {
+    }
+
+    int a;
+}

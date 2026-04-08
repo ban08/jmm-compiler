@@ -1,0 +1,10 @@
+package pt.up.fe.comp.cp2.extensions.ollir.declarations.jmm;
+
+class FieldMethodField {
+    int b;
+
+    void foo() {
+    }
+
+    int a;
+}

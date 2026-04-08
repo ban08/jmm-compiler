@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp2.core.ollir.entitiesandops.jmm;
+
+class AssignField {
+    int a;
+
+    public void method() {
+
+        a = 0;
+    }
+}
+

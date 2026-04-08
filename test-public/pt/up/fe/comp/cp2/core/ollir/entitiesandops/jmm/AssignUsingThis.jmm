@@ -1,0 +1,10 @@
+package pt.up.fe.comp.cp2.core.ollir.entitiesandops.jmm;
+
+class AssignUsingThis {
+
+    public void method() {
+        AssignUsingThis a;
+        a = this;
+    }
+}
+

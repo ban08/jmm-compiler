@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp2.core.ollir.entitiesandops.jmm;
+
+class AccessImplicitClass {
+
+    public String method(String a) {
+        return a;
+    }
+}
+

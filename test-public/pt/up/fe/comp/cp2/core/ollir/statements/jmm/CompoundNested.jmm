@@ -1,0 +1,19 @@
+package pt.up.fe.comp.cp2.core.ollir.statements.jmm;
+
+class CompoundNested {
+
+    public int method() {
+        int a;
+        a = 0;
+
+        {
+            a = 1;
+            {
+                a = a + 1;
+            }
+        }
+
+        return a;
+    }
+}
+

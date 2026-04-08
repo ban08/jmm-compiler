@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp2.core.ollir.entitiesandops.jmm;
+
+import examples.Quicksort;
+
+class AccessImportedClass {
+
+    public Quicksort method(Quicksort q) {
+        return q;
+    }
+}
+

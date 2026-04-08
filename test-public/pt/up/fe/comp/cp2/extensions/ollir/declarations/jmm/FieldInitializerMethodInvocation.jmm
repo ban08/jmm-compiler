@@ -1,0 +1,10 @@
+package pt.up.fe.comp.cp2.extensions.ollir.declarations.jmm;
+
+class FieldInitializerMethodInvocation {
+
+    int a = this.init();
+
+    int init() {
+        return 0;
+    }
+}

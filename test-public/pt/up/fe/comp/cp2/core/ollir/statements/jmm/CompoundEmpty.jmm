@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp2.core.ollir.statements.jmm;
+
+class CompoundEmpty {
+
+    public void method() {
+        {
+        }
+        return;
+    }
+}
+
