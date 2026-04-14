@@ -1,10 +1,10 @@
 package pt.up.fe.comp.cp2.core.ollir.entitiesandops.jmm;
 
-class AccessLocalVariable {
+class AddLiterals {
 
     public int method() {
         int a;
-        a = 1;
+        a = 1 + 2;
         return a;
     }
 }

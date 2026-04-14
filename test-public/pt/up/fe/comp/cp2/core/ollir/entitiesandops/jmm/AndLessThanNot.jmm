@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp2.core.ollir.entitiesandops.jmm;
+
+class AndLessThanNot {
+
+    public boolean method(boolean a, int b, int c, boolean d, boolean e) {
+        return a && b < c && (!d && e);
+    }
+}
+

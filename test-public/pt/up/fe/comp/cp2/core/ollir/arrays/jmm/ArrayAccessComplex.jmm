@@ -1,0 +1,8 @@
+package pt.up.fe.comp.cp2.core.ollir.arrays.jmm;
+
+class ArrayAccessComplex {
+    public int method(int[] a, int i) {
+        a[i + 2] = 5;
+        return a[i * 2];
+    }
+}

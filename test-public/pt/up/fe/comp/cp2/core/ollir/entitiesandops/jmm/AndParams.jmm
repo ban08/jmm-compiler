@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp2.core.ollir.entitiesandops.jmm;
+
+class AndParams {
+
+    public boolean method(boolean a, boolean b) {
+        return a && b;
+    }
+}
+

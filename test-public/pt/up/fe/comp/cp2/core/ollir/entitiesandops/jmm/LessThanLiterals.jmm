@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp2.core.ollir.entitiesandops.jmm;
+
+class LessThanLiterals {
+
+    public boolean method() {
+        boolean a;
+        a = 1 < 2;
+        return a;
+    }
+}
+

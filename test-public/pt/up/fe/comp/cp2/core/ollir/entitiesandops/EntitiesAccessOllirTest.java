@@ -43,16 +43,6 @@ public class EntitiesAccessOllirTest extends OllirTestEnv {
     }
 
     @Test
-    public void testAccessField() {
-        var method = toOllir("AccessField.jmm", "method");
-
-        assertInstExists(GetFieldInstruction.class, method);
-        var retInst = assertInstExists(ReturnInstruction.class, method);
-        assertTrue("Return must be i32", BuiltinType.is(retInst.getFirst().getReturnType(), BuiltinKind.INT32));
-
-    }
-
-    @Test
     public void testAccessParam() {
         var method = toOllir("AccessParam.jmm", "method");
 

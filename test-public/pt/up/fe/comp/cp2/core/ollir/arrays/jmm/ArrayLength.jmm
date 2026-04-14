@@ -1,0 +1,24 @@
+package pt.up.fe.comp.cp2.core.ollir.arrays.jmm;
+
+class ArrayLength {
+
+    public int getLocalLength() {
+        int[] a;
+        a = new int[5];
+        return a.length;
+    }
+
+    public int getParamLength(int[] b) {
+        return b.length;
+    }
+
+    public int[] getArray() {
+        int[] c;
+        c = new int[10];
+        return c;
+    }
+
+    public int getMethodReturnLength() {
+        return this.getArray().length;
+    }
+}

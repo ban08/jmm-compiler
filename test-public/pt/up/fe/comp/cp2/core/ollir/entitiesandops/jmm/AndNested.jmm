@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp2.core.ollir.entitiesandops.jmm;
+
+class AndNested {
+
+    public boolean method(boolean a, boolean b, boolean c, boolean d, boolean e) {
+        return a && b && c && d && e;
+    }
+}
+

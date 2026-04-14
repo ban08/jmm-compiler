@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp2.core.ollir.arrays.jmm;
+
+class ArrayAsArgument {
+    public int target(int[] a) {
+        return a[0];
+    }
+
+    public int method() {
+        int[] a;
+        a = new int[5];
+        return this.target(a);
+    }
+}

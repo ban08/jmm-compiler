@@ -1,0 +1,8 @@
+package pt.up.fe.comp.cp2.core.ollir.arrays.jmm;
+
+class ArrayStore {
+
+    public void method(int[] arr) {
+        arr[0] = 0;
+    }
+}

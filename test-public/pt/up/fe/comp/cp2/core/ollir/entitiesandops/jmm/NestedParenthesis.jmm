@@ -1,10 +1,10 @@
 package pt.up.fe.comp.cp2.core.ollir.entitiesandops.jmm;
 
-class AccessLocalVariable {
+class NestedParenthesis {
 
     public int method() {
         int a;
-        a = 1;
+        a = (((1 + 2) * 3) + 4);
         return a;
     }
 }

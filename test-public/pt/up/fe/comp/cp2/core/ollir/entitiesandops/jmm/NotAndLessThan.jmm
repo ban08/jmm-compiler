@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp2.core.ollir.entitiesandops.jmm;
+
+class NotAndLessThan {
+
+    public boolean method(int value1, int value2) {
+        return !(value1 < value2);
+    }
+}
+

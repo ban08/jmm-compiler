@@ -1,0 +1,8 @@
+package pt.up.fe.comp.cp2.core.ollir.arrays.jmm;
+
+class ArrayLoad {
+
+    public int method(int[] arr) {
+        return arr[0];
+    }
+}

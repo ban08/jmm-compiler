@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp2.core.ollir.arrays.jmm;
+
+class ArrayReferenceAssignment {
+    public int[] method(int[] a) {
+        int[] b;
+        b = a;
+        return b;
+    }
+}

@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp2.core.ollir.arrays.jmm;
+
+class ArrayInitVariable {
+    public int[] init(int size) {
+        int[] a;
+        a = new int[size];
+        return a;
+    }
+}

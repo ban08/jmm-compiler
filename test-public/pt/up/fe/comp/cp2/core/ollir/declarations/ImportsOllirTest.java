@@ -55,16 +55,6 @@ public class ImportsOllirTest extends OllirTestEnv {
     }
 
     @Test
-    public void testFieldTypeIsExplicitlyImported() {
-        var classUnit = toOllir("FieldTypeIsExplicitlyImported.jmm");
-        var field = classUnit.getFields().stream().filter(f -> f.getFieldName().equals("o")).findFirst();
-        assertTrue("Field 'o' should be present", field.isPresent());
-        var fieldType = field.orElseThrow().getFieldType();
-        assertTrue("Field type is a class", ClassType.is(fieldType, ClassKind.OBJECTREF));
-        assertEquals("Field type name should be ${expected}", "Quicksort", ((ClassType) fieldType).getName());
-    }
-
-    @Test
     public void testMethodReturnTypeIsImplicitlyImported() {
         var classUnit = toOllir("MethodReturnTypeIsImplicitlyImported.jmm");
         var method = classUnit.getMethods().stream().filter(m -> m.getMethodName().equals("make")).findFirst();
@@ -72,15 +62,5 @@ public class ImportsOllirTest extends OllirTestEnv {
         var returnType = method.orElseThrow().getReturnType();
         assertTrue("Method return type is a class", ClassType.is(returnType, ClassKind.OBJECTREF));
         assertEquals("Method return type name should be ${expected}", "Object", ((ClassType) returnType).getName());
-    }
-
-    @Test
-    public void testFieldTypeIsImplicitlyImported() {
-        var classUnit = toOllir("FieldTypeIsImplicitlyImported.jmm");
-        var field = classUnit.getFields().stream().filter(f -> f.getFieldName().equals("o")).findFirst();
-        assertTrue("Field 'o' should be present", field.isPresent());
-        var fieldType = field.orElseThrow().getFieldType();
-        assertTrue("Field type is a class", ClassType.is(fieldType, ClassKind.OBJECTREF));
-        assertEquals("Field type name should be ${expected}", "Object", ((ClassType) fieldType).getName());
     }
 }

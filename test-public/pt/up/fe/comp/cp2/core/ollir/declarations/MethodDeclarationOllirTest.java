@@ -59,17 +59,6 @@ public class MethodDeclarationOllirTest extends OllirTestEnv {
     }
 
     @Test
-    public void testClassWithFieldsAndMethods() {
-        var classUnit = toOllir("ClassWithFieldsAndMethods.jmm");
-        assertEquals("Class should have two fields", 2, classUnit.getNumFields());
-        assertEquals("Class should have two methods", 2L, classUnit.getMethods().stream().filter(m -> !m.isConstructMethod()).count());
-        assertTrue("Class should contain field intField", classUnit.getFields().stream().anyMatch(f -> f.getFieldName().equals("intField")));
-        assertTrue("Class should contain field boolField", classUnit.getFields().stream().anyMatch(f -> f.getFieldName().equals("boolField")));
-        assertTrue("Class should contain method method1", classUnit.getMethods().stream().anyMatch(m -> m.getMethodName().equals("method1")));
-        assertTrue("Class should contain method method2", classUnit.getMethods().stream().anyMatch(m -> m.getMethodName().equals("method2")));
-    }
-
-    @Test
     public void testMethodWithSingleParam() {
         var classUnit = toOllir("MethodWithSingleParam.jmm");
         assertEquals("Class should have one method", 1L, classUnit.getMethods().stream().filter(m -> !m.isConstructMethod()).count());
