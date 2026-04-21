@@ -1,0 +1,14 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+import examples.inheritance.B;
+import examples.inheritance.A;
+
+class ImportedClassesCallReturnStoredInSuperType {
+
+    public void method(B b) {
+        A a;
+        a = b.self();
+    }
+
+}
+

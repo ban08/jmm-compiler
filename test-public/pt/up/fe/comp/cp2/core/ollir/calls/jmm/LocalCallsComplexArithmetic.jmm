@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+class LocalCallsComplexArithmetic {
+
+    public int arithmetic(int x) {
+        return x;
+    }
+
+    public void method() {
+        int a;
+        a = this.arithmetic(1 + 2 * 3);
+    }
+    
+}
+

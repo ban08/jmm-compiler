@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+class InstantiateJavaLangClass {
+    String method() {
+        String s;
+        s = new String();
+        return s;
+    }
+}

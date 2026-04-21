@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+class LocalCallWithArg {
+
+    public int callee(int x) {
+        return x;
+    }
+
+    public int method() {
+        int a;
+        a = this.callee(1);
+        return a;
+    }
+
+
+}
+

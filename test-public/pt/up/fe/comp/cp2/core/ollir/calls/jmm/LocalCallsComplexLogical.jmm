@@ -1,0 +1,19 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+class LocalCallsComplexLogical {
+
+
+    public boolean logical(boolean b) {
+        return b;
+    }
+
+
+    public void method() {
+        int a;
+        boolean b;
+        a = 4;
+        b = this.logical(0 < a && a < 10);
+    }
+
+}
+

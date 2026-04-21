@@ -1,0 +1,16 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+class LocalCallWithMultipleArg {
+
+    public int callee(int x, boolean b, int y) {
+        return x;
+    }
+
+    public int method() {
+        int a;
+        a = this.callee(1, true, 2);
+        return a;
+    }
+
+}
+

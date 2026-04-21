@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+import examples.Quicksort;
+
+class InstantiateSelfStoreInImportedSuperType extends Quicksort {
+
+    public Quicksort method() {
+        Quicksort other;
+        other = new InstantiateSelfStoreInImportedSuperType();
+        return other;
+    }
+}
+

@@ -1,0 +1,14 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+class LocalSimpleCallOverVar {
+
+    public int callee() {
+        return 0;
+    }
+
+    public void method(LocalSimpleCallOverVar sc) {
+        int a;
+        a = sc.callee();
+    }
+}
+

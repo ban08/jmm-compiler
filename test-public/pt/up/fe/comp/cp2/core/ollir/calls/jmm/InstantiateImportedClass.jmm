@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+import java.util.Date;
+
+class InstantiateImportedClass {
+    Date method() {
+        Date d;
+        d = new Date();
+        return d;
+    }
+}

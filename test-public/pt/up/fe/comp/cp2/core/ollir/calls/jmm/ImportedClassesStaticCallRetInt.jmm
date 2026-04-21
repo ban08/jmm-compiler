@@ -1,0 +1,12 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+import util.io;
+
+class ImportedClassesStaticCallRetInt {
+
+    public void method() {
+        int a;
+        a = io.read();
+    }
+}
+

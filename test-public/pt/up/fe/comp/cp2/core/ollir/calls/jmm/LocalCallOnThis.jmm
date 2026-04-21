@@ -1,0 +1,12 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+class LocalCallOnThis {
+
+    public void callee() {
+    }
+
+    public void method() {
+        this.callee();
+    }
+}
+

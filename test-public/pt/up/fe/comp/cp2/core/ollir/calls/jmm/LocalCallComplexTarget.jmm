@@ -1,0 +1,19 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+class LocalCallComplexTarget {
+
+
+    public LocalCallComplexTarget thisInstance() {
+        return this;
+    }
+
+    public void foo() {
+
+    }
+
+    public void method() {
+        (new LocalCallComplexTarget().thisInstance()).foo();
+    }
+
+}
+

@@ -1,0 +1,10 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+class InstantiateSelfStoreInSuperType {
+
+    public void method() {
+        Object other;
+        other = new InstantiateSelfStoreInSuperType();
+    }
+}
+

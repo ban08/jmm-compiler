@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+class InstantiateSelf {
+
+    public InstantiateSelf method() {
+        InstantiateSelf other;
+        other = new InstantiateSelf();
+        return other;
+    }
+}
+

@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+import examples.Pair;
+
+class ImportedClassesSimpleCallExprStmtRetInt {
+
+    public void method(Pair pair) {
+        pair.getLeft();
+    }
+}
+

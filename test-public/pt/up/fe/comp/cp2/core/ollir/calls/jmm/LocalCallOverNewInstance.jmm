@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+class LocalCallOverNewInstance {
+
+
+    public void callee() {
+
+    }
+
+    public void method() {
+        new LocalCallOverNewInstance().callee();
+    }
+
+}
+

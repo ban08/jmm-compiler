@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+class LocalCallOverNewInstanceParenthesis {
+
+
+    public void callee() {
+
+    }
+
+    public void method() {
+        (new LocalCallOverNewInstanceParenthesis()).callee();
+    }
+
+}
+

@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+import examples.Auxi;
+
+class ImportedClassesCallWithArgExpectingClass {
+
+    public void method(Auxi auxi) {
+        int a;
+        a = auxi.instanceExpectingAuxi(auxi);
+    }
+
+}
+

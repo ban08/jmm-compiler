@@ -1,0 +1,19 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+class LocalCallChainedCall {
+
+
+    public LocalCallChainedCall thisInstance() {
+        return this;
+    }
+
+    public void foo() {
+
+    }
+
+    public void method() {
+        this.thisInstance().foo();
+    }
+
+}
+

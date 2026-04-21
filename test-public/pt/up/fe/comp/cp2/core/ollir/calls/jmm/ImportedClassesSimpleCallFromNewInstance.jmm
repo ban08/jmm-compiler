@@ -1,0 +1,12 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+import examples.Auxi;
+
+class ImportedClassesSimpleCallFromNewInstance {
+
+    public void method() {
+        int a;
+        a = (new Auxi()).instanceCallInt();
+    }
+}
+

@@ -8,6 +8,7 @@ import org.specs.comp.ollir.inst.ReturnInstruction;
 import org.specs.comp.ollir.type.BuiltinKind;
 import org.specs.comp.ollir.type.BuiltinType;
 import pt.up.fe.comp.test.env.OllirTestEnv;
+import pt.up.fe.specs.util.treenode.NodeInsertUtils;
 
 public class EntitiesAccessOllirTestArrayAndField extends OllirTestEnv {
     private static final String BASE_PATH = "pt/up/fe/comp/cp2/core/ollir/entitiesandops/jmm/";
@@ -36,6 +37,9 @@ public class EntitiesAccessOllirTestArrayAndField extends OllirTestEnv {
     @Test
     public void testAccessField() {
         var method = toOllir("AccessField.jmm", "method");
+
+        ((ClassUnit) method.getParent()).getFields().stream().filter(f -> f.getFieldName().equals("a")).findFirst()
+                .orElseThrow(() -> new AssertionError("Field 'a' should exist in the class"));
 
         assertInstExists(GetFieldInstruction.class, method);
         var retInst = assertInstExists(ReturnInstruction.class, method);

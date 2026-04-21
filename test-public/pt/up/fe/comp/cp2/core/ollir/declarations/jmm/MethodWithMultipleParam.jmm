@@ -2,7 +2,7 @@ package pt.up.fe.comp.cp2.core.ollir.declarations.jmm;
 
 class MethodWithMultipleParam {
 
-    public void method(int[] array, int size, boolean flag) {
+    public void method(int array, int size, boolean flag) {
 
     }
 

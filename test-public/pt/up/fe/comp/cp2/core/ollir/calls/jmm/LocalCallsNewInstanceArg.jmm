@@ -1,0 +1,16 @@
+package pt.up.fe.comp.cp2.core.ollir.calls.jmm;
+
+class LocalCallsNewInstanceArg {
+
+
+    public LocalCallsNewInstanceArg fromInstance(LocalCallsNewInstanceArg other) {
+        return other;
+    }
+
+    public void method() {
+        LocalCallsNewInstanceArg other;
+        other = this.fromInstance(new LocalCallsNewInstanceArg());
+    }
+
+}
+
