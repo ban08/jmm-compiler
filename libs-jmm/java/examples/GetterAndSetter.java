@@ -1,5 +1,6 @@
 package examples;
-class GetterAndSetter {
+
+public class GetterAndSetter {
     int a;
 
     public int getA() {

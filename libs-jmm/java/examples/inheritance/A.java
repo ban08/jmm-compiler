@@ -9,4 +9,8 @@ public class A {
     public int a() {
         return 1;
     }
+
+    public A self() {
+        return this;
+    }
 }

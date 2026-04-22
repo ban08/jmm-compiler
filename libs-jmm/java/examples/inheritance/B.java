@@ -4,8 +4,13 @@
 //
 
 package examples.inheritance;
+
 public class B extends A {
     public int a() {
         return 2;
+    }
+
+    public B self() {
+        return this;
     }
 }
