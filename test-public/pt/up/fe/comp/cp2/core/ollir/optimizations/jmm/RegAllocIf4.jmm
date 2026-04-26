@@ -1,0 +1,27 @@
+package pt.up.fe.comp.cp2.core.ollir.optimizations.jmm;
+
+class RegAllocIf4 {
+    public int method(int initB, int initC, int initE, int initF) {
+        int a;
+        int b;
+        int c;
+        int d;
+        int e;
+        int f;
+        int i;
+        b = initB;
+        c = initC;
+        e = initE;
+        f = initF;
+        a = b + c;
+        d = e + f;
+        d = d + e;
+        if (a == 0) {
+            b = a - d;
+        } else {
+            b = a + d;
+        }
+        i = b;
+        return i;
+    }
+}

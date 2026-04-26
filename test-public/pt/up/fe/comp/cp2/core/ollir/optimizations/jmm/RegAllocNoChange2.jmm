@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp2.core.ollir.optimizations.jmm;
+
+class RegAllocNoChange2 {
+    public int method() {
+        int a;
+        int b;
+        a = 0;
+        b = 2;
+        return a + b;
+    }
+}

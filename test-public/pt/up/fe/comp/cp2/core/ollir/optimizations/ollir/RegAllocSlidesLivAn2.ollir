@@ -1,0 +1,16 @@
+package pt.up.fe.comp.cp2.core.ollir.optimizations.jmm;
+
+RegAllocSlidesLivAn2 extends Object  {
+
+    .construct "<init>"().V {
+        invokespecial(this, "<init>" "java.lang.Object").V;
+    }
+
+    .method public method().i32 {
+       a.i32 :=.i32 1.i32;
+       b.i32 :=.i32 2.i32;
+       c.i32 :=.i32 a.i32 +.i32 b.i32;
+       ret.i32 c.i32;
+    }
+
+}

@@ -1,14 +1,15 @@
 package pt.up.fe.comp.cp2.core.ollir.entitiesandops;
 
 import org.junit.Test;
-import org.specs.comp.ollir.*;
-import org.specs.comp.ollir.inst.*;
+import org.specs.comp.ollir.ClassUnit;
+import org.specs.comp.ollir.Method;
+import org.specs.comp.ollir.Operand;
+import org.specs.comp.ollir.inst.AssignInstruction;
 import org.specs.comp.ollir.inst.utils.InstTypeUtils;
 import org.specs.comp.ollir.type.BuiltinKind;
 import org.specs.comp.ollir.type.BuiltinType;
 import org.specs.comp.ollir.type.ClassType;
 import pt.up.fe.comp.test.env.OllirTestEnv;
-import pt.up.fe.comp2026.optimization.OptUtils;
 
 public class AssignmentsOllirTest extends OllirTestEnv {
     private static final String BASE_PATH = "pt/up/fe/comp/cp2/core/ollir/entitiesandops/jmm/";
@@ -62,7 +63,7 @@ public class AssignmentsOllirTest extends OllirTestEnv {
         assertTrue("Should be able to determine type of rhs assignment to 'a'", rhsTypeOpt.isPresent());
         assertTrue("RHS of assignment to 'a' must be a i32", BuiltinType.is(rhsTypeOpt.orElseThrow(), BuiltinKind.INT32));
     }
-    
+
     @Test
     public void testAssignUsingThis() {
         var method = toOllir("AssignUsingThis.jmm", "method");

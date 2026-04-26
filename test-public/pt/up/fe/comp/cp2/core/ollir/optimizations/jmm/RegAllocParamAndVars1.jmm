@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp2.core.ollir.optimizations.jmm;
+
+class RegAllocParamAndVars1 {
+    public int method(int arg) {
+        int a;
+        int b;
+        int c;
+        int d;
+        a = arg;
+        b = a;
+        c = b;
+        d = c;
+        return d;
+    }
+}

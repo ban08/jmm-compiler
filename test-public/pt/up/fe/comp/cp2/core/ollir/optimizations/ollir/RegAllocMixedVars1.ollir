@@ -1,0 +1,16 @@
+package pt.up.fe.comp.cp2.core.ollir.optimizations.jmm;
+
+RegAllocMixedVars1 extends Object  {
+
+    .construct "<init>"().V {
+        invokespecial(this, "<init>" "java.lang.Object").V;
+    }
+
+    .method public method().i32 {
+       a.i32 :=.i32 0.i32;
+       b.i32 :=.i32 a.i32;
+       c.i32 :=.i32 b.i32;
+       d.i32 :=.i32 c.i32;
+       ret.i32 d.i32;
+    }
+}
