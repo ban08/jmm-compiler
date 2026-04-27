@@ -150,6 +150,197 @@ public class MyAstOptimizationTest extends JmmTestEnv {
         assertEquals("A discarded division expression may still fail at runtime", 1, divisions.size());
     }
 
+    @Test
+    public void doesNotPropagateAcrossIncrementExpressionStatement() {
+        var method = optimizedMethod("""
+                package p;
+                class A {
+                    int method() {
+                        int x;
+                        x = 1;
+                        ++x;
+                        return x;
+                    }
+                }
+                """);
+
+        var returnExpr = method.getDescendants(JmmKind.RETURN_STMT).getFirst().getChild(0);
+        assertTrue("Increment mutates x, so the later return must still read x",
+                JmmKind.VAR_REF_EXPR.check(returnExpr));
+        assertEquals("Expected the return expression to still read x",
+                "x", returnExpr.get(JmmAttributes.VAR_REF_EXPR.NAME));
+    }
+
+    @Test
+    public void doesNotRewriteIncrementOperandToLiteral() {
+        var method = optimizedMethod("""
+                package p;
+                class A {
+                    int method() {
+                        int x;
+                        x = 1;
+                        return ++x;
+                    }
+                }
+                """);
+
+        var returnExpr = method.getDescendants(JmmKind.RETURN_STMT).getFirst().getChild(0);
+        assertTrue("Expected the return expression to remain a mutating unary expression",
+                JmmKind.UNARY_EXPR.check(returnExpr));
+        assertTrue("The operand of ++ must remain assignable",
+                JmmKind.VAR_REF_EXPR.check(returnExpr.getChild(0)));
+    }
+
+    @Test
+    public void invalidatesVariablesMutatedInConditions() {
+        var method = optimizedMethod("""
+                package p;
+                class A {
+                    int method() {
+                        int x;
+                        x = 1;
+                        if (++x < 3) {
+                        }
+                        return x;
+                    }
+                }
+                """);
+
+        var returnExpr = method.getDescendants(JmmKind.RETURN_STMT).getFirst().getChild(0);
+        assertTrue("The if condition mutates x, so the later return must not become literal 1",
+                JmmKind.VAR_REF_EXPR.check(returnExpr));
+    }
+
+    @Test
+    public void doWhileFalseRunsBodyOnce() {
+        var method = optimizedMethod("""
+                package p;
+                class A {
+                    int method() {
+                        int x;
+                        x = 1;
+                        do {
+                            x = 2;
+                        } while (false);
+                        return x;
+                    }
+                }
+                """);
+
+        var returnExpr = method.getDescendants(JmmKind.RETURN_STMT).getFirst().getChild(0);
+        assertTrue("do-while(false) should keep the body once and propagate its assignment",
+                JmmKind.INTEGER_LITERAL.check(returnExpr));
+        assertEquals("Expected the body assignment to determine the return value",
+                "2", returnExpr.get(JmmAttributes.INTEGER_LITERAL.VALUE));
+    }
+
+    @Test
+    public void forFalseKeepsInitializerOnly() {
+        var method = optimizedMethod("""
+                package p;
+                class A {
+                    int method() {
+                        int x;
+                        int y;
+                        x = 0;
+                        for (y = 3; false; y = y + 1) {
+                            x = 1;
+                        }
+                        return y;
+                    }
+                }
+                """);
+
+        var returnExpr = method.getDescendants(JmmKind.RETURN_STMT).getFirst().getChild(0);
+        assertTrue("for(false) should preserve the initializer and remove body/update",
+                JmmKind.INTEGER_LITERAL.check(returnExpr));
+        assertEquals("Expected the initializer value to be propagated",
+                "3", returnExpr.get(JmmAttributes.INTEGER_LITERAL.VALUE));
+    }
+
+    @Test
+    public void foldsShortCircuitWithoutKeepingDeadDivision() {
+        var method = optimizedMethod("""
+                package p;
+                class A {
+                    boolean method() {
+                        return false && (1 / 0 < 1);
+                    }
+                }
+                """);
+
+        var returnExpr = method.getDescendants(JmmKind.RETURN_STMT).getFirst().getChild(0);
+        assertTrue("false && expr should fold to false without keeping a non-executed RHS",
+                JmmKind.BOOLEAN_LITERAL.check(returnExpr));
+        assertEquals("Expected the short-circuited expression to fold to false",
+                "false", returnExpr.get(JmmAttributes.BOOLEAN_LITERAL.VALUE));
+        assertTrue("The discarded RHS division is not executed and should disappear",
+                method.getDescendants(JmmKind.BINARY_EXPR).stream()
+                        .noneMatch(expr -> expr.get(JmmAttributes.BINARY_EXPR.OP).equals("/")));
+    }
+
+    @Test
+    public void keepsPotentiallyExecutingDivisionThroughBooleanIdentity() {
+        var method = optimizedMethod("""
+                package p;
+                class A {
+                    boolean method() {
+                        return (1 / 0 < 1) && true;
+                    }
+                }
+                """);
+
+        assertTrue("The left side of expr && true still executes, so its division must stay",
+                method.getDescendants(JmmKind.BINARY_EXPR).stream()
+                        .anyMatch(expr -> expr.get(JmmAttributes.BINARY_EXPR.OP).equals("/")));
+    }
+
+    @Test
+    public void propagatesConstantsAfterMatchingBranchAssignments() {
+        var method = optimizedMethod("""
+                package p;
+                class A {
+                    int method(boolean flag) {
+                        int x;
+                        if (flag) {
+                            x = 7;
+                        } else {
+                            x = 7;
+                        }
+                        return x;
+                    }
+                }
+                """);
+
+        var returnExpr = method.getDescendants(JmmKind.RETURN_STMT).getFirst().getChild(0);
+        assertTrue("Both branches assign the same constant, so the merge point can know x",
+                JmmKind.INTEGER_LITERAL.check(returnExpr));
+        assertEquals("Expected x to propagate after matching branch assignments",
+                "7", returnExpr.get(JmmAttributes.INTEGER_LITERAL.VALUE));
+    }
+
+    @Test
+    public void doesNotPropagateAfterConflictingBranchAssignments() {
+        var method = optimizedMethod("""
+                package p;
+                class A {
+                    int method(boolean flag) {
+                        int x;
+                        if (flag) {
+                            x = 7;
+                        } else {
+                            x = 8;
+                        }
+                        return x;
+                    }
+                }
+                """);
+
+        var returnExpr = method.getDescendants(JmmKind.RETURN_STMT).getFirst().getChild(0);
+        assertTrue("Conflicting branch constants must not propagate past the merge",
+                JmmKind.VAR_REF_EXPR.check(returnExpr));
+    }
+
     private JmmNode optimizedMethod(String code) {
         var semanticsResult = semanticsFromSnippet(code, false);
         var optimized = new JmmOptimizationImpl().transformAst(semanticsResult);
