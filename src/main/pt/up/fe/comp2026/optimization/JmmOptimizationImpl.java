@@ -5,7 +5,6 @@ import pt.up.fe.comp.jmm.ollir.JmmOptimization;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp2026.CompilerConfig;
 
-
 import java.util.Collections;
 
 public class JmmOptimizationImpl implements JmmOptimization {
@@ -43,7 +42,11 @@ public class JmmOptimizationImpl implements JmmOptimization {
             System.out.println(ollirResult.getOllirCode());
         }
 
-        //TODO: Do your OLLIR-based optimizations here
+        var registerAllocation = CompilerConfig.getRegisterAllocation(ollirResult.config());
+        if (registerAllocation >= 0 && ollirResult.getOllirClass() != null) {
+            ollirResult.reports().addAll(new RegisterAllocationOptimizer()
+                    .optimize(ollirResult.getOllirClass(), registerAllocation));
+        }
 
         return ollirResult;
     }
