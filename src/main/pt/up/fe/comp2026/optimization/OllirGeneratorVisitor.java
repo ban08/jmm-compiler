@@ -2,6 +2,7 @@ package pt.up.fe.comp2026.optimization;
 
 import pt.up.fe.comp.jmm.analysis.table.MethodSymbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
+import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmArrayType;
 import pt.up.fe.comp.jmm.analysis.table.type.JmmType;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
@@ -61,6 +62,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(FOR_STMT, this::visitForStmt);
         addVisit(COMPOUND_STMT, this::visitCompoundStmt);
         addVisit(EXPR_STMT, this::visitExprStmt);
+        addVisit(ARRAY_ASSIGN_STMT, this::visitArrayAssignStmt);
     }
 
     private String visitProgram(JmmNode node, Void unused) {
@@ -252,6 +254,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         return code.toString();
     }
 
+    private String visitArrayAssignStmt(JmmNode node, Void unused) {
+        String lhsName = node.get(JmmAttributes.ARRAY_ASSIGN_STMT.VAR);
+        return emitIndexedAssignment(node, lhsName, node.getChildren());
+    }
+
     private String visitCompoundStmt(JmmNode node, Void unused) {
         StringBuilder code = new StringBuilder();
         for (var child : node.getChildren(STMT)) {
@@ -388,7 +395,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         int childCount = header.getNumChildren();
 
         if (childCount != 1) {
-            throw new UnsupportedOperationException("Indexed for-header assignments are owned by the array OLLIR task");
+            return emitIndexedAssignment(header, name, header.getChildren());
         }
 
         var rhs = exprVisitor.visit(header.getChild(0));
@@ -408,5 +415,64 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 .append(rhs.getCode()).append(END_STMT);
 
         return code.toString();
+    }
+
+    private String emitIndexedAssignment(JmmNode context, String arrayName, java.util.List<JmmNode> children) {
+        int childCount = children.size();
+        if (childCount < 2) {
+            return "";
+        }
+
+        var resolved = types.resolveIdentifier(context, arrayName);
+        if (resolved.isPresent() && resolved.get().accessType() == AccessType.FIELD) {
+            throw new UnsupportedOperationException("Field writes are owned by the field OLLIR task");
+        }
+
+        JmmType arrayType = resolved.map(TypeUtils.ResolvedIdentifier::type)
+                .orElse(JmmArrayType.of(TypeUtils.intType()));
+
+        String arrayTypeSuffix = ollirTypes.toOllirType(arrayType);
+        int indexCount = childCount - 1;
+
+        StringBuilder code = new StringBuilder();
+
+        StringBuilder indexedLhs = new StringBuilder();
+        indexedLhs.append(ollirTypes.sanitizeId(arrayName)).append(arrayTypeSuffix);
+
+        for (int i = 0; i < indexCount; i++) {
+            var indexExpr = exprVisitor.visit(children.get(i));
+            code.append(indexExpr.getComputation());
+            indexedLhs.append("[").append(indexExpr.getCode()).append("]");
+        }
+
+        JmmType targetType = reduceArrayDepth(arrayType, indexCount);
+        String targetTypeSuffix = ollirTypes.toOllirType(targetType != null ? targetType : TypeUtils.intType());
+        indexedLhs.append(targetTypeSuffix);
+
+        var rhs = exprVisitor.visit(children.getLast());
+        code.append(rhs.getComputation());
+
+        code.append(indexedLhs).append(SPACE)
+                .append(ASSIGN).append(targetTypeSuffix).append(SPACE)
+                .append(rhs.getCode()).append(END_STMT);
+
+        return code.toString();
+    }
+
+    private static JmmType reduceArrayDepth(JmmType type, int depth) {
+        JmmType current = type;
+
+        for (int i = 0; i < depth; i++) {
+            if (current == null || !current.isArray()) {
+                return current;
+            }
+
+            var array = current.asArray();
+            current = array.dimension() == 1
+                    ? array.itemType()
+                    : JmmArrayType.of(array.itemType(), array.dimension() - 1);
+        }
+
+        return current;
     }
 }
