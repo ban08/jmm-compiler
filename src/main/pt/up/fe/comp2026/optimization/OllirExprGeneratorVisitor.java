@@ -176,7 +176,13 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         computation.append(arrayExpr.getComputation());
         computation.append(indexExpr.getComputation());
 
-        return new OllirExprResult(arrayExpr.getCode() + "[" + indexExpr.getCode() + "]" + resultSuffix, computation);
+        String tmp = ollirTypes.nextTemp() + resultSuffix;
+        computation.append(tmp).append(SPACE).append(ASSIGN).append(resultSuffix).append(SPACE)
+                .append(arrayExpr.getCode()).append("[").append(indexExpr.getCode()).append("]")
+                .append(resultSuffix)
+                .append(END_STMT);
+
+        return new OllirExprResult(tmp, computation);
     }
 
     private OllirExprResult visitNewIntArrayExpr(JmmNode node, Void unused) {
