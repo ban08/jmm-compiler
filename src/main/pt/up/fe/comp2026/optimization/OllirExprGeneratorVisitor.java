@@ -8,6 +8,10 @@ import pt.up.fe.comp2026.ast.AccessType;
 import pt.up.fe.comp2026.ast.TypeUtils;
 import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmClassType;
+import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmArrayType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static pt.up.fe.comp2026.jmm.ast.JmmKind.*;
 
@@ -47,6 +51,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         addVisit(BINARY_EXPR, this::visitBinExpr);
         addVisit(ARRAY_ACCESS_EXPR, this::visitArrayAccessExpr);
         addVisit(NEW_INT_ARRAY_EXPR, this::visitNewIntArrayExpr);
+        addVisit(ARRAY_INITIALIZER_EXPR, this::visitArrayInitializerExpr);
         addVisit(FIELD_ACCESS_EXPR, this::visitFieldAccessExpr);
         addVisit(METHOD_CALL_EXPR, this::visitMethodCallExpr);
         addVisit(IMPLICIT_THIS_CALL_EXPR, this::visitImplicitThisCallExpr);
@@ -186,29 +191,67 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     }
 
     private OllirExprResult visitNewIntArrayExpr(JmmNode node, Void unused) {
-        var dimensions = node.getChildren(ARRAY_CREATION_DIM);
-        OllirExprResult sizeExpr;
-        if (dimensions.isEmpty() || dimensions.getFirst().getNumChildren() == 0) {
-            sizeExpr = new OllirExprResult("0" + ollirTypes.toOllirType(TypeUtils.intType()));
-        } else {
-            sizeExpr = visit(dimensions.getFirst().getChild(0));
-        }
-
         JmmType arrayType = types.getExprType(node);
         if (arrayType == null) {
-            arrayType = pt.up.fe.comp.jmm.analysis.table.type.impls.JmmArrayType.of(TypeUtils.intType());
+            arrayType = JmmArrayType.of(TypeUtils.intType());
         }
-        String arraySuffix = ollirTypes.toOllirType(arrayType != null ? arrayType : types.getExprType(node));
+
+        var dimensions = node.getChildren(ARRAY_CREATION_DIM);
+        List<OllirExprResult> explicitSizes = new ArrayList<>();
 
         StringBuilder computation = new StringBuilder();
-        computation.append(sizeExpr.getComputation());
+        for (var dimension : dimensions) {
+            if (dimension.getNumChildren() == 0) {
+                break;
+            }
 
-        String tmp = ollirTypes.nextTemp() + arraySuffix;
-        computation.append(tmp).append(SPACE).append(ASSIGN).append(arraySuffix).append(SPACE)
-                .append("new(array, ").append(sizeExpr.getCode()).append(")").append(arraySuffix)
+            var sizeExpr = visit(dimension.getChild(0));
+            computation.append(sizeExpr.getComputation());
+            explicitSizes.add(sizeExpr);
+        }
+
+        if (explicitSizes.isEmpty()) {
+            var zero = "0" + ollirTypes.toOllirType(TypeUtils.intType());
+            explicitSizes.add(new OllirExprResult(zero));
+        }
+
+        String arraySuffix = ollirTypes.toOllirType(arrayType);
+
+        String arrayTemp = ollirTypes.nextTemp("arr") + arraySuffix;
+        computation.append(arrayTemp).append(SPACE).append(ASSIGN).append(arraySuffix).append(SPACE)
+                .append("new(array, ").append(explicitSizes.getFirst().getCode()).append(")").append(arraySuffix)
                 .append(END_STMT);
 
-        return new OllirExprResult(tmp, computation);
+        computation.append(emitNestedArrayInitialization(arrayTemp, arrayType, explicitSizes, 0));
+        return new OllirExprResult(arrayTemp, computation);
+    }
+
+    private OllirExprResult visitArrayInitializerExpr(JmmNode node, Void unused) {
+        JmmType arrayType = types.getExprType(node);
+        if (arrayType == null) {
+            arrayType = JmmArrayType.of(TypeUtils.intType());
+        }
+
+        String arraySuffix = ollirTypes.toOllirType(arrayType);
+        String intSuffix = ollirTypes.toOllirType(TypeUtils.intType());
+        String arrayTemp = ollirTypes.nextTemp("arr") + arraySuffix;
+
+        StringBuilder computation = new StringBuilder();
+        computation.append(arrayTemp).append(SPACE).append(ASSIGN).append(arraySuffix).append(SPACE)
+                .append("new(array, ").append(node.getNumChildren()).append(intSuffix).append(")").append(arraySuffix)
+                .append(END_STMT);
+
+        for (int i = 0; i < node.getNumChildren(); i++) {
+            var element = visit(node.getChild(i));
+            computation.append(element.getComputation());
+
+            String indexLiteral = i + intSuffix;
+            computation.append(arrayTemp).append("[").append(indexLiteral).append("]").append(intSuffix).append(SPACE)
+                    .append(ASSIGN).append(intSuffix).append(SPACE)
+                    .append(element.getCode()).append(END_STMT);
+        }
+
+        return new OllirExprResult(arrayTemp, computation);
     }
 
     private OllirExprResult visitFieldAccessExpr(JmmNode node, Void unused) {
@@ -329,6 +372,72 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                 .append(END_STMT);
 
         return new OllirExprResult(tmp, computation);
+    }
+
+    private String emitNestedArrayInitialization(String arrayOperand,
+                                                 JmmType arrayType,
+                                                 List<OllirExprResult> explicitSizes,
+                                                 int depth) {
+        if (!arrayType.isArray() || depth + 1 >= explicitSizes.size()) {
+            return "";
+        }
+
+        JmmType childType = arrayElementType(arrayType);
+        String childSuffix = ollirTypes.toOllirType(childType);
+        String intSuffix = ollirTypes.toOllirType(TypeUtils.intType());
+
+        String indexTemp = ollirTypes.nextTemp("idx") + intSuffix;
+        String condTemp = ollirTypes.nextTemp() + BOOL_SUFFIX;
+
+        String condLabel = ollirTypes.nextLabel("multi_arr_cond_");
+        String bodyLabel = ollirTypes.nextLabel("multi_arr_body_");
+        String endLabel = ollirTypes.nextLabel("multi_arr_end_");
+
+        StringBuilder computation = new StringBuilder();
+        computation.append(indexTemp).append(SPACE).append(ASSIGN).append(intSuffix).append(SPACE)
+                .append("0").append(intSuffix).append(END_STMT);
+        computation.append(condLabel).append(":\n");
+        computation.append(condTemp).append(SPACE).append(ASSIGN).append(BOOL_SUFFIX).append(SPACE)
+                .append(indexTemp).append(SPACE)
+                .append("<").append(intSuffix).append(SPACE)
+                .append(explicitSizes.get(depth).getCode()).append(END_STMT);
+        computation.append("if (").append(condTemp).append(") goto ").append(bodyLabel).append(END_STMT);
+        computation.append("goto ").append(endLabel).append(END_STMT);
+        computation.append(bodyLabel).append(":\n");
+
+        String childTemp = ollirTypes.nextTemp("arr") + childSuffix;
+        computation.append(childTemp).append(SPACE).append(ASSIGN).append(childSuffix).append(SPACE)
+                .append("new(array, ").append(explicitSizes.get(depth + 1).getCode()).append(")").append(childSuffix)
+                .append(END_STMT);
+
+        if (childType.isArray()) {
+            computation.append(emitNestedArrayInitialization(childTemp, childType, explicitSizes, depth + 1));
+        }
+
+        computation.append(arrayOperand).append("[").append(indexTemp).append("]").append(childSuffix).append(SPACE)
+                .append(ASSIGN).append(childSuffix).append(SPACE)
+                .append(childTemp).append(END_STMT);
+        computation.append(indexTemp).append(SPACE).append(ASSIGN).append(intSuffix).append(SPACE)
+                .append(indexTemp).append(SPACE)
+                .append("+").append(intSuffix).append(SPACE)
+                .append("1").append(intSuffix).append(END_STMT);
+        computation.append("goto ").append(condLabel).append(END_STMT);
+        computation.append(endLabel).append(":\n");
+
+        return computation.toString();
+    }
+
+    private static JmmType arrayElementType(JmmType type) {
+        if (!type.isArray()) {
+            return type;
+        }
+
+        var array = type.asArray();
+        if (array.dimension() == 1) {
+            return array.itemType();
+        }
+
+        return JmmArrayType.of(array.itemType(), array.dimension() - 1);
     }
 
     private OllirExprResult visitShortCircuit(JmmNode node, String op) {

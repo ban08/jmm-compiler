@@ -428,33 +428,39 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             throw new UnsupportedOperationException("Field writes are owned by the field OLLIR task");
         }
 
-        JmmType arrayType = resolved.map(TypeUtils.ResolvedIdentifier::type)
-                .orElse(JmmArrayType.of(TypeUtils.intType()));
-
-        String arrayTypeSuffix = ollirTypes.toOllirType(arrayType);
+        JmmType currentType = resolved.map(TypeUtils.ResolvedIdentifier::type)
+            .orElse(JmmArrayType.of(TypeUtils.intType()));
+        String currentOperand = ollirTypes.sanitizeId(arrayName) + ollirTypes.toOllirType(currentType);
         int indexCount = childCount - 1;
 
         StringBuilder code = new StringBuilder();
 
-        StringBuilder indexedLhs = new StringBuilder();
-        indexedLhs.append(ollirTypes.sanitizeId(arrayName)).append(arrayTypeSuffix);
-
         for (int i = 0; i < indexCount; i++) {
             var indexExpr = exprVisitor.visit(children.get(i));
             code.append(indexExpr.getComputation());
-            indexedLhs.append("[").append(indexExpr.getCode()).append("]");
-        }
 
-        JmmType targetType = reduceArrayDepth(arrayType, indexCount);
-        String targetTypeSuffix = ollirTypes.toOllirType(targetType != null ? targetType : TypeUtils.intType());
-        indexedLhs.append(targetTypeSuffix);
+            JmmType elementType = reduceArrayDepth(currentType, 1);
+            String elementSuffix = ollirTypes.toOllirType(elementType != null ? elementType : TypeUtils.intType());
 
-        var rhs = exprVisitor.visit(children.getLast());
-        code.append(rhs.getComputation());
-
-        code.append(indexedLhs).append(SPACE)
-                .append(ASSIGN).append(targetTypeSuffix).append(SPACE)
+            boolean isLastIndex = i == indexCount - 1;
+            if (isLastIndex) {
+            var rhs = exprVisitor.visit(children.getLast());
+            code.append(rhs.getComputation());
+            code.append(currentOperand).append("[").append(indexExpr.getCode()).append("]").append(elementSuffix).append(SPACE)
+                .append(ASSIGN).append(elementSuffix).append(SPACE)
                 .append(rhs.getCode()).append(END_STMT);
+            return code.toString();
+            }
+
+            String tmp = ollirTypes.nextTemp("arr") + elementSuffix;
+            code.append(tmp).append(SPACE)
+                .append(ASSIGN).append(elementSuffix).append(SPACE)
+                .append(currentOperand).append("[").append(indexExpr.getCode()).append("]").append(elementSuffix)
+                .append(END_STMT);
+
+            currentOperand = tmp;
+            currentType = elementType;
+        }
 
         return code.toString();
     }
