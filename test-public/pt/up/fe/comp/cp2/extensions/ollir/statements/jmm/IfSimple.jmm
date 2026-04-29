@@ -1,0 +1,14 @@
+package pt.up.fe.comp.cp2.extensions.ollir.statements.jmm;
+
+class IfSimple {
+
+    public int method(boolean a) {
+        int res;
+        res = 0;
+        if (a) {
+            res = 1;
+        }
+        return res;
+    }
+}
+

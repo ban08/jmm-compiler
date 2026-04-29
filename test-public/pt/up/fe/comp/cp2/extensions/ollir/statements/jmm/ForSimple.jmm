@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp2.extensions.ollir.statements.jmm;
+
+class ForSimple {
+
+    public int method(int limit) {
+        int i;
+        for (i = 0; i < limit; i = i + 1) {
+        }
+
+        return i;
+    }
+}
+
