@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp2.extensions.ollir.statements.jmm;
+
+class ForNested {
+
+    public int method(int n) {
+        int i;
+        int j;
+
+        for (i = 0; i < n; i = i + 1) {
+            for (j = 0; j < n; j = j + 1) {
+            }
+        }
+
+        return i;
+    }
+}
+

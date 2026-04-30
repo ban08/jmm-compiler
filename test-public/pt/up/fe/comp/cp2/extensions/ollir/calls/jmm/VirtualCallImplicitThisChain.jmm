@@ -1,0 +1,19 @@
+package pt.up.fe.comp.cp2.extensions.ollir.calls.jmm;
+
+class VirtualCallImplicitThisChain {
+
+    public int callee(int x) {
+        return x;
+    }
+
+    public int callee2() {
+        return 2;
+    }
+
+    public int method() {
+        int a;
+        a = callee(callee2());
+        return a;
+    }
+}
+
