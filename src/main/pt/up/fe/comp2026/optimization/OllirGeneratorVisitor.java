@@ -99,7 +99,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(" extends ").append(superSimpleName());
         code.append(L_BRACKET).append(NL);
 
-        code.append(buildConstructor()).append(NL);
+        code.append(buildFields());
+        code.append(buildConstructor(node)).append(NL);
 
         for (var child : node.getChildren(METHOD_DECL)) {
             code.append(visit(child));
@@ -109,18 +110,64 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         return code.toString();
     }
 
-    private String buildConstructor() {
+    private String buildConstructor(JmmNode classNode) {
         String superName = superSimpleName();
         ollirTypes.resetTemporaries();
 
         StringBuilder body = new StringBuilder();
         body.append("invokespecial(this.").append(superName).append(", \"<init>\").V").append(END_STMT);
+
+        for (var fieldDecl : classNode.getChildren(FIELD_DECL)) {
+            if (fieldDecl.getNumChildren() < 2) {
+                continue;
+            }
+
+            String fieldName = fieldDecl.get("name");
+
+            JmmType fieldType = table.getFields().stream()
+                    .filter(field -> field.name().equals(fieldName))
+                    .findFirst()
+                    .orElseThrow()
+                    .type();
+
+            String typeSuffix = ollirTypes.toOllirType(fieldType);
+
+            var initExpr = exprVisitor.visit(fieldDecl.getChild(1));
+
+            body.append(initExpr.getComputation());
+            body.append("putfield(this, ")
+                    .append(ollirTypes.sanitizeId(fieldName))
+                    .append(typeSuffix)
+                    .append(", ")
+                    .append(initExpr.getCode())
+                    .append(").V")
+                    .append(END_STMT);
+        }
+
         body.append("ret.V").append(END_STMT);
 
         StringBuilder code = new StringBuilder();
         code.append(INDENT).append(".construct \"<init>\"().V").append(L_BRACKET);
         code.append(indentBody(body.toString()));
         code.append(INDENT).append(R_BRACKET);
+        return code.toString();
+    }
+
+    private String buildFields() {
+        StringBuilder code = new StringBuilder();
+
+        for (var field : table.getFields()) {
+            code.append(INDENT)
+                    .append(".field private ")
+                    .append(ollirTypes.sanitizeId(field.name()))
+                    .append(ollirTypes.toOllirType(field.type()))
+                    .append(END_STMT);
+        }
+
+        if (!table.getFields().isEmpty()) {
+            code.append(NL);
+        }
+
         return code.toString();
     }
 
@@ -239,7 +286,18 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(rhs.getComputation());
 
         if (resolved.isPresent() && resolved.get().accessType() == AccessType.FIELD) {
-            throw new UnsupportedOperationException("Field writes are owned by the field OLLIR task");
+            JmmType lhsType = resolved.get().type();
+            String typeSuffix = ollirTypes.toOllirType(lhsType);
+
+            code.append("putfield(this, ")
+                    .append(ollirTypes.sanitizeId(lhsName))
+                    .append(typeSuffix)
+                    .append(", ")
+                    .append(rhs.getCode())
+                    .append(").V")
+                    .append(END_STMT);
+
+            return code.toString();
         }
 
         // Local or param target.
@@ -398,7 +456,18 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(rhs.getComputation());
 
         if (resolved.isPresent() && resolved.get().accessType() == AccessType.FIELD) {
-            throw new UnsupportedOperationException("Field writes are owned by the field OLLIR task");
+            JmmType lhsType = resolved.get().type();
+            String typeSuffix = ollirTypes.toOllirType(lhsType);
+
+            code.append("putfield(this, ")
+                    .append(ollirTypes.sanitizeId(name))
+                    .append(typeSuffix)
+                    .append(", ")
+                    .append(rhs.getCode())
+                    .append(").V")
+                    .append(END_STMT);
+
+            return code.toString();
         }
 
         JmmType lhsType = resolved.map(TypeUtils.ResolvedIdentifier::type).orElse(TypeUtils.intType());
