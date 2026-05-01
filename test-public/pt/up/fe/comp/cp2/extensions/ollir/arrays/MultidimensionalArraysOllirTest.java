@@ -44,9 +44,12 @@ public class MultidimensionalArraysOllirTest extends OllirTestEnv {
         assertEquals("A 2D array initialization 'new int[2][3]' should pass exactly 2 size arguments to 'new'",
                 2, newInst.getArguments().size());
 
+        assertTrue("The return type should be an ArrayType",
+                newInst.getReturnType() instanceof ArrayType);
+
         var returnType = (ArrayType) newInst.getReturnType();
-        assertTrue("The element type of a 2D array should be another ArrayType",
-                returnType.getElementType() instanceof ArrayType);
+        assertTrue("The return type should be an array with 2 dimensions",
+                returnType.getNumDimensions() == 2);
     }
 
     @Test
