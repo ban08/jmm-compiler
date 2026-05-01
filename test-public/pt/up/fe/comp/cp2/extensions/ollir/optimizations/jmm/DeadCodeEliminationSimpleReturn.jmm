@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+class DeadCodeEliminationSimpleReturn {
+
+    public int foo(int init) {
+        int res;
+        res = init;
+        return res;
+    }
+
+}

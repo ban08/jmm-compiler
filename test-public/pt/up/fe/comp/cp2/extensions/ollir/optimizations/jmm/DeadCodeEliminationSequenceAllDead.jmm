@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+class DeadCodeEliminationSequenceAllDead {
+
+    public int foo(int init) {
+        int a;
+        int b;
+        int c;
+        int d;
+        a = init;
+        b = init;
+        c = init;
+        d = init;
+        return 0;
+    }
+
+}

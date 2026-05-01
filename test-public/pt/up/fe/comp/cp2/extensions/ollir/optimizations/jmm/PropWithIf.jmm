@@ -1,0 +1,18 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+class PropWithIf {
+    public int foo(int b) {
+        int a;
+        int i;
+        int res;
+        a = 3;
+        i = 0;
+        if (i < b) {
+            i = i + 1;
+        } else {
+
+        }
+        res = i * a;
+        return res;
+    }
+}

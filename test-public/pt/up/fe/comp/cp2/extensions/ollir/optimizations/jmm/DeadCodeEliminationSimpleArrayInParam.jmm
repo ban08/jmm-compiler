@@ -1,0 +1,10 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+class DeadCodeEliminationSimpleArrayInParam {
+
+    public int foo(int[] v) {
+        v[0] = 2;
+        return 0;
+    }
+
+}

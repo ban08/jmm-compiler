@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp2.extensions.ollir.entitiesandops.jmm;
+
+class Remainder {
+
+    public int method() {
+        int a;
+        a = 1 % 2;
+        return a;
+    }
+}
+

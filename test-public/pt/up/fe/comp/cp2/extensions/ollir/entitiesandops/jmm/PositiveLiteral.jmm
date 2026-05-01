@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp2.extensions.ollir.entitiesandops.jmm;
+
+class PositiveLiteral {
+
+    public int method(int b) {
+        int a;
+        a = +1;
+        return a;
+    }
+}
+

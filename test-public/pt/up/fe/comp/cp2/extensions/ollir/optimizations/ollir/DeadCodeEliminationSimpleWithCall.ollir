@@ -1,0 +1,24 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+DeadCodeEliminationSimpleWithCall extends Object  {
+
+
+    
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public bar(v.i32).V {
+        ret.V ;
+    }
+
+    .method public foo(v.i32).i32 {
+        res.i32 :=.i32 v.i32;
+
+        invokevirtual(this.DeadCodeEliminationSimpleWithCall, "bar", res.i32).V;
+
+        ret.i32 0.i32;
+    }
+
+}

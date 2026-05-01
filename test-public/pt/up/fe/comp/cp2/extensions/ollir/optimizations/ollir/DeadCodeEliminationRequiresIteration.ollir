@@ -1,0 +1,20 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+DeadCodeEliminationRequiresIteration extends Object  {
+
+
+    
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public foo(vA.i32, vB.i32).i32 {
+        a.i32 :=.i32 vA.i32;
+
+        a.i32 :=.i32 vB.i32;
+
+        ret.i32 0.i32;
+    }
+
+}

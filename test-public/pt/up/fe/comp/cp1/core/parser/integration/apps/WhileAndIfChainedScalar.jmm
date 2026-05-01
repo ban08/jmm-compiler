@@ -1,0 +1,39 @@
+package pt.up.fe.comp.cp1.core.parser.integration.apps;
+
+import util.io;
+
+class WhileAndIfChained {
+
+    public static void main(String[] args) {
+        int a;
+        int b;
+        int c;
+        int d;
+        a = 20;
+        b = 10;
+        d = 0;
+        if (a < b) {
+            c = a - 1;
+
+            while (a < c) {
+                d = d + c + a - b;
+                c = c - 1;
+                a = a - 1;
+                b = b - 1;
+            }
+
+        } else {
+            c = b - 1;
+
+            while (a < c) {
+                d = d + c + a - b;
+                c = c - 1;
+                a = a - 1;
+                b = b - 1;
+            }
+        }
+
+        io.println(d);
+    }
+
+}

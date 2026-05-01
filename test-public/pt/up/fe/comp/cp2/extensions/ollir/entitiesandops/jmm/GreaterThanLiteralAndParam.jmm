@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp2.extensions.ollir.entitiesandops.jmm;
+
+class GreaterThanLiteralAndParam {
+
+    public boolean method(int b) {
+        boolean a;
+        a = 1 > b;
+        return a;
+    }
+}
+

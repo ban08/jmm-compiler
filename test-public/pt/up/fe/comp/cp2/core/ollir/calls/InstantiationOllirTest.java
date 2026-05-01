@@ -7,13 +7,10 @@ import org.specs.comp.ollir.Method;
 import org.specs.comp.ollir.Operand;
 import org.specs.comp.ollir.inst.*;
 import org.specs.comp.ollir.inst.utils.InstTypeUtils;
-import org.specs.comp.ollir.type.ClassType;
-import org.specs.comp.ollir.type.Type;
 import pt.up.fe.comp.test.env.OllirTestEnv;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 public class InstantiationOllirTest extends OllirTestEnv {
     private static final String BASE_PATH = "pt/up/fe/comp/cp2/core/ollir/calls/jmm/";
@@ -69,7 +66,7 @@ public class InstantiationOllirTest extends OllirTestEnv {
         assertTrue("invokespecial first argument should be of the class type",
                 InstTypeUtils.classTypeMatches(invokeSpecial.getCaller().getType(), classQualifiedName));
 
-        assertOrder(newInst, invokeSpecial, method);
+        assertOrder(method, newInst, invokeSpecial);
     }
 
 

@@ -1,0 +1,16 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+class DeadCodeEliminationWithIf {
+
+    public int foo(int x) {
+        int res;
+        res = x;
+        if (res > 0) {
+            res = res - 1;
+        } else {
+
+        }
+        return 0;
+    }
+
+}

@@ -14,19 +14,6 @@ public class AssignmentsParserTest extends JmmTestEnv {
     }
 
     @Test
-    public void testSimpleIntAssignment() {
-        setDescription("Test that a simple assignment is correctly parsed");
-        parseSnippet("a[0] = 0;", STATEMENT);
-    }
-
-    @Test
-    public void testSimpleIntAssignmentWithExpression() {
-        setDescription("Test that a simple assignment with an expression is correctly parsed");
-        parseSnippet("a[0   ] = 0 + 1;", STATEMENT);
-    }
-
-
-    @Test
     public void testAssignmentWithMethodCall() {
         setDescription("Test that an assignment with a method call is correctly parsed");
         parseSnippet("a = b.foo();", STATEMENT);

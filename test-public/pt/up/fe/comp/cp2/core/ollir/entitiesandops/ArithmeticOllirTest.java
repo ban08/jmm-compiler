@@ -73,7 +73,7 @@ public class ArithmeticOllirTest extends OllirTestEnv {
 
         var add = assertAtLeast(method, BinaryOpInstruction.class, OperationType.ADD, 1).getFirst();
         var sub = assertAtLeast(method, BinaryOpInstruction.class, OperationType.SUB, 1).getFirst();
-        assertOrder(add, sub, method);
+        assertOrder(method, add, sub);
     }
 
     @Test
@@ -98,7 +98,7 @@ public class ArithmeticOllirTest extends OllirTestEnv {
 
         var add = assertAtLeast(method, BinaryOpInstruction.class, OperationType.ADD, 1).getFirst();
         var mul = assertAtLeast(method, BinaryOpInstruction.class, OperationType.MUL, 1).getFirst();
-        assertOrder(mul, add, method);
+        assertOrder(method, mul, add);
     }
 
     @Test

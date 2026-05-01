@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+class NoOptimization {
+
+    public int foo(int a, int b) {
+        int i;
+        int res;
+        if (a < b) {
+            i = a + 1;
+        } else {
+            i = b + 1;
+        }
+        res = i * a;
+        return res;
+    }
+
+}

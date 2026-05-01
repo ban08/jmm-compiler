@@ -1,0 +1,12 @@
+package pt.up.fe.comp.cp2.extensions.ollir.entitiesandops.jmm;
+
+class DecrementSimple {
+
+    public int method(int b) {
+        int a;
+        a = 1;
+        --a;
+        return a;
+    }
+}
+

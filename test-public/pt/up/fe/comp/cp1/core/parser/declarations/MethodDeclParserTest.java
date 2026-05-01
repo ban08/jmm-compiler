@@ -50,7 +50,7 @@ public class MethodDeclParserTest extends JmmTestEnv {
     @Test
     public void testInstanceMethodEmpty() {
         setDescription("Parse an instance method with multiple parameters and empty body");
-        parseSnippet("int foo(int anInt, int[] anArray, boolean aBool, String aString) {}",
+        parseSnippet("int foo(int anInt, boolean aBool, String aString) {}",
                 METHOD);
     }
 
@@ -63,23 +63,18 @@ public class MethodDeclParserTest extends JmmTestEnv {
     @Test
     public void testMethodWithMultipleLocalVars() {
         setDescription("Parse a method with multiple local variable declarations");
-        parseSnippet("void foo() {int a; int[] b; int c; boolean d; Bar e;}", METHOD);
+        parseSnippet("void foo() {int a; int c; boolean d; Bar e;}", METHOD);
     }
 
     @Test
     public void testMethodWithMultipleParametersAndLocalVars() {
         parseSnippet("""
-                void foo(int anInt, int[] anArray, boolean aBool, String aString) {
-                    int a; int[] b; int c; boolean d; Bar e;
+                void foo(int anInt, boolean aBool, String aString) {
+                    int a; int c; boolean d; Bar e;
                 }
                 """, METHOD);
     }
 
-    @Test
-    public void testMethodReturnsArray() {
-        setDescription("Parse a method that returns an array type");
-        parseSnippet("int[] foo() {}", METHOD);
-    }
 
     @Test
     public void testMethodReturnsCustomType() {
@@ -106,7 +101,6 @@ public class MethodDeclParserTest extends JmmTestEnv {
         parseSnippet("""
                 void foo(
                     int a,
-                    int[] b,
                     String s
                 ) {}
                 """, METHOD);

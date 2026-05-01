@@ -17,32 +17,12 @@ public class CompleteAppsParserTest extends JmmTestEnv {
 
 
     @Test
-    public void testScientificApp() {
-        parseResource("FindMaximum.jmm");
+    public void testWhileAndIfSeqScalar() {
+        parseResource("WhileAndIfSeqScalar.jmm");
     }
 
     @Test
-    public void testSortingApp2() {
-        parseResource("Lazysort.jmm");
-    }
-
-    @Test
-    public void testSortingApp1() {
-        parseResource("QuickSort.jmm");
-    }
-
-    @Test
-    public void testGameApp1() {
-        parseResource("TicTacToe.jmm");
-    }
-
-    @Test
-    public void testWhileAndIfSeq() {
-        parseResource("WhileAndIfSeq.jmm");
-    }
-
-    @Test
-    public void testWhileAndIfChained() {
-        parseResource("WhileAndIfChained.jmm");
+    public void testWhileAndIfChainedScalar() {
+        parseResource("WhileAndIfChainedScalar.jmm");
     }
 }

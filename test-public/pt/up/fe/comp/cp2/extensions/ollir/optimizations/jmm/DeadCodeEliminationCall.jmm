@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+class DeadCodeEliminationCall {
+
+    public int bar() {
+        return 0;
+    }
+
+    public void foo() {
+        int res;
+        res = this.bar();
+    }
+}

@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp2.extensions.ollir.calls.jmm;
+
+import java.util.Date;
+
+class InstantiateWithArgs {
+    Date method() {
+        Date d;
+        d = new Date(2026, 5, 1 + 7);
+        return d;
+    }
+}

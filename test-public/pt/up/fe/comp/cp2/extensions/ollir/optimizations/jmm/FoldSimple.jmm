@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+import util.io;
+
+class FoldSimple {
+
+    public int foo() {
+        return 10 + 20;
+    }
+
+}

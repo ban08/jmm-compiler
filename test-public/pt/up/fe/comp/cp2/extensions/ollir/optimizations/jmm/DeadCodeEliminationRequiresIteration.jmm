@@ -1,0 +1,12 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+class DeadCodeEliminationRequiresIteration {
+
+    public int foo(int vA, int vB) {
+        int a;
+        a = vA;
+        a = vB;
+        return 0;
+    }
+
+}

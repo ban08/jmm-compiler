@@ -1,0 +1,16 @@
+package pt.up.fe.comp.cp2.extensions.ollir.calls.jmm;
+
+import util.io;
+
+class LocalStaticMethodCallRetInt {
+
+    public static int readNumber() {
+        return io.read();
+    }
+
+    public void method() {
+        int a;
+        a = LocalStaticMethodCallRetInt.readNumber();
+    }
+}
+

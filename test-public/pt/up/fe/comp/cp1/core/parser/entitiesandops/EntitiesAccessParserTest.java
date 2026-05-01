@@ -24,8 +24,8 @@ public class EntitiesAccessParserTest extends JmmTestEnv {
 
     @Test
     public void testLengthAccess() {
-        setDescription("Test that accessing the length of an array is correctly parsed");
-        parseSnippet("a.length;", STATEMENT);
+        setDescription("Test that accessing this is correctly parsed");
+        parseSnippet("this.foo();", STATEMENT);
     }
 
 

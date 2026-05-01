@@ -1,0 +1,18 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+DeadCodeEliminationSimpleReturn extends Object  {
+
+
+    
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public foo(init.i32).i32 {
+        res.i32 :=.i32 init.i32;
+
+        ret.i32 res.i32;
+    }
+
+}

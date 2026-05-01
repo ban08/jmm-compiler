@@ -12,32 +12,13 @@ public class CompleteAppsSemanticsTest extends JmmTestEnv {
 
 
     @Test
-    public void testScientificApp() {
-        semantics("FindMaximum.jmm", false);
+    public void testWhileAndIfSeqScalar() {
+        semantics("WhileAndIfSeqScalar.jmm", false);
     }
 
     @Test
-    public void testSortingApp2() {
-        semantics("Lazysort.jmm", false);
+    public void testWhileAndIfChainedScalar() {
+        semantics("WhileAndIfChainedScalar.jmm", false);
     }
 
-    @Test
-    public void testSortingApp1() {
-        semantics("QuickSort.jmm", false);
-    }
-
-    @Test
-    public void testGameApp1() {
-        semantics("TicTacToe.jmm", false);
-    }
-
-    @Test
-    public void testWhileAndIfSeq() {
-        semantics("WhileAndIfSeq.jmm", false);
-    }
-
-    @Test
-    public void testWhileAndIfChained() {
-        semantics("WhileAndIfChained.jmm", false);
-    }
 }

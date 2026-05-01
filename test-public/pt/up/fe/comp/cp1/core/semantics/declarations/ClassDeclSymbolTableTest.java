@@ -83,20 +83,5 @@ public class ClassDeclSymbolTableTest extends JmmTestEnv {
     }
 
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    @Test
-    public void FieldArrayType() {
-        var semantics = symbolTable("FieldArrayType.jmm", false);
-        var st = semantics.getSymbolTable();
-
-        var fInts = st.getField("ints");
-
-        super.assertTrue("ints field exists", fInts.isPresent());
-
-        var fIntsType = fInts.get().type();
-
-        super.assertTrue("ints should be array of ints", fIntsType.isArray() && fIntsType.asArray().itemType().equals(JmmPrimitiveType.INT));
-    }
-
 
 }

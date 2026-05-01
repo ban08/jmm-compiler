@@ -144,15 +144,4 @@ public class MethodDeclSymbolTableTest extends pt.up.fe.comp.test.env.JmmTestEnv
         super.assertTrue("Local variable a exists", foo.getLocalVariable("a").isPresent());
     }
 
-    @Test
-    public void ParameterWithSameNameAsField() {
-        var semantics = symbolTable("ParameterWithSameNameAsField.jmm", false);
-        var st = semantics.getSymbolTable();
-        super.assertTrue("Field a exists", st.getField("a").isPresent());
-        var methods = st.getMethods("foo");
-        super.assertEquals("Should have one foo method", 1, methods.size());
-        var foo = methods.getFirst();
-        super.assertTrue("Parameter a exists", foo.getParameter("a").isPresent());
-
-    }
 }

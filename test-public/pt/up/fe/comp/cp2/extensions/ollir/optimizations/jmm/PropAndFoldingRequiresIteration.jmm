@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+class PropAndFoldingRequiresIteration {
+
+    public int foo() {
+        int a;
+        int b;
+        int c;
+        a = 5;
+        b = 20 - a;
+        c = b;
+        return c;
+    }
+
+}

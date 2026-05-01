@@ -1,0 +1,20 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+DeadCodeEliminationSimpleArray extends Object  {
+
+
+    
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public foo(v.i32).i32 {
+        res.array.i32 :=.array.i32 new(array, v.i32).array.i32;
+
+res[0.i32].i32 :=.i32 v.i32;
+
+        ret.i32 0.i32;
+    }
+
+}

@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+import util.io;
+
+class FoldSequence {
+
+    public int foo() {
+        int a;
+
+        a = 20 - 10 * 3 / 5;
+
+        return a;
+    }
+
+}

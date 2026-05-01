@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp2.extensions.ollir.arrays.jmm;
+
+class MultiDimInit {
+    public int[][] method() {
+        int[][] a;
+        a = new int[2][3];
+        return a;
+    }
+}

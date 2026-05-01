@@ -1,0 +1,20 @@
+package pt.up.fe.comp.cp2.extensions.ollir.calls.jmm;
+
+class VirtualCallImplicitThisOnCondition {
+
+    public boolean isEmpty() {
+        return true;
+    }
+
+    public int method() {
+        int a;
+        if (isEmpty()) {
+            a = 1;
+        } else {
+
+        }
+        a = 0;
+        return a;
+    }
+}
+

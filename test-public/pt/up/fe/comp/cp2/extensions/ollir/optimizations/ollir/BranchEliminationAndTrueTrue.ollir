@@ -1,0 +1,33 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+BranchEliminationAndTrueTrue extends Object  {
+
+
+    
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public foo(trueValue.i32, falseValue.i32).i32 {
+
+        if (1.bool) goto then0;
+            andTmp0.bool :=.bool 0.bool;
+            goto endif0;
+    then0:
+
+            andTmp0.bool :=.bool 1.bool;
+    endif0:
+        if (andTmp0.bool) goto then1;
+            res.i32 :=.i32 falseValue.i32;
+
+            goto endif1;
+    then1:
+            res.i32 :=.i32 trueValue.i32;
+
+    endif1:
+
+        ret.i32 res.i32;
+    }
+
+}

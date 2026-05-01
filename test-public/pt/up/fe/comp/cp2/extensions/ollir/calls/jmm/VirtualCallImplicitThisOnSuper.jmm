@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp2.extensions.ollir.calls.jmm;
+
+import examples.Auxi;
+
+class VirtualCallImplicitThisOnSuper extends Auxi {
+
+    public int method() {
+        int a;
+        a = instanceCallIntWithArgs(0, 2);
+        return a;
+    }
+}
+

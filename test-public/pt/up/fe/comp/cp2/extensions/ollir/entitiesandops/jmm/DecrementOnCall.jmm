@@ -1,0 +1,16 @@
+package pt.up.fe.comp.cp2.extensions.ollir.entitiesandops.jmm;
+
+class DecrementOnCall {
+
+    public int foo(int r) {
+        return r + 1;
+    }
+
+    public int method(int b) {
+        int a;
+        a = 1;
+        a = this.foo(--a);
+        return a;
+    }
+}
+

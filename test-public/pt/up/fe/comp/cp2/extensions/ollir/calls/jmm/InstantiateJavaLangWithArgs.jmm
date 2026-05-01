@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp2.extensions.ollir.calls.jmm;
+
+class InstantiateJavaLangWithArgs {
+    String method(String original) {
+        String s;
+        s = new String(original);
+        return s;
+    }
+}

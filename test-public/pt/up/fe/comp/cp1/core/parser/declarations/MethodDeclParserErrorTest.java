@@ -107,13 +107,7 @@ public class MethodDeclParserErrorTest extends JmmTestEnv {
 
     }
 
-    @Test
-    public void testMethodInvalidArrayTypeSyntax() {
-        setDescription("Method declaration with malformed array type syntax");
-        parseSnippetWithErrors("int[]] foo() {}", METHOD);
-        parseSnippet("int[] foo() {}", METHOD);
 
-    }
 
     @Test
     public void testMethodDuplicateModifier() {

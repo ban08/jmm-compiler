@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+class PropSimple {
+    public int foo() {
+        int a;
+        a = 1;
+        return a;
+    }
+}

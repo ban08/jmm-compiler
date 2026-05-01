@@ -61,9 +61,9 @@ public class LogicalOllirTest extends OllirTestEnv {
         var adds = assertAtLeast(method, BinaryOpInstruction.class, OperationType.ADD, 1);
         var divs = assertAtLeast(method, BinaryOpInstruction.class, OperationType.DIV, 2);
         var mults = assertAtLeast(method, BinaryOpInstruction.class, OperationType.MUL, 1);
-        assertOrder(adds.getFirst(), lth, method);
-        assertOrder(divs.getFirst(), lth, method);
-        assertOrder(mults.getFirst(), lth, method);
+        assertOrder(method, adds.getFirst(), lth);
+        assertOrder(method, divs.getFirst(), lth);
+        assertOrder(method, mults.getFirst(), lth);
     }
 
 
@@ -72,7 +72,7 @@ public class LogicalOllirTest extends OllirTestEnv {
         var method = toOllir("NotAndLessThan.jmm", "method");
         var lth = assertAtLeast(method, BinaryOpInstruction.class, OperationType.LTH, 1);
         var not = assertAtLeast(method, UnaryOpInstruction.class, OperationType.LOGICAL_NOT, 1);
-        assertOrder(lth.getFirst(), not.getFirst(), method);
+        assertOrder(method, lth.getFirst(), not.getFirst());
     }
 
     @Test
@@ -90,20 +90,13 @@ public class LogicalOllirTest extends OllirTestEnv {
     @Test
     public void testAndNested() {
         var method = toOllir("AndNested.jmm", "method");
-        assertAtLeast(CondBranchInstruction.class, 4, method);
+        assertAtLeast(method, CondBranchInstruction.class, 4);
     }
 
     @Test
     public void testAndLessThanNot() {
         var method = toOllir("AndLessThanNot.jmm", "method");
-        assertAtLeast(CondBranchInstruction.class, 3, method);
+        assertAtLeast(method, CondBranchInstruction.class, 3);
     }
-
-    /*
-        new file:   test-public/pt/up/fe/comp/cp2/core/ollir/entitiesandops/jmm/AndLessThanNot.jmm
-        new file:   test-public/pt/up/fe/comp/cp2/core/ollir/entitiesandops/jmm/AndLiterals.jmm
-        new file:   test-public/pt/up/fe/comp/cp2/core/ollir/entitiesandops/jmm/AndNested.jmm
-        new file:   test-public/pt/up/fe/comp/cp2/core/ollir/entitiesandops/jmm/AndParams.jmm
-     * */
 }
 

@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+class PropWithCall {
+    public int bar() {
+        return 0;
+    }
+
+    public int foo(int b) {
+        int a;
+        int i;
+        int res;
+        a = 3;
+        i = this.bar();
+        res = i * a;
+        return res;
+    }
+}

@@ -1,0 +1,25 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+BranchEliminationSimpleTrue extends Object  {
+
+
+    
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public foo(trueValue.i32, falseValue.i32).i32 {
+        if (1.bool) goto then0;
+            res.i32 :=.i32 falseValue.i32;
+
+            goto endif0;
+    then0:
+            res.i32 :=.i32 trueValue.i32;
+
+    endif0:
+
+        ret.i32 res.i32;
+    }
+
+}

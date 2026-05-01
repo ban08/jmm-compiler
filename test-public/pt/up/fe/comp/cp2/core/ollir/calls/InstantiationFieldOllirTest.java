@@ -3,7 +3,6 @@ package pt.up.fe.comp.cp2.core.ollir.calls;
 import org.junit.Test;
 import org.specs.comp.ollir.ClassUnit;
 import org.specs.comp.ollir.LiteralElement;
-import org.specs.comp.ollir.Method;
 import org.specs.comp.ollir.Operand;
 import org.specs.comp.ollir.inst.CallInstruction;
 import org.specs.comp.ollir.inst.InvokeSpecialInstruction;
@@ -12,7 +11,6 @@ import org.specs.comp.ollir.inst.PutFieldInstruction;
 import org.specs.comp.ollir.type.ClassType;
 import pt.up.fe.comp.test.env.OllirTestEnv;
 
-import java.util.Date;
 import java.util.List;
 
 public class InstantiationFieldOllirTest extends OllirTestEnv {
@@ -74,7 +72,7 @@ public class InstantiationFieldOllirTest extends OllirTestEnv {
                 putField.getValue().getType() instanceof ClassType ct
                         && thisType.contains(ct.getName()));
 
-        assertOrder(List.of(newInst, invokeSpecial, putField), method);
+        assertOrder(method, List.of(newInst, invokeSpecial, putField));
     }
 
 }

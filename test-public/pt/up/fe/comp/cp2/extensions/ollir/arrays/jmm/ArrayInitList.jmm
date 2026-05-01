@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp2.extensions.ollir.arrays.jmm;
+
+class ArrayInitList {
+    public int[] method() {
+        int[] a;
+        a = new int[]{10, 20, 30};
+        return a;
+    }
+}

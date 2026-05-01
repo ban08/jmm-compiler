@@ -53,11 +53,6 @@ public class ClassDeclParserTest extends JmmTestEnv {
     }
 
     @Test
-    public void testIntArray() {
-        parseSnippet("int[]", TYPE);
-    }
-
-    @Test
     public void testVoid() {
         parseSnippet("void", TYPE);
     }
@@ -72,50 +67,6 @@ public class ClassDeclParserTest extends JmmTestEnv {
         parseSnippet("String[]", TYPE);
     }
 
-
-    @Test
-    public void testSingleFieldDecl() {
-        parseSnippet("package comp; class Foo {int a;}");
-    }
-
-    @Test
-    public void testMultipleFieldDecls() {
-        parseSnippet("package comp; class Foo {int a; int[] b; int c; boolean d; Bar e;}");
-    }
-
-    @Test
-    public void testSingleCharId() {
-        parseSnippet("class A{int a;}", CLASS);
-    }
-
-    @Test
-    public void testStringField() {
-        parseSnippet("class A{String a;}", CLASS);
-    }
-
-    @Test
-    public void testIdStartingChar1() {
-        parseSnippet("class A{String _a;}", CLASS);
-    }
-
-    @Test
-    public void testIdStartingChar2() {
-        parseSnippet("class A{String $a;}", CLASS);
-    }
-
-
-    @Test
-    public void testClassWithCommentsInside() {
-        parseSnippet("class A { // comment\n int a; /* multi */ }", CLASS);
-    }
-
-
-    @Test
-    public void testClassWithComplexIdentifiers() {
-        parseSnippet("class A{int _a$1; String $s_2;}", CLASS);
-    }
-
-
     @Test
     public void testClassWithSimpleMethod() {
         parseSnippet("class A {void foo() {}}", CLASS);
@@ -127,6 +78,8 @@ public class ClassDeclParserTest extends JmmTestEnv {
         parseSnippet("package foo; class A {public static void main(String[] args) {}}");
     }
 
+
+
     @Test
     public void testClassWithMultipleMethods() {
         parseSnippet("""
@@ -134,39 +87,12 @@ public class ClassDeclParserTest extends JmmTestEnv {
                 class A {
                     public static void main(String[] args) {}
                     void bar() {}
-                    void foo(int anInt, int[] anArray, boolean aBool, String aString) {}
-                }
-                """);
-    }
-
-    @Test
-    public void testClassWithOneFieldsAndOneMethod() {
-        parseSnippet("""
-                package foo;
-                class A {
-                    int a;
-                    void bar() {}
-                }
-                """);
-    }
-
-    @Test
-    public void testClassWithMultipleFieldsAndMethods() {
-        parseSnippet("""
-                package foo;
-                class A {
-                    int a; int[] b; int c; boolean d; Bar e;
-                    public static void main(String[] args) {}
-                    void bar() {}
-                    void foo(int anInt, int[] anArray, boolean aBool, String aString) {}
+                    void foo(int anInt, boolean aBool, String aString) {}
                 }
                 """);
     }
 
 
-    @Test
-    public void testClassWithFieldArrayAndMethod() {
-        parseSnippet("package p; class A { int[] arr; void m(int[] a) {} }");
-    }
+
 
 }

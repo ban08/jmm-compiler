@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+class BranchEliminationSimpleFalse {
+
+    public int foo(int trueValue, int falseValue) {
+        int res;
+        if (false) {
+            res = trueValue;
+        } else {
+            res = falseValue;
+        }
+        return res;
+    }
+
+}

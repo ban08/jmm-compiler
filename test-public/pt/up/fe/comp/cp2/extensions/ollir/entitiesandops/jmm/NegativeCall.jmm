@@ -1,0 +1,14 @@
+package pt.up.fe.comp.cp2.extensions.ollir.entitiesandops.jmm;
+
+class NegativeCall {
+    public int foo() {
+        return 1;
+    }
+
+    public int method(int b) {
+        int a;
+        a = -this.foo();
+        return a;
+    }
+}
+

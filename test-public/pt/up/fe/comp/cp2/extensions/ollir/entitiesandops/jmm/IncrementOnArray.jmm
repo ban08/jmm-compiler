@@ -1,0 +1,10 @@
+package pt.up.fe.comp.cp2.extensions.ollir.entitiesandops.jmm;
+
+class IncrementOnArray {
+
+    public int method(int[] b) {
+        ++b[0];
+        return 0;
+    }
+}
+

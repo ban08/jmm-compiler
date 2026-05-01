@@ -21,11 +21,5 @@ public class EntityAccessSemanticAnalysisTest extends pt.up.fe.comp.test.env.Jmm
         semantics("AccessLocalVariablesOk.jmm", false);
     }
 
-    @Test
-    public void accessClassFields() {
-        setDescription("Test access to class fields");
-        semantics("AccessClassFieldsFail.jmm", true);
-        semantics("AccessClassFieldsOk.jmm", false);
-    }
 
 }

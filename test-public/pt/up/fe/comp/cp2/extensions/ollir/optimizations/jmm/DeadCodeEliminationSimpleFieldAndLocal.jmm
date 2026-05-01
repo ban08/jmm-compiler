@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp2.extensions.ollir.optimizations.jmm;
+
+class DeadCodeEliminationSimpleFieldAndLocal {
+    int a;
+
+    public int foo() {
+        int x;
+        x = a;
+        a = 2;
+        return 0;
+    }
+
+}

@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp2.extensions.ollir.entitiesandops.jmm;
+
+class OrLiterals {
+
+    public boolean method() {
+        return false || true;
+    }
+}
+

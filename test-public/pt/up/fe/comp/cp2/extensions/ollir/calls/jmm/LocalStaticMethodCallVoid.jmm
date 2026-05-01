@@ -1,0 +1,16 @@
+package pt.up.fe.comp.cp2.extensions.ollir.calls.jmm;
+
+import util.io;
+
+
+class LocalStaticMethodCallVoid {
+
+    public static void printNumber(int i) {
+        io.print(i);
+    }
+
+    public void method() {
+        LocalStaticMethodCallVoid.printNumber(1);
+    }
+}
+

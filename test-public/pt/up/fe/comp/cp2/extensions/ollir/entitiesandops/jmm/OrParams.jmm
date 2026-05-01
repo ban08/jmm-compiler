@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp2.extensions.ollir.entitiesandops.jmm;
+
+class OrParams {
+
+    public boolean method(boolean a, boolean b) {
+        return a || b;
+    }
+}
+

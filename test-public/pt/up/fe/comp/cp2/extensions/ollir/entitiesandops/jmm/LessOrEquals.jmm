@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp2.extensions.ollir.entitiesandops.jmm;
+
+class LessOrEquals {
+
+    public boolean method(int value1, int value2) {
+        return value1 <= value2;
+    }
+}
+

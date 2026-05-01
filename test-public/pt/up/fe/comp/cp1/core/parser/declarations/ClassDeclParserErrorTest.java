@@ -21,11 +21,7 @@ public class ClassDeclParserErrorTest extends JmmTestEnv {
         parseSnippet("package x; /* Multi-line comment */ /* class A{}*/ class A{}");
     }
 
-    @Test
-    public void testInvalidStuffOutsideClasses() {
-        parseSnippetWithErrors("package x; class A{} int a;");
-        parseSnippet("package x; class A{ int a; }");
-    }
+
 
     @Test
     public void testInvalidIncompleteExtends() {
@@ -54,19 +50,7 @@ public class ClassDeclParserErrorTest extends JmmTestEnv {
         parseSnippet("class A {}", CLASS);
     }
 
-    @Test
-    public void testFieldMissingSemicolon() {
-        // field declaration inside class without terminating semicolon
-        parseSnippetWithErrors("class A { int a }", CLASS);
-        parseSnippet("class A { int a; }", CLASS);
-    }
 
-    @Test
-    public void testInvalidFieldType() {
-        // field type cannot be a number
-        parseSnippetWithErrors("class A { 10 a; }", CLASS);
-        parseSnippet("class A { int a; }", CLASS);
-    }
 
     @Test
     public void testInvalidMethodMissingParentheses() {

@@ -1,0 +1,8 @@
+package pt.up.fe.comp.cp2.extensions.ollir.arrays.jmm;
+
+class MultiDimAccess {
+    public int method(int[][] a) {
+        a[0][1] = 5;
+        return a[1][2];
+    }
+}

@@ -3,12 +3,10 @@ package pt.up.fe.comp.cp2.core.ollir.calls;
 import org.junit.Test;
 import org.specs.comp.ollir.ClassUnit;
 import org.specs.comp.ollir.LiteralElement;
-import org.specs.comp.ollir.Operand;
 import org.specs.comp.ollir.inst.*;
 import org.specs.comp.ollir.inst.utils.InstTypeUtils;
 import org.specs.comp.ollir.type.BuiltinKind;
 import org.specs.comp.ollir.type.BuiltinType;
-import org.specs.comp.ollir.type.ClassType;
 import pt.up.fe.comp.test.env.OllirTestEnv;
 
 import java.util.List;
@@ -136,7 +134,7 @@ public class LocalCallsOllirTest extends OllirTestEnv {
         assertTrue("Argument should be boolean", call.getArguments().getFirst().getType() instanceof BuiltinType bt && bt.getKind() == BuiltinKind.BOOLEAN);
         assertTrue("Call return type should be boolean", BuiltinType.is(call.getReturnType(), BuiltinKind.BOOLEAN));
 
-        assertOrder(sc, call, method);
+        assertOrder(method, sc, call);
     }
 
     @Test
@@ -162,7 +160,7 @@ public class LocalCallsOllirTest extends OllirTestEnv {
         assertTrue("Call return type should be void ", call.getReturnType() instanceof BuiltinType bt
                 && BuiltinType.is(bt, BuiltinKind.VOID));
 
-        assertOrder(newInst, call, method);
+        assertOrder(method, newInst, call);
     }
 
     @Test
@@ -188,7 +186,7 @@ public class LocalCallsOllirTest extends OllirTestEnv {
         assertTrue("Call return type should be void ", call.getReturnType() instanceof BuiltinType bt
                 && BuiltinType.is(bt, BuiltinKind.VOID));
 
-        assertOrder(newInst, call, method);
+        assertOrder(method, newInst, call);
     }
 
 
@@ -253,7 +251,7 @@ public class LocalCallsOllirTest extends OllirTestEnv {
         assertEquals("Second call should have no arguments", 0, second.getArguments().size());
         assertTrue("Second call return type should be 'void'", BuiltinType.is(second.getReturnType(), BuiltinKind.VOID));
 
-        assertOrder(first, second, method);
+        assertOrder(method, first, second);
     }
 
     @Test

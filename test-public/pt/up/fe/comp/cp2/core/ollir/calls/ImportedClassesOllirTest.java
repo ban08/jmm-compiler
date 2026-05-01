@@ -131,7 +131,7 @@ public class ImportedClassesOllirTest extends OllirTestEnv {
         var newInst = news.getFirst();
         assertTrue("New instruction should be of type '" + callerType + "'", InstTypeUtils.classTypeMatches(newInst.getReturnType(), callerType));
         var invoke = assertCall(method, methodName, false, callerType, returnType, argsTypes, assignmentType, assignmentType);
-        assertOrder(newInst, invoke, method);
+        assertOrder(method, newInst, invoke);
     }
 
     @Test

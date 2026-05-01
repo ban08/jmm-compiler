@@ -29,7 +29,7 @@ public class IfWithoutElseOllirTest extends OllirTestEnv {
 
         var cond = assertInstExists(CondBranchInstruction.class, method);
         var ret = assertInstExists(ReturnInstruction.class, method);
-        assertOrder(cond.getFirst(), ret.getFirst(), method);
+        assertOrder(method, cond.getFirst(), ret.getFirst());
     }
 
     @Test
@@ -37,7 +37,7 @@ public class IfWithoutElseOllirTest extends OllirTestEnv {
         var classUnit = toOllir("IfNested.jmm");
         var method = classUnit.getMethods().stream().filter(m -> m.getMethodName().equals("method")).findFirst().orElseThrow();
 
-        var conds = assertAtLeast(CondBranchInstruction.class, 2, method);
+        var conds = assertAtLeast(method, CondBranchInstruction.class, 2);
         var ret = assertInstExists(ReturnInstruction.class, method);
         assertOrder(method, conds.getFirst(), conds.get(1), ret.getFirst());
     }
