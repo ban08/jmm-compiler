@@ -95,7 +95,7 @@ public class DeadCodeEliminationTest extends OllirTestEnv {
     @Test
     public void testDeadCodeEliminationSimpleReturn() {
         baseTest();
-        optimize("DeadCodeEliminationSimple", "foo", false);
+        optimize("DeadCodeEliminationSimpleReturn", "foo", false);
     }
 
     @Test
