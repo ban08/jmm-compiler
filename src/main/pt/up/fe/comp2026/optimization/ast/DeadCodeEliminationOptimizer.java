@@ -1,9 +1,15 @@
 package pt.up.fe.comp2026.optimization.ast;
 
+import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp2026.ast.AccessType;
+import pt.up.fe.comp2026.ast.TypeUtils;
+import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.comp2026.jmm.ast.JmmKind;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import static pt.up.fe.comp2026.optimization.ast.AstOptimizationUtils.isPureExpression;
 import static pt.up.fe.comp2026.optimization.ast.AstOptimizationUtils.readBoolean;
@@ -12,6 +18,12 @@ import static pt.up.fe.comp2026.optimization.ast.AstOptimizationUtils.readBoolea
  * Removes statement-level code that cannot affect program behavior.
  */
 public class DeadCodeEliminationOptimizer {
+
+    private final TypeUtils types;
+
+    public DeadCodeEliminationOptimizer(SymbolTable table) {
+        this.types = new TypeUtils(table);
+    }
 
     public boolean optimize(JmmNode root) {
         return eliminate(root);
@@ -25,6 +37,7 @@ public class DeadCodeEliminationOptimizer {
         }
 
         changed |= pruneStatementChildren(node);
+        changed |= pruneDeadStores(node);
         return changed;
     }
 
@@ -61,6 +74,169 @@ public class DeadCodeEliminationOptimizer {
         return JmmKind.EXPR_STMT.check(statement)
                 && statement.getNumChildren() == 1
                 && isPureExpression(statement.getChild(0));
+    }
+
+    private boolean pruneDeadStores(JmmNode parent) {
+        if (!canOwnStatementSequence(parent)) {
+            return false;
+        }
+
+        return processStatementSequence(parent, new HashSet<>());
+    }
+
+    private boolean canOwnStatementSequence(JmmNode node) {
+        return JmmKind.METHOD_DECL.check(node);
+    }
+
+    private boolean processStatementSequence(JmmNode parent, Set<String> liveAfter) {
+        boolean changed = false;
+
+        for (var child : parent.getChildren().reversed()) {
+            if (JmmKind.STMT.check(child)) {
+                changed |= processStatement(child, liveAfter);
+            }
+        }
+
+        return changed;
+    }
+
+    private boolean processStatement(JmmNode statement, Set<String> liveAfter) {
+        if (JmmKind.RETURN_STMT.check(statement)) {
+            for (var child : statement.getChildren()) {
+                collectLocalReads(child, liveAfter);
+            }
+            return false;
+        }
+
+        if (JmmKind.ASSIGN_STMT.check(statement)) {
+            return processAssignment(statement, liveAfter);
+        }
+
+        if (JmmKind.ARRAY_ASSIGN_STMT.check(statement)) {
+            return processArrayAssignment(statement, liveAfter);
+        }
+
+        if (JmmKind.EXPR_STMT.check(statement)) {
+            for (var child : statement.getChildren()) {
+                collectLocalReads(child, liveAfter);
+            }
+            return false;
+        }
+
+        if (JmmKind.IF_STMT.check(statement)) {
+            return processIf(statement, liveAfter);
+        }
+
+        if (JmmKind.COMPOUND_STMT.check(statement)) {
+            return processStatementSequence(statement, liveAfter);
+        }
+
+        collectLocalReads(statement, liveAfter);
+        return false;
+    }
+
+    private boolean processAssignment(JmmNode statement, Set<String> liveAfter) {
+        String name = statement.get(JmmAttributes.ASSIGN_STMT.VAR);
+        var resolved = types.resolveIdentifier(statement, name);
+        boolean localValue = resolved.map(identifier ->
+                identifier.accessType() == AccessType.LOCAL || identifier.accessType() == AccessType.PARAM
+        ).orElse(false);
+
+        var rhs = statement.getChild(0);
+        if (localValue && !liveAfter.contains(name) && canDropAssignmentRhs(rhs)) {
+            statement.delete();
+            return true;
+        }
+
+        if (localValue) {
+            liveAfter.remove(name);
+        }
+        collectLocalReads(rhs, liveAfter);
+        return false;
+    }
+
+    private boolean processArrayAssignment(JmmNode statement, Set<String> liveAfter) {
+        String name = statement.get(JmmAttributes.ARRAY_ASSIGN_STMT.VAR);
+        var resolved = types.resolveIdentifier(statement, name);
+        boolean localArray = resolved.map(identifier -> identifier.accessType() == AccessType.LOCAL).orElse(false);
+
+        if (localArray && !liveAfter.contains(name) && arrayAssignmentChildrenAreDroppable(statement)) {
+            statement.delete();
+            return true;
+        }
+
+        resolved.ifPresent(identifier -> {
+            if (identifier.accessType() == AccessType.LOCAL || identifier.accessType() == AccessType.PARAM) {
+                liveAfter.add(name);
+            }
+        });
+        for (var child : statement.getChildren()) {
+            collectLocalReads(child, liveAfter);
+        }
+        return false;
+    }
+
+    private boolean processIf(JmmNode statement, Set<String> liveAfter) {
+        var liveAfterIf = new HashSet<>(liveAfter);
+        var branches = statement.getChildren(JmmKind.STMT);
+
+        Set<String> thenLive = new HashSet<>(liveAfterIf);
+        boolean changed = false;
+        if (!branches.isEmpty()) {
+            changed |= processStatement(branches.get(0), thenLive);
+        }
+
+        Set<String> elseLive = new HashSet<>(liveAfterIf);
+        if (branches.size() > 1) {
+            changed |= processStatement(branches.get(1), elseLive);
+        }
+
+        liveAfter.clear();
+        liveAfter.addAll(thenLive);
+        liveAfter.addAll(elseLive);
+        collectLocalReads(statement.getChild(0), liveAfter);
+        return changed;
+    }
+
+    private boolean canDropAssignmentRhs(JmmNode rhs) {
+        if (isPureExpression(rhs)) {
+            return true;
+        }
+
+        if (JmmKind.PAREN_EXPR.check(rhs)) {
+            return canDropAssignmentRhs(rhs.getChild(0));
+        }
+
+        if (JmmKind.NEW_INT_ARRAY_EXPR.check(rhs)) {
+            return rhs.getChildren(JmmKind.ARRAY_CREATION_DIM).stream()
+                    .allMatch(dimension -> dimension.getNumChildren() == 0 || canDropAssignmentRhs(dimension.getChild(0)));
+        }
+
+        if (JmmKind.ARRAY_INITIALIZER_EXPR.check(rhs)) {
+            return rhs.getChildren().stream().allMatch(this::canDropAssignmentRhs);
+        }
+
+        return false;
+    }
+
+    private boolean arrayAssignmentChildrenAreDroppable(JmmNode statement) {
+        return statement.getChildren().stream().allMatch(this::canDropAssignmentRhs);
+    }
+
+    private void collectLocalReads(JmmNode node, Set<String> reads) {
+        if (JmmKind.VAR_REF_EXPR.check(node)) {
+            String name = node.get(JmmAttributes.VAR_REF_EXPR.NAME);
+            types.resolveIdentifier(node, name).ifPresent(identifier -> {
+                if (identifier.accessType() == AccessType.LOCAL || identifier.accessType() == AccessType.PARAM) {
+                    reads.add(name);
+                }
+            });
+            return;
+        }
+
+        for (var child : node.getChildren()) {
+            collectLocalReads(child, reads);
+        }
     }
 
     private boolean statementCannotCompleteNormally(JmmNode statement) {

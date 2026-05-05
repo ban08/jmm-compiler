@@ -33,11 +33,13 @@ final class RegisterColoring {
             return strictColoring.get();
         }
 
-        var temporaryRelaxedColoring = colorWithDomains(graph, node ->
-                RegisterAllocationUtils.isGeneratedTemporary(node) ? graph.size() : Math.max(localRegisterLimit, 0));
+        var boundedTemporaryColoring = colorWithDomains(graph, node ->
+                RegisterAllocationUtils.isGeneratedTemporary(node)
+                        ? Math.max(localRegisterLimit + 1, 0)
+                        : Math.max(localRegisterLimit, 0));
 
-        if (temporaryRelaxedColoring.isPresent()) {
-            return temporaryRelaxedColoring.get();
+        if (boundedTemporaryColoring.isPresent()) {
+            return boundedTemporaryColoring.get();
         }
 
         var minimumColoring = minimumColoring(graph);

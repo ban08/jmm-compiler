@@ -17,7 +17,7 @@ public class AstOptimizer {
         this.constantPropagation = new ConstantPropagationOptimizer(table);
         this.constantFolding = new ConstantFoldingOptimizer();
         this.branchElimination = new BranchEliminationOptimizer();
-        this.deadCodeElimination = new DeadCodeEliminationOptimizer();
+        this.deadCodeElimination = new DeadCodeEliminationOptimizer(table);
     }
 
     public boolean optimize(JmmNode root) {
