@@ -4,6 +4,8 @@ import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ollir.JmmOptimization;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp2026.CompilerConfig;
+import pt.up.fe.comp2026.optimization.ast.AstOptimizer;
+import pt.up.fe.comp2026.optimization.register.RegisterAllocationOptimizer;
 
 import java.util.Collections;
 

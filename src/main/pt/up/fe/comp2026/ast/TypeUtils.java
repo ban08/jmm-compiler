@@ -27,6 +27,8 @@ import static pt.up.fe.comp2026.jmm.ast.JmmKind.*;
  */
 public class TypeUtils {
 
+    private static final String JAVA_LANG_OBJECT = "java.lang.Object";
+
     public record ResolvedIdentifier(String name, JmmType type, AccessType accessType) {
     }
 
@@ -563,7 +565,7 @@ public class TypeUtils {
     }
 
     private boolean sameClass(String left, String right) {
-        return left.equals(right);
+        return normalizeClassName(left).equals(normalizeClassName(right));
     }
 
     private boolean isClassAssignable(String targetClass, String valueClass) {
@@ -582,13 +584,26 @@ public class TypeUtils {
     }
 
     private String getDirectSuperClass(String classQualifiedName) {
+        if (isJavaLangObject(classQualifiedName)) {
+            return null;
+        }
+
         if (sameClass(classQualifiedName, table.getFullyQualifiedName())) {
-            return table.getSuperFullyQualifiedName();
+            var superName = table.getSuperFullyQualifiedName();
+            return superName != null ? superName : JAVA_LANG_OBJECT;
         }
 
         return table.getImportedSymbolTable(classQualifiedName)
                 .map(SymbolTable::getSuperFullyQualifiedName)
-                .orElse(null);
+                .orElse(JAVA_LANG_OBJECT);
+    }
+
+    private static String normalizeClassName(String className) {
+        return "Object".equals(className) ? JAVA_LANG_OBJECT : className;
+    }
+
+    private static boolean isJavaLangObject(String className) {
+        return JAVA_LANG_OBJECT.equals(normalizeClassName(className));
     }
 
     // Imported symbol tables expose only the fields declared in that class, so we

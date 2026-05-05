@@ -280,9 +280,12 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitAssignStmt(JmmNode node, Void unused) {
         String lhsName = node.get(JmmAttributes.ASSIGN_STMT.VAR);
-        var rhs = exprVisitor.visit(node.getChild(0));
+        return emitSimpleAssignment(node, lhsName, node.getChild(0));
+    }
 
-        var resolved = types.resolveIdentifier(node, lhsName);
+    private String emitSimpleAssignment(JmmNode context, String lhsName, JmmNode rhsNode) {
+        var rhs = exprVisitor.visit(rhsNode);
+        var resolved = types.resolveIdentifier(context, lhsName);
 
         StringBuilder code = new StringBuilder();
         code.append(rhs.getComputation());
@@ -456,34 +459,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             return emitIndexedAssignment(header, name, header.getChildren());
         }
 
-        var rhs = exprVisitor.visit(header.getChild(0));
-        var resolved = types.resolveIdentifier(header, name);
-
-        StringBuilder code = new StringBuilder();
-        code.append(rhs.getComputation());
-
-        if (resolved.isPresent() && resolved.get().accessType() == AccessType.FIELD) {
-            JmmType lhsType = resolved.get().type();
-            String typeSuffix = ollirTypes.toOllirType(lhsType);
-
-            code.append("putfield(this, ")
-                    .append(ollirTypes.sanitizeId(name))
-                    .append(typeSuffix)
-                    .append(", ")
-                    .append(rhs.getCode())
-                    .append(").V")
-                    .append(END_STMT);
-
-            return code.toString();
-        }
-
-        JmmType lhsType = resolved.map(TypeUtils.ResolvedIdentifier::type).orElse(TypeUtils.intType());
-        String typeSuffix = ollirTypes.toOllirType(lhsType);
-        code.append(ollirTypes.sanitizeId(name)).append(typeSuffix).append(SPACE)
-                .append(ASSIGN).append(typeSuffix).append(SPACE)
-                .append(rhs.getCode()).append(END_STMT);
-
-        return code.toString();
+        return emitSimpleAssignment(header, name, header.getChild(0));
     }
 
     private String emitIndexedAssignment(JmmNode context, String arrayName, java.util.List<JmmNode> children) {
@@ -493,9 +469,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         }
 
         var resolved = types.resolveIdentifier(context, arrayName);
-        if (resolved.isPresent() && resolved.get().accessType() == AccessType.FIELD) {
-            throw new UnsupportedOperationException("Field writes are owned by the field OLLIR task");
-        }
 
         JmmType currentType = resolved.map(TypeUtils.ResolvedIdentifier::type)
             .orElse(JmmArrayType.of(TypeUtils.intType()));
@@ -503,6 +476,19 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         int indexCount = childCount - 1;
 
         StringBuilder code = new StringBuilder();
+
+        if (resolved.isPresent() && resolved.get().accessType() == AccessType.FIELD) {
+            String arraySuffix = ollirTypes.toOllirType(currentType);
+            currentOperand = ollirTypes.nextTemp("arr") + arraySuffix;
+            code.append(currentOperand).append(SPACE)
+                    .append(ASSIGN).append(arraySuffix).append(SPACE)
+                    .append("getfield(this, ")
+                    .append(ollirTypes.sanitizeId(arrayName))
+                    .append(arraySuffix)
+                    .append(")")
+                    .append(arraySuffix)
+                    .append(END_STMT);
+        }
 
         for (int i = 0; i < indexCount; i++) {
             var indexExpr = exprVisitor.visit(children.get(i));
@@ -513,12 +499,13 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
             boolean isLastIndex = i == indexCount - 1;
             if (isLastIndex) {
-            var rhs = exprVisitor.visit(children.getLast());
-            code.append(rhs.getComputation());
-            code.append(currentOperand).append("[").append(indexExpr.getCode()).append("]").append(elementSuffix).append(SPACE)
-                .append(ASSIGN).append(elementSuffix).append(SPACE)
-                .append(rhs.getCode()).append(END_STMT);
-            return code.toString();
+                var rhs = exprVisitor.visit(children.getLast());
+                code.append(rhs.getComputation());
+                code.append(currentOperand).append("[").append(indexExpr.getCode()).append("]").append(elementSuffix)
+                        .append(SPACE)
+                        .append(ASSIGN).append(elementSuffix).append(SPACE)
+                        .append(rhs.getCode()).append(END_STMT);
+                return code.toString();
             }
 
             String tmp = ollirTypes.nextTemp("arr") + elementSuffix;

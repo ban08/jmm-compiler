@@ -33,6 +33,14 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     private final TypeUtils types;
     private final OptUtils ollirTypes;
 
+    @FunctionalInterface
+    private interface WriteBack {
+        void append(StringBuilder computation, String valueCode);
+    }
+
+    private record AssignableValue(String readCode, JmmType type, StringBuilder computation, WriteBack writeBack) {
+    }
+
     public OllirExprGeneratorVisitor(SymbolTable table, OptUtils ollirTypes) {
         this.table = table;
         this.types = new TypeUtils(table);
@@ -114,12 +122,23 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     }
 
     private OllirExprResult visitNewExpr(JmmNode node, Void unused) {
-        String className = node.get("name");
+        String className = ollirClassName(types.getExprType(node), node.get("name"));
         String typeSuffix = "." + className;
 
         String tmp = ollirTypes.nextTemp() + typeSuffix;
 
         StringBuilder computation = new StringBuilder();
+        StringBuilder argsCode = new StringBuilder();
+
+        for (int i = 0; i < node.getNumChildren(); i++) {
+            var arg = visit(node.getChild(i));
+            computation.append(arg.getComputation());
+
+            if (!argsCode.isEmpty()) {
+                argsCode.append(", ");
+            }
+            argsCode.append(arg.getCode());
+        }
 
         computation.append(tmp)
                 .append(SPACE)
@@ -134,7 +153,11 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         computation.append("invokespecial(")
                 .append(tmp)
-                .append(", \"<init>\"")
+                .append(", \"<init>\"");
+        if (!argsCode.isEmpty()) {
+            computation.append(", ").append(argsCode);
+        }
+        computation
                 .append(").V")
                 .append(END_STMT);
 
@@ -157,58 +180,17 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             argsCode.append(", ").append(arg.getCode());
         }
 
-        if (TypeUtils.voidType().equals(returnType)) {
-            computation.append("invokevirtual(this, \"")
-                    .append(methodName)
-                    .append("\"")
-                    .append(argsCode)
-                    .append(")")
-                    .append(returnSuffix)
-                    .append(END_STMT);
-
-            return new OllirExprResult("", computation);
-        }
-
-        String tmp = ollirTypes.nextTemp() + returnSuffix;
-
-        computation.append(tmp)
-                .append(SPACE)
-                .append(ASSIGN)
-                .append(returnSuffix)
-                .append(SPACE)
-                .append("invokevirtual(this, \"")
-                .append(methodName)
-                .append("\"")
-                .append(argsCode)
-                .append(")")
-                .append(returnSuffix)
-                .append(END_STMT);
-
-        return new OllirExprResult(tmp, computation);
-    }
-
-    private OllirExprResult visitMethodCallExpr(JmmNode node, Void unused) {
-        String methodName = node.get("name");
-
-        var receiver = visit(node.getChild(0));
-
-        JmmType returnType = types.getExprType(node);
-        String returnSuffix = returnType != null ? ollirTypes.toOllirType(returnType) : ".V";
-
-        StringBuilder computation = new StringBuilder();
-        computation.append(receiver.getComputation());
-
-        StringBuilder argsCode = new StringBuilder();
-        for (int i = 1; i < node.getNumChildren(); i++) {
-            var arg = visit(node.getChild(i));
-            computation.append(arg.getComputation());
-
-            argsCode.append(", ").append(arg.getCode());
-        }
+        var resolvedCall = types.resolveImplicitThisMethodCall(node);
+        boolean staticCall = resolvedCall.map(call -> call.method().isStatic())
+                .orElseGet(() -> types.isStaticMethodContext(node));
+        String invocationKind = staticCall ? "invokestatic" : "invokevirtual";
+        String receiverCode = staticCall
+                ? ollirTypes.sanitizeId(OptUtils.simpleClassName(table.getFullyQualifiedName()))
+                : "this";
 
         if (TypeUtils.voidType().equals(returnType)) {
-            computation.append("invokevirtual(")
-                    .append(receiver.getCode())
+            computation.append(invocationKind).append("(")
+                    .append(receiverCode)
                     .append(", \"")
                     .append(methodName)
                     .append("\"")
@@ -227,8 +209,76 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                 .append(ASSIGN)
                 .append(returnSuffix)
                 .append(SPACE)
-                .append("invokevirtual(")
-                .append(receiver.getCode())
+                .append(invocationKind)
+                .append("(")
+                .append(receiverCode)
+                .append(", \"")
+                .append(methodName)
+                .append("\"")
+                .append(argsCode)
+                .append(")")
+                .append(returnSuffix)
+                .append(END_STMT);
+
+        return new OllirExprResult(tmp, computation);
+    }
+
+    private OllirExprResult visitMethodCallExpr(JmmNode node, Void unused) {
+        String methodName = node.get("name");
+
+        var receiverNode = node.getChild(0);
+        var receiver = visit(receiverNode);
+
+        JmmType returnType = types.getExprType(node);
+        String returnSuffix = returnType != null ? ollirTypes.toOllirType(returnType) : ".V";
+
+        StringBuilder computation = new StringBuilder();
+        computation.append(receiver.getComputation());
+
+        StringBuilder argsCode = new StringBuilder();
+        for (int i = 1; i < node.getNumChildren(); i++) {
+            var arg = visit(node.getChild(i));
+            computation.append(arg.getComputation());
+
+            argsCode.append(", ").append(arg.getCode());
+        }
+
+        var resolvedCall = types.resolveMethodCall(node);
+        boolean staticCall = resolvedCall.map(call -> call.method().isStatic())
+                .orElseGet(() -> types.tryGetExprType(receiverNode)
+                        .filter(JmmType::isClass)
+                        .map(type -> type.asClass().staticRef())
+                        .orElse(false));
+        String invocationKind = staticCall ? "invokestatic" : "invokevirtual";
+        String receiverCode = staticCall
+                ? staticCallReceiver(receiverNode, resolvedCall)
+                : receiver.getCode();
+
+        if (TypeUtils.voidType().equals(returnType)) {
+            computation.append(invocationKind)
+                    .append("(")
+                    .append(receiverCode)
+                    .append(", \"")
+                    .append(methodName)
+                    .append("\"")
+                    .append(argsCode)
+                    .append(")")
+                    .append(returnSuffix)
+                    .append(END_STMT);
+
+            return new OllirExprResult("", computation);
+        }
+
+        String tmp = ollirTypes.nextTemp() + returnSuffix;
+
+        computation.append(tmp)
+                .append(SPACE)
+                .append(ASSIGN)
+                .append(returnSuffix)
+                .append(SPACE)
+                .append(invocationKind)
+                .append("(")
+                .append(receiverCode)
                 .append(", \"")
                 .append(methodName)
                 .append("\"")
@@ -256,14 +306,27 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
     private OllirExprResult visitUnary(JmmNode node, Void unused) {
         String op = node.get("op");
-        var operand = visit(node.getChild(0));
         String intSuffix = ollirTypes.toOllirType(TypeUtils.intType());
 
+        if ("++".equals(op) || "--".equals(op)) {
+            var assignable = resolveAssignableValue(node.getChild(0));
+            StringBuilder computation = new StringBuilder();
+            computation.append(assignable.computation());
+
+            String tmp = ollirTypes.nextTemp() + intSuffix;
+            String arithmeticOp = "++".equals(op) ? "+" : "-";
+            computation.append(tmp).append(SPACE).append(ASSIGN).append(intSuffix).append(SPACE)
+                    .append(assignable.readCode()).append(SPACE)
+                    .append(arithmeticOp).append(intSuffix).append(SPACE)
+                    .append("1").append(intSuffix).append(END_STMT);
+            assignable.writeBack().append(computation, tmp);
+            return new OllirExprResult(tmp, computation);
+        }
+
+        var operand = visit(node.getChild(0));
         StringBuilder computation = new StringBuilder();
         computation.append(operand.getComputation());
-
         String tmp = ollirTypes.nextTemp() + intSuffix;
-
         switch (op) {
             case "+" -> {
                 // Identity; still bind to a temp so the surrounding expression has an operand.
@@ -276,8 +339,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                         .append("-").append(intSuffix).append(SPACE)
                         .append(operand.getCode()).append(END_STMT);
             }
-            case "++", "--" -> throw new UnsupportedOperationException(
-                    "Prefix increment/decrement needs writeback support and is not part of the core OLLIR slice");
             default -> throw new RuntimeException("Unknown unary operator: " + op);
         }
 
@@ -425,7 +486,152 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             return new OllirExprResult(tmp, computation);
         }
 
-        throw new UnsupportedOperationException("Field reads are owned by the field OLLIR task");
+        JmmType fieldType = types.resolveFieldAccessType(node)
+                .orElseThrow(() -> new IllegalArgumentException("Unknown field access: " + fieldName));
+        String fieldSuffix = ollirTypes.toOllirType(fieldType);
+        String tmp = ollirTypes.nextTemp() + fieldSuffix;
+        computation.append(tmp).append(SPACE).append(ASSIGN).append(fieldSuffix).append(SPACE)
+                .append("getfield(").append(receiver.getCode()).append(", ")
+                .append(ollirTypes.sanitizeId(fieldName)).append(fieldSuffix).append(")")
+                .append(fieldSuffix)
+                .append(END_STMT);
+        return new OllirExprResult(tmp, computation);
+    }
+
+    private AssignableValue resolveAssignableValue(JmmNode rawNode) {
+        JmmNode node = unwrapParen(rawNode);
+
+        if (VAR_REF_EXPR.check(node)) {
+            return resolveIdentifierAssignable(node);
+        }
+
+        if (ARRAY_ACCESS_EXPR.check(node)) {
+            return resolveArrayAssignable(node);
+        }
+
+        if (FIELD_ACCESS_EXPR.check(node)) {
+            return resolveFieldAssignable(node);
+        }
+
+        throw new IllegalArgumentException("Expression is not assignable: " + node);
+    }
+
+    private AssignableValue resolveIdentifierAssignable(JmmNode node) {
+        String name = node.get("name");
+        var resolved = types.resolveIdentifier(node, name)
+                .orElseThrow(() -> new IllegalArgumentException("Unknown assignable identifier: " + name));
+
+        JmmType valueType = resolved.type();
+        String typeSuffix = ollirTypes.toOllirType(valueType);
+        String safeName = ollirTypes.sanitizeId(name);
+
+        if (resolved.accessType() == AccessType.FIELD) {
+            String tmp = ollirTypes.nextTemp() + typeSuffix;
+            StringBuilder computation = new StringBuilder();
+            computation.append(tmp).append(SPACE).append(ASSIGN).append(typeSuffix).append(SPACE)
+                    .append("getfield(this, ").append(safeName).append(typeSuffix).append(")")
+                    .append(typeSuffix).append(END_STMT);
+
+            return new AssignableValue(tmp, valueType, computation, (out, valueCode) ->
+                    out.append("putfield(this, ")
+                            .append(safeName)
+                            .append(typeSuffix)
+                            .append(", ")
+                            .append(valueCode)
+                            .append(").V")
+                            .append(END_STMT));
+        }
+
+        String operand = safeName + typeSuffix;
+        return new AssignableValue(operand, valueType, new StringBuilder(), (out, valueCode) ->
+                out.append(operand).append(SPACE)
+                        .append(ASSIGN).append(typeSuffix).append(SPACE)
+                        .append(valueCode).append(END_STMT));
+    }
+
+    private AssignableValue resolveArrayAssignable(JmmNode node) {
+        var arrayExpr = visit(node.getChild(0));
+        var indexExpr = visit(node.getChild(1));
+
+        JmmType valueType = types.getExprType(node);
+        if (valueType == null) {
+            valueType = TypeUtils.intType();
+        }
+        String valueSuffix = ollirTypes.toOllirType(valueType);
+        String elementOperand = arrayExpr.getCode() + "[" + indexExpr.getCode() + "]" + valueSuffix;
+
+        StringBuilder computation = new StringBuilder();
+        computation.append(arrayExpr.getComputation());
+        computation.append(indexExpr.getComputation());
+
+        String tmp = ollirTypes.nextTemp() + valueSuffix;
+        computation.append(tmp).append(SPACE).append(ASSIGN).append(valueSuffix).append(SPACE)
+                .append(elementOperand).append(END_STMT);
+
+        return new AssignableValue(tmp, valueType, computation, (out, valueCode) ->
+                out.append(elementOperand).append(SPACE)
+                        .append(ASSIGN).append(valueSuffix).append(SPACE)
+                        .append(valueCode).append(END_STMT));
+    }
+
+    private AssignableValue resolveFieldAssignable(JmmNode node) {
+        var receiver = visit(node.getChild(0));
+        String fieldName = node.get(JmmAttributes.FIELD_ACCESS_EXPR.NAME);
+
+        JmmType valueType = types.resolveFieldAccessType(node)
+                .orElseThrow(() -> new IllegalArgumentException("Unknown assignable field: " + fieldName));
+        String valueSuffix = ollirTypes.toOllirType(valueType);
+        String fieldOperand = ollirTypes.sanitizeId(fieldName) + valueSuffix;
+
+        StringBuilder computation = new StringBuilder();
+        computation.append(receiver.getComputation());
+
+        String tmp = ollirTypes.nextTemp() + valueSuffix;
+        computation.append(tmp).append(SPACE).append(ASSIGN).append(valueSuffix).append(SPACE)
+                .append("getfield(").append(receiver.getCode()).append(", ").append(fieldOperand).append(")")
+                .append(valueSuffix).append(END_STMT);
+
+        return new AssignableValue(tmp, valueType, computation, (out, valueCode) ->
+                out.append("putfield(")
+                        .append(receiver.getCode())
+                        .append(", ")
+                        .append(fieldOperand)
+                        .append(", ")
+                        .append(valueCode)
+                        .append(").V")
+                        .append(END_STMT));
+    }
+
+    private static JmmNode unwrapParen(JmmNode node) {
+        var current = node;
+        while (PAREN_EXPR.check(current)) {
+            current = current.getChild(0);
+        }
+
+        return current;
+    }
+
+    private String staticCallReceiver(JmmNode receiverNode, java.util.Optional<TypeUtils.ResolvedMethodCall> resolvedCall) {
+        return resolvedCall
+                .map(TypeUtils.ResolvedMethodCall::receiverType)
+                .filter(JmmType::isClass)
+                .map(type -> type.asClass().fullyQualifiedName())
+                .or(() -> types.tryGetExprType(receiverNode)
+                        .filter(JmmType::isClass)
+                        .map(type -> type.asClass().fullyQualifiedName()))
+                .map(OptUtils::simpleClassName)
+                .map(ollirTypes::sanitizeId)
+                .orElseGet(() -> receiverNode.hasAttribute("name")
+                        ? ollirTypes.sanitizeId(receiverNode.get("name"))
+                        : ollirTypes.sanitizeId(OptUtils.simpleClassName(table.getFullyQualifiedName())));
+    }
+
+    private static String ollirClassName(JmmType type, String fallbackName) {
+        if (type != null && type.isClass()) {
+            return OptUtils.simpleClassName(type.asClass().fullyQualifiedName());
+        }
+
+        return OptUtils.simpleClassName(fallbackName);
     }
 
     private String emitNestedArrayInitialization(String arrayOperand,

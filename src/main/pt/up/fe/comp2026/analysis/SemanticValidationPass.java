@@ -189,7 +189,13 @@ public abstract class SemanticValidationPass extends AnalysisVisitorWithTable {
     }
 
     protected boolean isAssignableEntity(JmmNode expr) {
-        return JmmKind.VAR_REF_EXPR.check(expr) || JmmKind.ARRAY_ACCESS_EXPR.check(expr);
+        if (JmmKind.PAREN_EXPR.check(expr)) {
+            return isAssignableEntity(expr.getChild(0));
+        }
+
+        return JmmKind.VAR_REF_EXPR.check(expr)
+                || JmmKind.ARRAY_ACCESS_EXPR.check(expr)
+                || JmmKind.FIELD_ACCESS_EXPR.check(expr);
     }
 
     protected JmmType getIndexedType(JmmNode arrayAssignStmt, JmmType baseType, String targetName) {
