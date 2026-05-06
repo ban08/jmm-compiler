@@ -3,6 +3,7 @@ package pt.up.fe.comp2026.optimization.ast;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2026.ast.AccessType;
+import pt.up.fe.comp2026.ast.ForStmtUtils;
 import pt.up.fe.comp2026.ast.TypeUtils;
 import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.comp2026.jmm.ast.JmmKind;
@@ -122,7 +123,7 @@ public class ConstantPropagationOptimizer {
     }
 
     private Map<String, Constant> processForStatement(JmmNode forStmt, Map<String, Constant> env) {
-        var parts = splitFor(forStmt);
+        var parts = ForStmtUtils.split(forStmt);
 
         if (parts.init() != null) {
             env = processForHeaderAssign(parts.init(), env);
@@ -314,31 +315,4 @@ public class ConstantPropagationOptimizer {
         return current;
     }
 
-    private ForParts splitFor(JmmNode forStmt) {
-        JmmNode init = null;
-        JmmNode condition = null;
-        JmmNode update = null;
-        JmmNode body = null;
-
-        boolean firstHeaderSeen = false;
-        for (var child : forStmt.getChildren()) {
-            if (JmmKind.FOR_HEADER_ASSIGN.check(child)) {
-                if (!firstHeaderSeen) {
-                    init = child;
-                    firstHeaderSeen = true;
-                } else {
-                    update = child;
-                }
-            } else if (JmmKind.EXPR.check(child)) {
-                condition = child;
-            } else if (JmmKind.STMT.check(child)) {
-                body = child;
-            }
-        }
-
-        return new ForParts(init, condition, update, body);
-    }
-
-    private record ForParts(JmmNode init, JmmNode condition, JmmNode update, JmmNode body) {
-    }
 }

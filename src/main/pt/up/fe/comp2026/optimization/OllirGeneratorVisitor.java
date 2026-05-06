@@ -7,6 +7,7 @@ import pt.up.fe.comp.jmm.analysis.table.type.JmmType;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2026.ast.AccessType;
+import pt.up.fe.comp2026.ast.ForStmtUtils;
 import pt.up.fe.comp2026.ast.TypeUtils;
 import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 
@@ -510,31 +511,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String visitForStmt(JmmNode node, Void unused) {
-        // The grammar admits an optional init, cond, update, then a STMT body.
-        JmmNode init = null;
-        JmmNode cond = null;
-        JmmNode update = null;
-        JmmNode body = null;
-
-        boolean firstHeaderSeen = false;
-        for (var child : node.getChildren()) {
-            if (FOR_HEADER_ASSIGN.check(child)) {
-                if (!firstHeaderSeen) {
-                    init = child;
-                    firstHeaderSeen = true;
-                } else {
-                    update = child;
-                }
-            } else if (EXPR.check(child)) {
-                cond = child;
-            } else if (STMT.check(child)) {
-                body = child;
-            }
-        }
+        var parts = ForStmtUtils.split(node);
 
         StringBuilder code = new StringBuilder();
-        if (init != null) {
-            code.append(emitForHeaderAssign(init));
+        if (parts.init() != null) {
+            code.append(emitForHeaderAssign(parts.init()));
         }
 
         String condLabel = ollirTypes.nextLabel("for_cond_");
@@ -542,8 +523,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         String endLabel = ollirTypes.nextLabel("for_end_");
 
         code.append(condLabel).append(":\n");
-        if (cond != null) {
-            var condResult = exprVisitor.visit(cond);
+        if (parts.condition() != null) {
+            var condResult = exprVisitor.visit(parts.condition());
             code.append(condResult.getComputation());
             code.append("if (").append(condResult.getCode()).append(") goto ").append(bodyLabel).append(END_STMT);
             code.append("goto ").append(endLabel).append(END_STMT);
@@ -552,12 +533,12 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         }
 
         code.append(bodyLabel).append(":\n");
-        if (body != null) {
-            String bodyCode = visit(body);
+        if (parts.body() != null) {
+            String bodyCode = visit(parts.body());
             if (bodyCode != null) code.append(bodyCode);
         }
-        if (update != null) {
-            code.append(emitForHeaderAssign(update));
+        if (parts.update() != null) {
+            code.append(emitForHeaderAssign(parts.update()));
         }
         code.append("goto ").append(condLabel).append(END_STMT);
         code.append(endLabel).append(":\n");

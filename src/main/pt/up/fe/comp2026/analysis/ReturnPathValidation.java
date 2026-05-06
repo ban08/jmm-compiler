@@ -2,6 +2,7 @@ package pt.up.fe.comp2026.analysis;
 
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp2026.ast.ForStmtUtils;
 import pt.up.fe.comp2026.ast.TypeUtils;
 import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.comp2026.jmm.ast.JmmKind;
@@ -80,12 +81,12 @@ public class ReturnPathValidation extends SemanticValidationPass {
 
     private boolean isStaticallyTrueLoop(JmmNode loopStmt) {
         if (JmmKind.FOR_STMT.check(loopStmt)) {
-            var conditions = loopStmt.getChildren(JmmKind.EXPR);
-            if (conditions.isEmpty()) {
+            var condition = ForStmtUtils.split(loopStmt).condition();
+            if (condition == null) {
                 return true;
             }
 
-            return tryEvaluateBooleanConstant(conditions.getFirst()).orElse(false);
+            return tryEvaluateBooleanConstant(condition).orElse(false);
         }
 
         if (JmmKind.WHILE_STMT.check(loopStmt)) {

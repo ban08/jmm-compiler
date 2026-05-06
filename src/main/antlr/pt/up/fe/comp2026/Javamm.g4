@@ -91,12 +91,24 @@ forHeaderAssign
     | var = ID ('[' expr ']')+ '=' expr
     ;
 
+forInit
+    : forHeaderAssign
+    ;
+
+forCondition
+    : expr
+    ;
+
+forUpdate
+    : forHeaderAssign
+    ;
+
 stmt
     : '{' stmt* '}' #CompoundStmt
     | IF '(' expr ')' stmt (ELSE stmt)? #IfStmt
     | WHILE '(' expr ')' stmt #WhileStmt
     | DO stmt WHILE '(' expr ')' ';' #DoWhileStmt
-    | FOR '(' forHeaderAssign? ';' expr? ';' forHeaderAssign? ')' stmt #ForStmt
+    | FOR '(' forInit? ';' forCondition? ';' forUpdate? ')' stmt #ForStmt
     | expr ';' #ExprStmt
     | var = ID '=' expr ';' #AssignStmt
     | var = ID ('[' expr ']')+ '=' expr ';' #ArrayAssignStmt

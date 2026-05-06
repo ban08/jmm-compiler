@@ -3,6 +3,7 @@ package pt.up.fe.comp2026.optimization.ast;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2026.ast.AccessType;
+import pt.up.fe.comp2026.ast.ForStmtUtils;
 import pt.up.fe.comp2026.ast.TypeUtils;
 import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.comp2026.jmm.ast.JmmKind;
@@ -369,8 +370,8 @@ public class DeadCodeEliminationOptimizer {
         }
 
         if (JmmKind.FOR_STMT.check(statement)) {
-            var conditions = statement.getChildren(JmmKind.EXPR);
-            return conditions.isEmpty() || readBoolean(conditions.getFirst()).orElse(false);
+            var condition = ForStmtUtils.split(statement).condition();
+            return condition == null || readBoolean(condition).orElse(false);
         }
 
         return false;

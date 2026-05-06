@@ -171,4 +171,57 @@ public class MyOllirEdgeCasesTest {
                 ollir.contains("new(ReferenceLoopReturns).ReferenceLoopReturns")
                         && ollir.contains("invokespecial(unreach"));
     }
+
+    @Test
+    public void myTestForWithoutInitializerKeepsUpdateInsideLoop() {
+        var result = toOllir("""
+                package core.optimization;
+
+                class ForWithoutInitializer {
+                    int method(int limit) {
+                        int i;
+                        i = 0;
+                        for (; i < limit; i = i + 1) {
+                        }
+                        return i;
+                    }
+                }
+                """);
+
+        assertNoErrors(result);
+
+        String ollir = result.getOllirCode();
+        int condIndex = ollir.indexOf("for_cond_");
+        Assert.assertTrue("The for condition label should be emitted", condIndex >= 0);
+
+        String beforeCondition = ollir.substring(0, condIndex);
+        Assert.assertFalse("The update slot of for (; cond; update) must not execute before the loop test",
+                beforeCondition.contains("+.i32 1.i32"));
+    }
+
+    @Test
+    public void myTestForWithoutInitializerOrConditionKeepsUpdateInsideLoop() {
+        var result = toOllir("""
+                package core.optimization;
+
+                class ForOnlyUpdate {
+                    void method() {
+                        int i;
+                        i = 0;
+                        for (;; i = i + 1) {
+                        }
+                    }
+                }
+                """);
+
+        assertNoErrors(result);
+
+        String ollir = result.getOllirCode();
+        int condIndex = ollir.indexOf("for_cond_");
+        Assert.assertTrue("The for condition label should be emitted", condIndex >= 0);
+
+        String beforeCondition = ollir.substring(0, condIndex);
+        Assert.assertFalse("The update slot of for (;; update) must not execute before entering the loop",
+                beforeCondition.contains("+.i32 1.i32"));
+    }
 }

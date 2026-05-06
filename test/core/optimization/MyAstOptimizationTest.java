@@ -280,6 +280,29 @@ public class MyAstOptimizationTest extends JmmTestEnv {
     }
 
     @Test
+    public void forFalseWithoutInitializerDoesNotRunUpdate() {
+        var method = optimizedMethod("""
+                package p;
+                class A {
+                    int method() {
+                        int y;
+                        y = 3;
+                        for (; false; y = y + 1) {
+                            y = 9;
+                        }
+                        return y;
+                    }
+                }
+                """);
+
+        var returnExpr = method.getDescendants(JmmKind.RETURN_STMT).getFirst().getChild(0);
+        assertTrue("for(; false; update) must remove the loop without preserving the update",
+                JmmKind.INTEGER_LITERAL.check(returnExpr));
+        assertEquals("Expected the pre-loop value to remain",
+                "3", returnExpr.get(JmmAttributes.INTEGER_LITERAL.VALUE));
+    }
+
+    @Test
     public void foldsShortCircuitWithoutKeepingDeadDivision() {
         var method = optimizedMethod("""
                 package p;

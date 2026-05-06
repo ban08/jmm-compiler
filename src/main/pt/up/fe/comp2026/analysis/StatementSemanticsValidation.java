@@ -2,6 +2,7 @@ package pt.up.fe.comp2026.analysis;
 
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp2026.ast.ForStmtUtils;
 import pt.up.fe.comp2026.ast.TypeUtils;
 import pt.up.fe.comp2026.jmm.ast.JmmAttributes;
 import pt.up.fe.comp2026.jmm.ast.JmmKind;
@@ -45,9 +46,9 @@ public class StatementSemanticsValidation extends SemanticValidationPass {
     }
 
     private Void visitForStmt(JmmNode forStmt, SymbolTable ignored) {
-        var conditions = forStmt.getChildren(JmmKind.EXPR);
-        if (!conditions.isEmpty()) {
-            validateBooleanCondition(conditions.getFirst(), "FOR");
+        var parts = ForStmtUtils.split(forStmt);
+        if (parts.condition() != null) {
+            validateBooleanCondition(parts.condition(), "FOR");
         }
 
         return null;
