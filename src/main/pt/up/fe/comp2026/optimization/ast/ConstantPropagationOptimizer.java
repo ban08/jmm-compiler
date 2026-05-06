@@ -297,12 +297,21 @@ public class ConstantPropagationOptimizer {
     }
 
     private Optional<String> assignedNameFromMutatingUnary(JmmNode node) {
-        var target = node.getChild(0);
+        var target = unwrapParen(node.getChild(0));
         if (!JmmKind.VAR_REF_EXPR.check(target)) {
             return Optional.empty();
         }
 
         return Optional.of(target.get(JmmAttributes.VAR_REF_EXPR.NAME));
+    }
+
+    private JmmNode unwrapParen(JmmNode node) {
+        var current = node;
+        while (JmmKind.PAREN_EXPR.check(current)) {
+            current = current.getChild(0);
+        }
+
+        return current;
     }
 
     private ForParts splitFor(JmmNode forStmt) {

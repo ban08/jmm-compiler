@@ -172,6 +172,27 @@ public class MyAstOptimizationTest extends JmmTestEnv {
     }
 
     @Test
+    public void doesNotPropagateAcrossParenthesizedIncrementExpressionStatement() {
+        var method = optimizedMethod("""
+                package p;
+                class A {
+                    int method() {
+                        int x;
+                        x = 1;
+                        ++(x);
+                        return x;
+                    }
+                }
+                """);
+
+        var returnExpr = method.getDescendants(JmmKind.RETURN_STMT).getFirst().getChild(0);
+        assertTrue("Parenthesized increment still mutates x, so the later return must still read x",
+                JmmKind.VAR_REF_EXPR.check(returnExpr));
+        assertEquals("Expected the return expression to still read x",
+                "x", returnExpr.get(JmmAttributes.VAR_REF_EXPR.NAME));
+    }
+
+    @Test
     public void doesNotRewriteIncrementOperandToLiteral() {
         var method = optimizedMethod("""
                 package p;
