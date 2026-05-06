@@ -5,15 +5,9 @@ import org.junit.Test;
 import org.specs.comp.ollir.ArrayOperand;
 import org.specs.comp.ollir.inst.AssignInstruction;
 import org.specs.comp.ollir.inst.NewInstruction;
-import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
-import pt.up.fe.comp.jmm.ollir.OllirResult;
-import pt.up.fe.comp.jmm.report.ReportType;
-import pt.up.fe.comp2026.analysis.JmmAnalysisImpl;
-import pt.up.fe.comp2026.lexer.JmmLexerImpl;
-import pt.up.fe.comp2026.optimization.JmmOptimizationImpl;
-import pt.up.fe.comp2026.parser.JmmParserImpl;
 
-import java.util.HashMap;
+import static core.optimization.MyOllirTestSupport.assertNoErrors;
+import static core.optimization.MyOllirTestSupport.toOllir;
 
 public class MyArrayOllirGenerationTest {
 
@@ -94,26 +88,5 @@ public class MyArrayOllirGenerationTest {
 
         Assert.assertTrue("Multidimensional array lowering should emit stores into array elements", arrayStores >= 2);
         Assert.assertTrue("Multidimensional array lowering should materialize at least one array read", arrayReads >= 1);
-    }
-
-    private static OllirResult toOllir(String code) {
-        var config = new HashMap<String, String>();
-
-        var lexerResult = new JmmLexerImpl().lex(code, config);
-        Assert.assertFalse("Lexing should succeed", lexerResult.hasErrors());
-
-        var parserResult = new JmmParserImpl().parse(lexerResult, config);
-        Assert.assertFalse("Parsing should succeed", parserResult.hasErrors());
-
-        JmmSemanticsResult semanticsResult = new JmmAnalysisImpl().semanticAnalysis(parserResult);
-        Assert.assertTrue("Semantic analysis should not emit errors",
-                semanticsResult.getReports(ReportType.ERROR).isEmpty());
-
-        return new JmmOptimizationImpl().toOllir(semanticsResult);
-    }
-
-    private static void assertNoErrors(OllirResult result) {
-        Assert.assertTrue("OLLIR generation should not emit errors",
-                result.reports().stream().noneMatch(report -> report.getType() == ReportType.ERROR));
     }
 }

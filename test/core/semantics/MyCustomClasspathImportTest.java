@@ -313,6 +313,26 @@ public class MyCustomClasspathImportTest {
                 semanticsResult.hasErrors());
     }
 
+    @Test
+    public void myTestCurrentClassInstancesAreAssignableToImplicitJavaLangObject() throws Exception {
+        var tempDir = Files.createTempDirectory("jmm-extra-classpath-object-assignability");
+
+        var code = """
+                package p;
+                class A {
+                    public Object foo() {
+                        Object value;
+                        value = new A();
+                        return value;
+                    }
+                }
+                """;
+
+        var semanticsResult = analyze(code, tempDir);
+        Assert.assertFalse("Every class should be assignable to implicit java.lang.Object",
+                semanticsResult.hasErrors());
+    }
+
     private static void compileHelpers(Path outputDir, Path... javaFiles) {
         var compiler = ToolProvider.getSystemJavaCompiler();
         Assert.assertNotNull("Expected a JDK compiler to be available during tests", compiler);

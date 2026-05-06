@@ -341,6 +341,56 @@ public class MyAstOptimizationTest extends JmmTestEnv {
                 JmmKind.VAR_REF_EXPR.check(returnExpr));
     }
 
+    @Test
+    public void myTestDeadStoreEliminationRemovesOverwrittenAndExitDeadStores() {
+        var method = optimizedMethod("""
+                package p;
+                class A {
+                    int method() {
+                        int x;
+                        x = 1;
+                        x = 2;
+                        return 0;
+                    }
+                }
+                """);
+
+        var storesToX = method.getDescendants(JmmKind.ASSIGN_STMT).stream()
+                .filter(assign -> assign.get(JmmAttributes.ASSIGN_STMT.VAR).equals("x"))
+                .toList();
+
+        assertTrue("Assignments to x are dead before overwrite or method exit and should be removed",
+                storesToX.isEmpty());
+    }
+
+    @Test
+    public void myTestDeadStoreEliminationKeepsAssignmentsWhoseRhsMayHaveSideEffects() {
+        var method = optimizedMethod("""
+                package p;
+                class A {
+                    int method() {
+                        int x;
+                        x = this.sideEffect();
+                        return 0;
+                    }
+
+                    int sideEffect() {
+                        return 1;
+                    }
+                }
+                """);
+
+        var storesToX = method.getDescendants(JmmKind.ASSIGN_STMT).stream()
+                .filter(assign -> assign.get(JmmAttributes.ASSIGN_STMT.VAR).equals("x"))
+                .toList();
+
+        assertEquals("The dead local value can be ignored, but the call-producing assignment must stay",
+                1, storesToX.size());
+        assertTrue("The side-effecting method call should still be present",
+                method.getDescendants(JmmKind.METHOD_CALL_EXPR).stream()
+                        .anyMatch(call -> call.get(JmmAttributes.METHOD_CALL_EXPR.NAME).equals("sideEffect")));
+    }
+
     private JmmNode optimizedMethod(String code) {
         var semanticsResult = semanticsFromSnippet(code, false);
         var optimized = new JmmOptimizationImpl().transformAst(semanticsResult);
