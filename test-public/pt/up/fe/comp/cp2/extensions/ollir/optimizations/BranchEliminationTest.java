@@ -51,12 +51,15 @@ public class BranchEliminationTest extends OllirTestEnv {
     public ClassUnit optimize(String resourceName, boolean shouldChange) {
         var original = toOllir(resourceName, false);
         var optimized = toOllir(resourceName, true);
+
+        var originalCode = original.getOllirClass().code(); //.getOllirCode();
+        var optimizedCode = optimized.getOllirClass().code(); //.getOllirCode();
         if (shouldChange) {
             assertNotEquals("Expected code to change with -o flag",
-                    original.getOllirCode(), optimized.getOllirCode());
+                    originalCode, optimizedCode);
         } else {
             assertEquals("Expected code to not change with -o flag",
-                    original.getOllirCode(), optimized.getOllirCode());
+                    originalCode, optimizedCode);
         }
         return optimized.getOllirClass();
     }
