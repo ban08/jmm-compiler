@@ -5,6 +5,7 @@ import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp2026.analysis.JmmAnalysisImpl;
 import pt.up.fe.comp2026.lexer.JmmLexerImpl;
+import pt.up.fe.comp2026.optimization.JmmOptimizationImpl;
 import pt.up.fe.comp2026.parser.JmmParserImpl;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsSystem;
@@ -33,20 +34,33 @@ public class Launcher {
         var parserResult = parser.parse(lexerResult, config);
         parserResult.throwIfErrors();
 
-        System.out.println("AST:");
-        System.out.println(parserResult.rootNode().toTree());
+        boolean debug = Boolean.parseBoolean(config.getOrDefault("debug", "false"));
+        if (debug) {
+            System.out.println("AST:");
+            System.out.println(parserResult.rootNode().toTree());
+        }
 
         var sema = new JmmAnalysisImpl();
         JmmSemanticsResult semanticsResult = sema.semanticAnalysis(parserResult);
 
-        System.out.println("Symbol Table:");
-        System.out.println(semanticsResult.getSymbolTable().print());
+        if (debug) {
+            System.out.println("Symbol Table:");
+            System.out.println(semanticsResult.getSymbolTable().print());
 
-        System.out.println("Annotated AST:");
-        System.out.println(semanticsResult.getRootNode().toTree());
+            System.out.println("Annotated AST:");
+            System.out.println(semanticsResult.getRootNode().toTree());
+        }
 
         printReports(semanticsResult.reports());
         semanticsResult.throwIfErrors();
+
+        var optimization = new JmmOptimizationImpl();
+        semanticsResult = optimization.transformAst(semanticsResult);
+        var ollirResult = optimization.toOllir(semanticsResult);
+        ollirResult = optimization.transformOllir(ollirResult);
+
+        printReports(ollirResult.reports());
+        ollirResult.throwIfErrors();
     }
 
     private static void printReports(List<Report> reports) {
