@@ -219,9 +219,16 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             }
         }
 
-        // Void methods that don't end with an explicit return must still terminate with ret.V
-        // so that any trailing label (from ifs/loops) attaches to a real instruction.
-        if (TypeUtils.voidType().equals(currentMethod.returnType()) && !endsWithReturn(body)) {
+        // OLLIR rejects labels that don't precede an instruction. Trailing labels can
+        // appear at the tail of a method when the last source statement is an if/else
+        // or a loop. visitIfStmt elides the end label when both branches always exit;
+        // for everything else (e.g. a non-void method that ends with a while(true) loop
+        // whose body always returns) we append a synthetic return with a default value
+        // for the method's return type. The synthetic return is unreachable in valid
+        // programs, since semantic return-path validation rejects fall-through.
+        if (endsWithLabel(body)) {
+            body.append(buildSyntheticReturn(currentMethod.returnType()));
+        } else if (TypeUtils.voidType().equals(currentMethod.returnType()) && !endsWithReturn(body)) {
             body.append("ret.V").append(END_STMT);
         }
 
@@ -231,6 +238,77 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(NL);
 
         currentMethod = null;
+        return code.toString();
+    }
+
+    private static boolean endsWithLabel(CharSequence body) {
+        int len = body.length();
+        int end = len;
+        while (end > 0 && Character.isWhitespace(body.charAt(end - 1))) {
+            end--;
+        }
+        if (end == 0) {
+            return false;
+        }
+        int start = end;
+        while (start > 0 && body.charAt(start - 1) != '\n') {
+            start--;
+        }
+        String last = body.subSequence(start, end).toString().trim();
+        if (!last.endsWith(":")) {
+            return false;
+        }
+        String labelName = last.substring(0, last.length() - 1).trim();
+        if (labelName.isEmpty()) {
+            return false;
+        }
+        for (int i = 0; i < labelName.length(); i++) {
+            char c = labelName.charAt(i);
+            if (!(Character.isLetterOrDigit(c) || c == '_' || c == '$')) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private String buildSyntheticReturn(JmmType returnType) {
+        // Unreachable trailing return chosen to keep OLLIR parseable. Returning the
+        // type's natural default avoids inventing a fresh local that might confuse
+        // var-table builders.
+        if (TypeUtils.voidType().equals(returnType)) {
+            return "ret.V" + END_STMT;
+        }
+
+        String typeSuffix = ollirTypes.toOllirType(returnType);
+        if (TypeUtils.intType().equals(returnType)) {
+            return "ret" + typeSuffix + SPACE + "0" + typeSuffix + END_STMT;
+        }
+        if (TypeUtils.booleanType().equals(returnType)) {
+            return "ret" + typeSuffix + SPACE + "0" + typeSuffix + END_STMT;
+        }
+
+        String intSuffix = ollirTypes.toOllirType(TypeUtils.intType());
+        String tmp = ollirTypes.nextTemp("unreach") + typeSuffix;
+        StringBuilder code = new StringBuilder();
+
+        if (returnType.isArray()) {
+            code.append(tmp).append(SPACE)
+                    .append(ASSIGN).append(typeSuffix).append(SPACE)
+                    .append("new(array, 0").append(intSuffix).append(")")
+                    .append(typeSuffix).append(END_STMT);
+            code.append("ret").append(typeSuffix).append(SPACE).append(tmp).append(END_STMT);
+            return code.toString();
+        }
+
+        String className = returnType.isClass()
+                ? OptUtils.simpleClassName(returnType.asClass().fullyQualifiedName())
+                : "Object";
+        code.append(tmp).append(SPACE)
+                .append(ASSIGN).append(typeSuffix).append(SPACE)
+                .append("new(").append(className).append(")")
+                .append(typeSuffix).append(END_STMT);
+        code.append("invokespecial(").append(tmp).append(", \"<init>\").V").append(END_STMT);
+        code.append("ret").append(typeSuffix).append(SPACE).append(tmp).append(END_STMT);
         return code.toString();
     }
 
@@ -342,23 +420,59 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         String thenLabel = ollirTypes.nextLabel("if_then_");
         String endLabel = ollirTypes.nextLabel("if_end_");
 
+        // Build branch bodies first so we can detect always-exits paths and avoid
+        // dangling end labels (OLLIR forbids labels not followed by an instruction).
+        String thenCode = visit(node.getChild(1));
+        if (thenCode == null) thenCode = "";
+        String elseCode = "";
+        if (hasElse) {
+            String visited = visit(node.getChild(2));
+            if (visited != null) elseCode = visited;
+        }
+
+        boolean thenAlwaysExits = endsWithUnconditionalExit(thenCode);
+        // The fall-through (no else) path always reaches end_label, so the else side
+        // can only be considered terminating when an explicit else exists and exits.
+        boolean elseAlwaysExits = hasElse && endsWithUnconditionalExit(elseCode);
+
         StringBuilder code = new StringBuilder();
         code.append(cond.getComputation());
         code.append("if (").append(cond.getCode()).append(") goto ").append(thenLabel).append(END_STMT);
 
-        // Else branch (or fall-through nothing) executes when cond is false.
-        if (hasElse) {
-            String elseCode = visit(node.getChild(2));
-            if (elseCode != null) code.append(elseCode);
+        code.append(elseCode);
+        if (!elseAlwaysExits) {
+            code.append("goto ").append(endLabel).append(END_STMT);
         }
-        code.append("goto ").append(endLabel).append(END_STMT);
 
         code.append(thenLabel).append(":\n");
-        String thenCode = visit(node.getChild(1));
-        if (thenCode != null) code.append(thenCode);
+        code.append(thenCode);
 
-        code.append(endLabel).append(":\n");
+        if (!thenAlwaysExits || !elseAlwaysExits) {
+            code.append(endLabel).append(":\n");
+        }
         return code.toString();
+    }
+
+    /**
+     * True when {@code body}'s last non-empty line is an unconditional control transfer
+     * (return/goto). Used by if/else lowering to avoid emitting an end-label that no
+     * branch can fall through to, which would otherwise trail a method as a dangling
+     * label and fail OLLIR parsing.
+     */
+    private static boolean endsWithUnconditionalExit(CharSequence body) {
+        int len = body.length();
+        int end = len;
+        while (end > 0 && Character.isWhitespace(body.charAt(end - 1))) {
+            end--;
+        }
+        int start = end;
+        while (start > 0 && body.charAt(start - 1) != '\n') {
+            start--;
+        }
+        String last = body.subSequence(start, end).toString().trim();
+        return last.startsWith("ret.")
+                || last.startsWith("ret ")
+                || last.startsWith("goto ");
     }
 
     private String visitWhileStmt(JmmNode node, Void unused) {

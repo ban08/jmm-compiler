@@ -103,4 +103,72 @@ public class MyOllirEdgeCasesTest {
         Assert.assertTrue("Field-backed array writes should store into the loaded array element",
                 ollir.contains("].i32 :=.i32 5.i32"));
     }
+
+    @Test
+    public void myTestIfElseReturningBothBranchesDoesNotLeaveDanglingEndLabel() {
+        var result = toOllir("""
+                package core.optimization;
+
+                class IfElseReturns {
+                    int method(boolean flag) {
+                        if (flag) {
+                            return 1;
+                        } else {
+                            return 2;
+                        }
+                    }
+                }
+                """);
+
+        assertNoErrors(result);
+
+        String ollir = result.getOllirCode();
+        Assert.assertFalse("An if/else whose branches both return should not emit an unused end label",
+                ollir.contains("if_end_"));
+        Assert.assertEquals("Both source branches should lower to direct returns",
+                2, countOccurrences(ollir, "ret.i32"));
+    }
+
+    @Test
+    public void myTestTrueLoopAtMethodEndDoesNotLeaveDanglingEndLabel() {
+        var result = toOllir("""
+                package core.optimization;
+
+                class TrueLoopReturns {
+                    int method() {
+                        while (true) {
+                            return 5;
+                        }
+                    }
+                }
+                """);
+
+        assertNoErrors(result);
+
+        String ollir = result.getOllirCode();
+        Assert.assertTrue("Trailing loop end labels must be followed by a parseable return instruction",
+                ollir.contains("while_end_") && ollir.contains("ret.i32 0.i32"));
+    }
+
+    @Test
+    public void myTestReferenceTrueLoopFallbackUsesDefinedValue() {
+        var result = toOllir("""
+                package core.optimization;
+
+                class ReferenceLoopReturns {
+                    ReferenceLoopReturns method() {
+                        while (true) {
+                            return new ReferenceLoopReturns();
+                        }
+                    }
+                }
+                """);
+
+        assertNoErrors(result);
+
+        String ollir = result.getOllirCode();
+        Assert.assertTrue("Reference fallback return should initialize the synthetic value before returning it",
+                ollir.contains("new(ReferenceLoopReturns).ReferenceLoopReturns")
+                        && ollir.contains("invokespecial(unreach"));
+    }
 }
