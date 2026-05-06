@@ -412,6 +412,28 @@ public class MyAstOptimizationTest extends JmmTestEnv {
                         .anyMatch(call -> call.get(JmmAttributes.METHOD_CALL_EXPR.NAME).equals("sideEffect")));
     }
 
+    @Test
+    public void myTestDeadStoreEliminationKeepsStoresThroughArrayAliases() {
+        var method = optimizedMethod("""
+                package p;
+                class A {
+                    int method(int[] input) {
+                        int[] alias;
+                        alias = input;
+                        alias[0] = 4;
+                        return 0;
+                    }
+                }
+                """);
+
+        var arrayStores = method.getDescendants(JmmKind.ARRAY_ASSIGN_STMT).stream()
+                .filter(assign -> assign.get(JmmAttributes.ARRAY_ASSIGN_STMT.VAR).equals("alias"))
+                .toList();
+
+        assertEquals("A store through a local alias of a parameter array is externally visible",
+                1, arrayStores.size());
+    }
+
     private JmmNode optimizedMethod(String code) {
         var semanticsResult = semanticsFromSnippet(code, false);
         var optimized = new JmmOptimizationImpl().transformAst(semanticsResult);
