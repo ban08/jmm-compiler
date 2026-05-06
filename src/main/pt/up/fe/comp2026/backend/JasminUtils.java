@@ -42,7 +42,6 @@ public class JasminUtils {
 
 
     public String getTypePrefix(Type type) {
-        System.out.println("[TODO] JasminUtils.getTypePrefix(): Assumes it is always int, needs to be expanded");
         return "i";
     }
 
