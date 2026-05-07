@@ -19,7 +19,7 @@ public class OptUtils {
 
     private static final Set<String> OLLIR_KEYWORDS = Set.of("bool", "i32", "V", "array", "String", "final", "goto", "if", "import", "interface", "new", "package"
             , "private", "protected", "public", "ret", "static", "this", "ldc", "invokespecial", "invokevirtual", "invokestatic", "arraylength", "getfield", "putfield", "getstatic", "putstatic",
-            ".method", ".construct", ".field", "extends"
+            ".method", ".construct", ".field", "extends", "varargs"
     );
 
     private final TypeUtils types;
@@ -64,7 +64,7 @@ public class OptUtils {
         return "." + buildOllirTypeBody(type);
     }
 
-    private static String buildOllirTypeBody(JmmType type) {
+    private String buildOllirTypeBody(JmmType type) {
         if (type.isArray()) {
             JmmArrayType array = type.asArray();
             StringBuilder sb = new StringBuilder();
@@ -86,10 +86,14 @@ public class OptUtils {
         }
 
         if (type.isClass()) {
-            return simpleClassName(type.asClass().fullyQualifiedName());
+            return toOllirClassName(type.asClass().fullyQualifiedName());
         }
 
         throw new RuntimeException("Unknown JmmType: " + type);
+    }
+
+    public String toOllirClassName(String fullyQualifiedName) {
+        return sanitizeClassName(simpleClassName(fullyQualifiedName));
     }
 
     public static String simpleClassName(String fullyQualifiedName) {
@@ -98,6 +102,20 @@ public class OptUtils {
         }
         int dot = fullyQualifiedName.lastIndexOf('.');
         return dot >= 0 ? fullyQualifiedName.substring(dot + 1) : fullyQualifiedName;
+    }
+
+    public String sanitizeClassName(String id) {
+        // OLLIR's grammar does not reserve String, so keeping it unquoted avoids
+        // surprising class descriptors while still escaping real keyword collisions.
+        if ("String".equals(id)) {
+            return id;
+        }
+
+        return sanitizeId(id);
+    }
+
+    public String sanitizePathSegment(String id) {
+        return sanitizeClassName(id);
     }
 
     public String sanitizeId(String id) {

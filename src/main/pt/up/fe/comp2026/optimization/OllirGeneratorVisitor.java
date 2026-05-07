@@ -75,11 +75,15 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String visitPackageDecl(JmmNode packageDecl, Void unused) {
-        return "package " + String.join(".", packageDecl.getObjectAsList("path", String.class)) + ";\n";
+        return "package " + packageDecl.getObjectAsList("path", String.class).stream()
+                .map(ollirTypes::sanitizePathSegment)
+                .collect(Collectors.joining(".")) + ";\n";
     }
 
     private String visitImportDecl(JmmNode importDecl, Void unused) {
-        return "import " + String.join(".", importDecl.getObjectAsList("path", String.class)) + ";\n";
+        return "import " + importDecl.getObjectAsList("path", String.class).stream()
+                .map(ollirTypes::sanitizePathSegment)
+                .collect(Collectors.joining(".")) + ";\n";
     }
 
     private String visitVarDecl(JmmNode varDecl, Void unused) {
@@ -98,7 +102,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         StringBuilder code = new StringBuilder();
         code.append(NL);
 
-        code.append(table.getClassName());
+        code.append(ollirTypes.sanitizeClassName(table.getClassName()));
         code.append(" extends ").append(superSimpleName());
         code.append(L_BRACKET).append(NL);
 
@@ -179,7 +183,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         if (superFqn == null || superFqn.isBlank()) {
             return DEFAULT_SUPER;
         }
-        return OptUtils.simpleClassName(superFqn);
+        return ollirTypes.toOllirClassName(superFqn);
     }
 
     private String visitMethodDecl(JmmNode node, Void unused) {
@@ -302,7 +306,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         }
 
         String className = returnType.isClass()
-                ? OptUtils.simpleClassName(returnType.asClass().fullyQualifiedName())
+                ? ollirTypes.toOllirClassName(returnType.asClass().fullyQualifiedName())
                 : "Object";
         code.append(tmp).append(SPACE)
                 .append(ASSIGN).append(typeSuffix).append(SPACE)

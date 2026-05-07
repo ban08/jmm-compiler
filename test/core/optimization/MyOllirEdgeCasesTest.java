@@ -173,6 +173,73 @@ public class MyOllirEdgeCasesTest {
     }
 
     @Test
+    public void myTestOllirKeywordClassNamesAreEscapedInClassTypes() {
+        var result = toOllir("""
+                package array.ret;
+
+                class array {
+                    array method(array value) {
+                        array local;
+                        local = new array();
+                        return local;
+                    }
+                }
+                """);
+
+        assertNoErrors(result);
+
+        String ollir = result.getOllirCode();
+        Assert.assertTrue("Package segments that are OLLIR keywords must be emitted as quoted ids",
+                ollir.contains("package \"array\".\"ret\";"));
+        Assert.assertTrue("Class names that are OLLIR keywords must be emitted as quoted ids",
+                ollir.contains("\"array\" extends Object"));
+        Assert.assertTrue("Class type suffixes that are OLLIR keywords must be emitted as quoted ids",
+                ollir.contains("local.\"array\"") && ollir.contains("new(\"array\").\"array\""));
+    }
+
+    @Test
+    public void myTestOllirKeywordClassNamesAreEscapedOnThisOperands() {
+        var result = toOllir("""
+                package array.ret;
+
+                class array {
+                    array method() {
+                        return this;
+                    }
+                }
+                """);
+
+        assertNoErrors(result);
+
+        String ollir = result.getOllirCode();
+        Assert.assertTrue("The implicit this operand type must be escaped when the class name is an OLLIR keyword",
+                ollir.contains("ret.\"array\" this.\"array\""));
+    }
+
+    @Test
+    public void myTestOllirKeywordLocalNamesAreEscaped() {
+        var result = toOllir("""
+                package core.optimization;
+
+                class KeywordLocals {
+                    int method(int final) {
+                        int varargs;
+                        varargs = final + 1;
+                        return varargs;
+                    }
+                }
+                """);
+
+        assertNoErrors(result);
+
+        String ollir = result.getOllirCode();
+        Assert.assertTrue("Local names that collide with OLLIR keywords must be quoted",
+                ollir.contains("\"varargs\".i32"));
+        Assert.assertTrue("Parameter names that collide with OLLIR keywords must be quoted",
+                ollir.contains("\"final\".i32"));
+    }
+
+    @Test
     public void myTestForWithoutInitializerKeepsUpdateInsideLoop() {
         var result = toOllir("""
                 package core.optimization;

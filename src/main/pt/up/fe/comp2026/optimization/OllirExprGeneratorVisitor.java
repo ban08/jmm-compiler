@@ -83,7 +83,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     }
 
     private OllirExprResult visitThis(JmmNode node, Void unused) {
-        String code = "this." + OptUtils.simpleClassName(table.getFullyQualifiedName());
+        String code = "this." + ollirTypes.toOllirClassName(table.getFullyQualifiedName());
         return new OllirExprResult(code);
     }
 
@@ -185,7 +185,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                 .orElseGet(() -> types.isStaticMethodContext(node));
         String invocationKind = staticCall ? "invokestatic" : "invokevirtual";
         String receiverCode = staticCall
-                ? ollirTypes.sanitizeId(OptUtils.simpleClassName(table.getFullyQualifiedName()))
+                ? ollirTypes.toOllirClassName(table.getFullyQualifiedName())
                 : "this";
 
         if (TypeUtils.voidType().equals(returnType)) {
@@ -619,19 +619,18 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                 .or(() -> types.tryGetExprType(receiverNode)
                         .filter(JmmType::isClass)
                         .map(type -> type.asClass().fullyQualifiedName()))
-                .map(OptUtils::simpleClassName)
-                .map(ollirTypes::sanitizeId)
+                .map(ollirTypes::toOllirClassName)
                 .orElseGet(() -> receiverNode.hasAttribute("name")
-                        ? ollirTypes.sanitizeId(receiverNode.get("name"))
-                        : ollirTypes.sanitizeId(OptUtils.simpleClassName(table.getFullyQualifiedName())));
+                        ? ollirTypes.sanitizeClassName(receiverNode.get("name"))
+                        : ollirTypes.toOllirClassName(table.getFullyQualifiedName()));
     }
 
-    private static String ollirClassName(JmmType type, String fallbackName) {
+    private String ollirClassName(JmmType type, String fallbackName) {
         if (type != null && type.isClass()) {
-            return OptUtils.simpleClassName(type.asClass().fullyQualifiedName());
+            return ollirTypes.toOllirClassName(type.asClass().fullyQualifiedName());
         }
 
-        return OptUtils.simpleClassName(fallbackName);
+        return ollirTypes.toOllirClassName(fallbackName);
     }
 
     private String emitNestedArrayInitialization(String arrayOperand,
