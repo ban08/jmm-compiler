@@ -16,4 +16,9 @@ public class MyInheritedMethodTypingTest extends JmmTestEnv {
         semantics("GrandparentMethodReturnOk.jmm", false);
         semantics("GrandparentMethodAssignMismatch.jmm", true);
     }
+
+    @Test
+    public void importedReceiverCanCallInheritedMethod() {
+        semantics("ImportedReceiverInheritedMethodOk.jmm", false);
+    }
 }

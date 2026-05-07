@@ -1,0 +1,9 @@
+package core.semantics.inheritedmethods;
+
+import core.semantics.imports.ImportedGrandparentMethodsChild;
+
+class ImportedReceiverInheritedMethodOk {
+    boolean method(ImportedGrandparentMethodsChild child) {
+        return child.inheritedBoolean();
+    }
+}
