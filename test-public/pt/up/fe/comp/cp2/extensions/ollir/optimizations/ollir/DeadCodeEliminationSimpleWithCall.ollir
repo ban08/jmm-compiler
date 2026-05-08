@@ -14,7 +14,7 @@ DeadCodeEliminationSimpleWithCall extends Object  {
     }
 
     .method public foo(v.i32).i32 {
-        res.i32 :=.i32 v.i32;
+        res.i32 :=.i32 v.i32 +.i32 10.i32;
 
         invokevirtual(this.DeadCodeEliminationSimpleWithCall, "bar", res.i32).V;
 

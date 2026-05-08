@@ -7,7 +7,7 @@ class DeadCodeEliminationSimpleWithCall {
 
     public int foo(int v) {
         int res;
-        res = v;
+        res = v + 10;
         this.bar(res);
         return 0;
     }

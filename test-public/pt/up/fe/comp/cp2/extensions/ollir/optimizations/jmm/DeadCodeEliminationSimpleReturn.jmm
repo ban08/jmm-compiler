@@ -4,7 +4,7 @@ class DeadCodeEliminationSimpleReturn {
 
     public int foo(int init) {
         int res;
-        res = init;
+        res = init + 10;
         return res;
     }
 

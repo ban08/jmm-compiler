@@ -10,7 +10,7 @@ DeadCodeEliminationSimpleReturn extends Object  {
     }
 
     .method public foo(init.i32).i32 {
-        res.i32 :=.i32 init.i32;
+        res.i32 :=.i32 init.i32 +.i32 + 10.i32;
 
         ret.i32 res.i32;
     }

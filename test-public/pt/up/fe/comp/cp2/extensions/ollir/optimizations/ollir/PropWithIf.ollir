@@ -24,6 +24,7 @@ PropWithIf extends Object  {
     endif0:
 
         res.i32 :=.i32 i.i32 *.i32 a.i32;
+        res.i32 :=.i32 res.i32 +.i32 a.i32;
 
         ret.i32 res.i32;
     }
