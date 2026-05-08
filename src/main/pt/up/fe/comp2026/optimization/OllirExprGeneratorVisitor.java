@@ -251,7 +251,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         String invocationKind = staticCall ? "invokestatic" : "invokevirtual";
         String receiverCode = staticCall
                 ? staticCallReceiver(receiverNode, resolvedCall)
-                : receiver.getCode();
+                : objectRefForReceiver(receiverNode, receiver);
 
         if (TypeUtils.voidType().equals(returnType)) {
             computation.append(invocationKind)
@@ -470,14 +470,15 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     }
 
     private OllirExprResult visitFieldAccessExpr(JmmNode node, Void unused) {
-        var receiver = visit(node.getChild(0));
+        var receiverNode = node.getChild(0);
+        var receiver = visit(receiverNode);
         var fieldName = node.get(JmmAttributes.FIELD_ACCESS_EXPR.NAME);
 
         StringBuilder computation = new StringBuilder();
         computation.append(receiver.getComputation());
 
         // Core array support: lower arr.length to arraylength(arr).
-        var receiverType = types.tryGetExprType(node.getChild(0));
+        var receiverType = types.tryGetExprType(receiverNode);
         if ("length".equals(fieldName) && receiverType.isPresent() && receiverType.get().isArray()) {
             String intSuffix = ollirTypes.toOllirType(TypeUtils.intType());
             String tmp = ollirTypes.nextTemp() + intSuffix;
@@ -492,7 +493,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         String fieldSuffix = ollirTypes.toOllirType(fieldType);
         String tmp = ollirTypes.nextTemp() + fieldSuffix;
         computation.append(tmp).append(SPACE).append(ASSIGN).append(fieldSuffix).append(SPACE)
-                .append("getfield(").append(receiver.getCode()).append(", ")
+                .append("getfield(").append(objectRefForReceiver(receiverNode, receiver)).append(", ")
                 .append(ollirTypes.sanitizeId(fieldName)).append(fieldSuffix).append(")")
                 .append(fieldSuffix)
                 .append(END_STMT);
@@ -576,25 +577,27 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     }
 
     private AssignableValue resolveFieldAssignable(JmmNode node) {
-        var receiver = visit(node.getChild(0));
+        var receiverNode = node.getChild(0);
+        var receiver = visit(receiverNode);
         String fieldName = node.get(JmmAttributes.FIELD_ACCESS_EXPR.NAME);
 
         JmmType valueType = types.resolveFieldAccessType(node)
                 .orElseThrow(() -> new IllegalArgumentException("Unknown assignable field: " + fieldName));
         String valueSuffix = ollirTypes.toOllirType(valueType);
         String fieldOperand = ollirTypes.sanitizeId(fieldName) + valueSuffix;
+        String objectRef = objectRefForReceiver(receiverNode, receiver);
 
         StringBuilder computation = new StringBuilder();
         computation.append(receiver.getComputation());
 
         String tmp = ollirTypes.nextTemp() + valueSuffix;
         computation.append(tmp).append(SPACE).append(ASSIGN).append(valueSuffix).append(SPACE)
-                .append("getfield(").append(receiver.getCode()).append(", ").append(fieldOperand).append(")")
+                .append("getfield(").append(objectRef).append(", ").append(fieldOperand).append(")")
                 .append(valueSuffix).append(END_STMT);
 
         return new AssignableValue(tmp, valueType, computation, (out, valueCode) ->
                 out.append("putfield(")
-                        .append(receiver.getCode())
+                        .append(objectRef)
                         .append(", ")
                         .append(fieldOperand)
                         .append(", ")
@@ -610,6 +613,19 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         }
 
         return current;
+    }
+
+    /**
+     * Returns the OLLIR receiver string to use as the object operand of a
+     * {@code getfield}/{@code putfield}/{@code invokevirtual}. The OLLIR doc
+     * (Figure 4 of OLLIR-COMP2026.pdf) lowers source-level {@code this.field}
+     * and {@code this.method()} to bare {@code this} (no class qualifier),
+     * matching the {@code THIS (type)?} branch of the {@code objectRef} rule.
+     * For non-{@code this} receivers we keep the typed operand returned by
+     * the expression visitor.
+     */
+    private String objectRefForReceiver(JmmNode receiverNode, OllirExprResult receiver) {
+        return THIS_EXPR.check(receiverNode) ? "this" : receiver.getCode();
     }
 
     private String staticCallReceiver(JmmNode receiverNode, java.util.Optional<TypeUtils.ResolvedMethodCall> resolvedCall) {

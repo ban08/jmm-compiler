@@ -267,6 +267,40 @@ public class MyOllirEdgeCasesTest {
     }
 
     @Test
+    public void myTestExplicitThisReceiverLowersToBareThisForFieldAndMethodAccess() {
+        // OLLIR-COMP2026.pdf, Figure 4: source-level `this.a` and `this.method()`
+        // lower to `getfield(this, ...)` and `invokevirtual(this, ...)` with bare
+        // `this`. The OLLIR grammar's objectRef rule lets THIS appear without a
+        // type qualifier in those positions.
+        var result = toOllir("""
+                package core.optimization;
+
+                class ExplicitThis {
+                    int a;
+
+                    int read() {
+                        return this.a;
+                    }
+
+                    int chain() {
+                        return this.read();
+                    }
+                }
+                """);
+
+        assertNoErrors(result);
+
+        String ollir = result.getOllirCode();
+        Assert.assertTrue("Source `this.a` should lower to getfield with bare `this` receiver",
+                ollir.contains("getfield(this, a.i32).i32"));
+        Assert.assertTrue("Source `this.read()` should lower to invokevirtual with bare `this` receiver",
+                ollir.contains("invokevirtual(this, \"read\").i32"));
+        Assert.assertFalse("getfield/invokevirtual on `this` must not carry the class type qualifier",
+                ollir.contains("getfield(this.ExplicitThis,")
+                        || ollir.contains("invokevirtual(this.ExplicitThis,"));
+    }
+
+    @Test
     public void myTestForWithoutInitializerOrConditionKeepsUpdateInsideLoop() {
         var result = toOllir("""
                 package core.optimization;
