@@ -30,8 +30,8 @@ public class MyClassDeclParserTest extends JmmTestEnv {
     }
 
     @Test
-    public void testImportRequiresQualifiedName() {
+    public void testImportAllowsSingleAndQualifiedName() {
+        parseSnippet("import Foo;", IMPORT);
         parseSnippet("import bar.Foo;", IMPORT);
-        parseSnippetWithErrors("import Foo;", IMPORT);
     }
 }
