@@ -59,6 +59,7 @@ public class MyArrayOllirGenerationTest {
                         int value;
                         matrix = new int[n][m];
                         matrix[0][1] = 7;
+                        matrix[1][2] = 8;
                         value = matrix[0][1];
                         return value;
                     }
@@ -86,7 +87,19 @@ public class MyArrayOllirGenerationTest {
                 .filter(ArrayOperand.class::isInstance)
                 .count();
 
-        Assert.assertTrue("Multidimensional array lowering should emit stores into array elements", arrayStores >= 2);
-        Assert.assertTrue("Multidimensional array lowering should materialize at least one array read", arrayReads >= 1);
+        long multidimAllocations = assigns.stream()
+                .filter(assign -> assign.getRhs() instanceof NewInstruction newInst
+                        && newInst.getArguments().size() >= 2)
+                .count();
+
+        // Two explicit `matrix[i][j] = v` source statements should each lower to one store.
+        // The `multianewarray` already initializes every dimension, so no nested-init loop
+        // should add bonus stores.
+        Assert.assertEquals("Each `matrix[i][j] = v` should lower to exactly one array store",
+                2, arrayStores);
+        Assert.assertEquals("`new int[n][m]` should produce a single multi-dimensional allocation",
+                1, multidimAllocations);
+        Assert.assertTrue("Multidimensional access should materialize at least one array read",
+                arrayReads >= 1);
     }
 }
