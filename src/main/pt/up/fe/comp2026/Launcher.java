@@ -34,22 +34,17 @@ public class Launcher {
         var parserResult = parser.parse(lexerResult, config);
         parserResult.throwIfErrors();
 
-        boolean debug = Boolean.parseBoolean(config.getOrDefault("debug", "false"));
-        if (debug) {
-            System.out.println("AST:");
-            System.out.println(parserResult.rootNode().toTree());
-        }
+        System.out.println("AST:");
+        System.out.println(parserResult.rootNode().toTree());
 
         var sema = new JmmAnalysisImpl();
         JmmSemanticsResult semanticsResult = sema.semanticAnalysis(parserResult);
 
-        if (debug) {
-            System.out.println("Symbol Table:");
-            System.out.println(semanticsResult.getSymbolTable().print());
+        System.out.println("Symbol Table:");
+        System.out.println(semanticsResult.getSymbolTable().print());
 
-            System.out.println("Annotated AST:");
-            System.out.println(semanticsResult.getRootNode().toTree());
-        }
+        System.out.println("Annotated AST:");
+        System.out.println(semanticsResult.getRootNode().toTree());
 
         printReports(semanticsResult.reports());
         semanticsResult.throwIfErrors();
@@ -58,6 +53,9 @@ public class Launcher {
         semanticsResult = optimization.transformAst(semanticsResult);
         var ollirResult = optimization.toOllir(semanticsResult);
         ollirResult = optimization.transformOllir(ollirResult);
+
+        System.out.println("OLLIR CODE:");
+        System.out.println(ollirResult.getOllirCode());
 
         printReports(ollirResult.reports());
         ollirResult.throwIfErrors();
