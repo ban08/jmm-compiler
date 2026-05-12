@@ -1,0 +1,10 @@
+package pt.up.fe.comp.cp3.core.jasmin.declarations.methoddecl.jmm;
+
+class MethodWithReturnType {
+
+    public int method() {
+        return 0;
+    }
+
+
+}

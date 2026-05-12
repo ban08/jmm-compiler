@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.logical.jmm;
+
+class NotAndLessThan {
+
+    public boolean method(int value1, int value2) {
+        return !(value1 < value2);
+    }
+}
+

@@ -1,0 +1,5 @@
+package pt.up.fe.comp.cp3.core.jasmin.declarations.imports.jmm;
+
+class FieldTypeIsImplicitlyImported {
+    Object o;
+}

@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.entities.jmm;
+
+class AccessImplicitClass {
+
+    public String method(String a) {
+        return a;
+    }
+}
+

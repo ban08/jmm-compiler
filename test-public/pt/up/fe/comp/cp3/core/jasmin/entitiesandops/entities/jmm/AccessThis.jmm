@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.entities.jmm;
+
+class AccessThis {
+
+    public AccessThis method() {
+        return this;
+    }
+}
+

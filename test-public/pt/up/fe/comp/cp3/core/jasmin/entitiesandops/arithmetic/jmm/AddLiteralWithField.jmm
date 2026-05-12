@@ -1,0 +1,12 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.arithmetic.jmm;
+
+class AddLiteralWithField {
+    int b;
+
+    public int method() {
+        int a;
+        a = 1 + b;
+        return a;
+    }
+}
+

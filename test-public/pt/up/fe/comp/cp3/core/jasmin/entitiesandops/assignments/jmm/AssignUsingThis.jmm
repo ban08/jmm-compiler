@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.assignments.jmm;
+
+class AssignUsingThis {
+
+    public AssignUsingThis method() {
+        AssignUsingThis a;
+        a = this;
+        return a;
+    }
+}
+

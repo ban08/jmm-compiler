@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.core.jasmin.declarations.ollir;
+
+FieldTypeIsImplicitlyImported extends Object  {
+
+    .field public o.Object;
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+}

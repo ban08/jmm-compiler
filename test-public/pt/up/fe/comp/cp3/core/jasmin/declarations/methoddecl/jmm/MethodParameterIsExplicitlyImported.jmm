@@ -1,0 +1,8 @@
+package pt.up.fe.comp.cp3.core.jasmin.declarations.methoddecl.jmm;
+
+import examples.Quicksort;
+
+class MethodParameterIsExplicitlyImported {
+    public void make(Quicksort q) {
+    }
+}

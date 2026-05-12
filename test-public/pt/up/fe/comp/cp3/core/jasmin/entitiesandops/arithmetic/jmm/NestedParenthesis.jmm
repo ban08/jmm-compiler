@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.arithmetic.jmm;
+
+class NestedParenthesis {
+
+    public int method() {
+        int a;
+        a = (((1 + 2) * 3) + 4);
+        return a;
+    }
+}
+

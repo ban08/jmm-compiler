@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.logical.jmm;
+
+class AndLiterals {
+
+    public boolean method() {
+        return true && true;
+    }
+}
+

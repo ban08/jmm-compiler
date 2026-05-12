@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp3.core.jasmin.declarations.ollir;
+
+ClassWithTwoFields extends Object  {
+
+
+    .field public intField.i32;
+    .field public boolField.bool;
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+}

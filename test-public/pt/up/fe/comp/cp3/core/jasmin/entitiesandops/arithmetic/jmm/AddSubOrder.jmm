@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.arithmetic.jmm;
+
+class AddSubOrder {
+
+    public int method(int b) {
+        int a;
+        a = 1 + b - 3;
+        return a;
+    }
+}
+

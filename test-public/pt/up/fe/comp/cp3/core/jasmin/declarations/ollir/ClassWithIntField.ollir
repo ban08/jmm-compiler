@@ -1,0 +1,10 @@
+package pt.up.fe.comp.cp3.core.jasmin.declarations.ollir;
+
+ClassWithIntField extends Object  {
+    .field public field.i32;
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+}

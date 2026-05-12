@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.logical.jmm;
+
+class LessThanComplexCalc {
+
+    public boolean method(int b) {
+        boolean a;
+        a = b / 2 < (b / (2 * 3) + 1);
+        return a;
+    }
+}
+

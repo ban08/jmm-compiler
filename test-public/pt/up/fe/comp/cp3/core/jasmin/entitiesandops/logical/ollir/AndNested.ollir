@@ -1,0 +1,48 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.logical.ollir;
+
+AndNested extends Object  {
+
+
+    
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method(a.bool, b.bool, c.bool, d.bool, e.bool).bool {
+
+        if (a.bool) goto then0;
+            andTmp0.bool :=.bool 0.bool;
+            goto endif0;
+    then0:
+
+            andTmp0.bool :=.bool b.bool;
+    endif0:
+
+        if (andTmp0.bool) goto then1;
+            andTmp1.bool :=.bool 0.bool;
+            goto endif1;
+    then1:
+
+            andTmp1.bool :=.bool c.bool;
+    endif1:
+
+        if (andTmp1.bool) goto then2;
+            andTmp2.bool :=.bool 0.bool;
+            goto endif2;
+    then2:
+
+            andTmp2.bool :=.bool d.bool;
+    endif2:
+
+        if (andTmp2.bool) goto then3;
+            andTmp3.bool :=.bool 0.bool;
+            goto endif3;
+    then3:
+
+            andTmp3.bool :=.bool e.bool;
+    endif3:
+        ret.bool andTmp3.bool;
+    }
+
+}

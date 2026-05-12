@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp3.core.jasmin.declarations.ollir;
+import examples.Quicksort;
+
+MethodParameterIsExplicitlyImported extends Object  {
+
+
+    
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public make(q.Quicksort).V {
+        ret.V ;
+    }
+
+}

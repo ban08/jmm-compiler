@@ -1,0 +1,16 @@
+package pt.up.fe.comp.cp3.core.jasmin.declarations.ollir;
+
+MethodWithSingleParam extends Object  {
+
+
+    
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method(a.i32).V {
+        ret.V ;
+    }
+
+}

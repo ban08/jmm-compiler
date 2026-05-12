@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp3.core.jasmin.declarations.ollir;
+
+ClassWithStringField extends Object  {
+    .field public field."java.lang.String";
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+}

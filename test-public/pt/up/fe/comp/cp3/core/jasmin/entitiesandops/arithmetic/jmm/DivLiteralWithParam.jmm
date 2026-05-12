@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.arithmetic.jmm;
+
+class DivLiteralWithParam {
+
+    public int method(int b) {
+        int a;
+        a = 10 / b;
+        return a;
+    }
+}
+

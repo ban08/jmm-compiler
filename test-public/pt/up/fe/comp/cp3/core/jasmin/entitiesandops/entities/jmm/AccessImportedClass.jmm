@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.entities.jmm;
+
+import examples.Quicksort;
+
+class AccessImportedClass {
+
+    public Quicksort method(Quicksort q) {
+        return q;
+    }
+}
+

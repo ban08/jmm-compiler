@@ -1,0 +1,20 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.arithmetic.ollir;
+
+AddLiteralWithField extends Object  {
+
+
+    .field public b.i32;
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method().i32 {
+        tmp0.i32 :=.i32 getfield(this, b.i32).i32;
+        tmp1.i32 :=.i32 1.i32 +.i32 tmp0.i32;
+        a.i32 :=.i32 tmp1.i32;
+
+        ret.i32 a.i32;
+    }
+
+}

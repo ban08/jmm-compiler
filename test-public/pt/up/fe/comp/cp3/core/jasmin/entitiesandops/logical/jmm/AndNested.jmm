@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.logical.jmm;
+
+class AndNested {
+
+    public boolean method(boolean a, boolean b, boolean c, boolean d, boolean e) {
+        return a && b && c && d && e;
+    }
+}
+

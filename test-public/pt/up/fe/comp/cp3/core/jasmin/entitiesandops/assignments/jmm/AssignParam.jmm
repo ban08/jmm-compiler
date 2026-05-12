@@ -1,0 +1,10 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.assignments.jmm;
+
+class AssignParam {
+
+    public int method(int a) {
+        a = 0;
+        return a;
+    }
+}
+

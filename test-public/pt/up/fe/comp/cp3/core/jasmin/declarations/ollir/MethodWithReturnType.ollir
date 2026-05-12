@@ -1,0 +1,16 @@
+package pt.up.fe.comp.cp3.core.jasmin.declarations.ollir;
+
+MethodWithReturnType extends Object  {
+
+
+    
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method().i32 {
+        ret.i32 0.i32;
+    }
+
+}

@@ -1,0 +1,10 @@
+package pt.up.fe.comp.cp3.core.jasmin.declarations.methoddecl.jmm;
+
+class MethodWithMultipleParam {
+
+    public void method(int array, int size, boolean flag) {
+
+    }
+
+
+}

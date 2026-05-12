@@ -1,0 +1,14 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.assignments.jmm;
+
+class AssignField {
+    int a;
+
+    public void set(int v) {
+        a = v;
+    }
+
+    public int get() {
+        return a;
+    }
+}
+

@@ -1,0 +1,10 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.entities.jmm;
+
+class AccessField {
+    int a;
+
+    public int get() {
+        return a;
+    }
+}
+

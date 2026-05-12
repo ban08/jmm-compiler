@@ -1,0 +1,12 @@
+package pt.up.fe.comp.cp3.core.jasmin.declarations.imports.ollir;
+
+BasicClassWithSuperImplicitClass extends Exception  {
+
+
+    
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Exception", "<init>").V;
+    }
+
+}

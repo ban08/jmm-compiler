@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.assignments.jmm;
+
+import examples.Quicksort;
+
+class AssignInSuperType extends Quicksort {
+
+    public Quicksort method() {
+        Quicksort q;
+        q = this;
+        return q;
+    }
+}
+

@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.logical.ollir;
+
+SimpleUnaryNot extends Object  {
+
+
+    
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method(value.bool).bool {
+        tmp0.bool :=.bool !.bool value.bool;
+        ret.bool tmp0.bool;
+    }
+
+}

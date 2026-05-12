@@ -1,0 +1,18 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.assignments.ollir;
+
+AssignUsingThis extends Object  {
+
+
+    
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method().AssignUsingThis {
+        a.AssignUsingThis :=.AssignUsingThis this.AssignUsingThis;
+
+        ret.AssignUsingThis a.AssignUsingThis;
+    }
+
+}

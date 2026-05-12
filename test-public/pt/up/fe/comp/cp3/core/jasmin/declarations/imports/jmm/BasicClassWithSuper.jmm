@@ -1,0 +1,6 @@
+package pt.up.fe.comp.cp3.core.jasmin.declarations.imports.jmm;
+
+import examples.Quicksort;
+
+class BasicClassWithSuper extends Quicksort {
+}

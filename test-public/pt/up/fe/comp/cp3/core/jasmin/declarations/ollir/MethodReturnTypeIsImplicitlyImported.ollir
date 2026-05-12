@@ -1,0 +1,18 @@
+package pt.up.fe.comp.cp3.core.jasmin.declarations.ollir;
+
+MethodReturnTypeIsImplicitlyImported extends Object  {
+
+
+    
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public make().Object {
+        tmp0.Object :=.Object new(Object).Object;
+        invokespecial(tmp0.Object, "<init>").V;
+        ret.Object tmp0.Object;
+    }
+
+}

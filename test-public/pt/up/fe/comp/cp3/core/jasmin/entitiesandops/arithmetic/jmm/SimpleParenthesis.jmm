@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.arithmetic.jmm;
+
+class SimpleParenthesis {
+
+    public int method() {
+        int a;
+        a = 3 * (2 - 3);
+        return a;
+    }
+}
+

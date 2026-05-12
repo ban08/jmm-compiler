@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.entities.ollir;
+import examples.Quicksort;
+
+AccessImportedClass extends Object  {
+
+
+    
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method(q.Quicksort).Quicksort {
+        ret.Quicksort q.Quicksort;
+    }
+
+}

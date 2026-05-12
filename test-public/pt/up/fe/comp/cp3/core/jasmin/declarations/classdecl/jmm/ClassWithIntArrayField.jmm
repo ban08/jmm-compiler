@@ -1,0 +1,7 @@
+package pt.up.fe.comp.cp3.core.jasmin.declarations.classdecl.jmm;
+
+
+class ClassWithIntArrayField {
+
+    int[] field;
+}

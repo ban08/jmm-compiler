@@ -1,0 +1,30 @@
+package pt.up.fe.comp.cp3.core.jasmin.declarations.ollir;
+import examples.Quicksort;
+
+ClassWithFieldsAndMethods extends Quicksort  {
+
+
+    .field public intField.i32;
+    .field public boolField.bool;
+
+    .construct "<init>"().V {
+        invokespecial(this."examples.Quicksort", "<init>").V;
+    }
+
+    .method public method1().i32 {
+        intLocal1.i32 :=.i32 0.i32;
+
+        boolLocal1.bool :=.bool 1.bool;
+
+        ret.i32 0.i32;
+    }
+
+    .method public method2(intParam1.i32, boolParam1.bool).bool {
+        ret.bool boolParam1.bool;
+    }
+
+    .method public static main(args.array.String).V {
+        ret.V ;
+    }
+
+}

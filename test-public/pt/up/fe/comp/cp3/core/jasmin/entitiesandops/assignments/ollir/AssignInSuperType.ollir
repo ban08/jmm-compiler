@@ -1,0 +1,19 @@
+package pt.up.fe.comp.cp3.core.jasmin.entitiesandops.assignments.ollir;
+import examples.Quicksort;
+
+AssignInSuperType extends Quicksort  {
+
+
+    
+
+    .construct "<init>"().V {
+        invokespecial(this."examples.Quicksort", "<init>").V;
+    }
+
+    .method public method().Quicksort {
+        q.Quicksort :=.Quicksort this.AssignInSuperType;
+
+        ret.Quicksort q.Quicksort;
+    }
+
+}
