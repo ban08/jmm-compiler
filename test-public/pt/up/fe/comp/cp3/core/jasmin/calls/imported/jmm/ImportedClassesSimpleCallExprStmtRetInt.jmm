@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.imported.jmm;
+
+import examples.Pair;
+
+class ImportedClassesSimpleCallExprStmtRetInt {
+
+    public void method(Pair pair) {
+        pair.setLeft(200);
+    }
+}
+

@@ -1,0 +1,7 @@
+package pt.up.fe.comp.cp3.core.jasmin.arrays.load.jmm;
+
+class ArrayAsParameter {
+    public int[] method(int[] a) {
+        return a;
+    }
+}

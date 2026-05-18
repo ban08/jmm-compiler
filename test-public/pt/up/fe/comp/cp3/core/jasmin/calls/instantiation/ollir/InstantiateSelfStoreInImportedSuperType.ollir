@@ -1,0 +1,18 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.instantiation.ollir;
+import examples.Quicksort;
+
+InstantiateSelfStoreInImportedSuperType extends Quicksort  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."examples.Quicksort", "<init>").V;
+    }
+
+    .method public method().Quicksort {
+        tmp0.InstantiateSelfStoreInImportedSuperType :=.InstantiateSelfStoreInImportedSuperType new(InstantiateSelfStoreInImportedSuperType).InstantiateSelfStoreInImportedSuperType;
+        invokespecial(tmp0.InstantiateSelfStoreInImportedSuperType, "<init>").V;
+        other.Quicksort :=.Quicksort tmp0.InstantiateSelfStoreInImportedSuperType;
+
+        ret.Quicksort other.Quicksort;
+    }
+
+}

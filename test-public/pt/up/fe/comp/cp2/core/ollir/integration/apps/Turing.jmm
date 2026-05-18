@@ -101,7 +101,7 @@ class Turing {
             i = i + 1;
         }
 
-        io.println();
+        io.printLine();
 
 
         i = 0;
@@ -110,8 +110,8 @@ class Turing {
 
             i = i + 1;
         }
-        io.println();
-        io.println();
+        io.printLine();
+        io.printLine();
 
         return true;
 

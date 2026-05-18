@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.local.jmm;
+
+class LocalCallExprStmtVoid {
+
+    public void callee(int x) {
+
+    }
+
+    public void method() {
+        this.callee(1);
+    }
+
+
+}
+

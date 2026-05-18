@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp3.core.jasmin.arrays.store.jmm;
+
+class ArrayReferenceAssignment {
+    public int[] method(int[] a, int p1, int p2) {
+        int[] b;
+        int aux;
+        b = a;
+        aux = b[p1];
+        b[p1] = a[p2];
+        b[p2] = aux;
+        return b;
+    }
+}

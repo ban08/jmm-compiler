@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.imported.jmm;
+
+import util.io;
+
+class ImportedClassesStaticCallRetInt {
+
+    public int method() {
+        int a;
+        a = io.read();
+        return a;
+    }
+}
+

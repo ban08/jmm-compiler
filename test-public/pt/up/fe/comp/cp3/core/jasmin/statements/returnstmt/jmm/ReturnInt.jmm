@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp3.core.jasmin.statements.returnstmt.jmm;
+
+class ReturnInt {
+
+    public int method() {
+        return 7;
+    }
+}
+

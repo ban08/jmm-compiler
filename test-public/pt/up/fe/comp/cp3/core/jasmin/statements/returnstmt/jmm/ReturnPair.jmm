@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.core.jasmin.statements.returnstmt.jmm;
+
+import examples.Pair;
+
+class ReturnPair {
+
+    public Pair method(Pair p) {
+        return p;
+    }
+}
+

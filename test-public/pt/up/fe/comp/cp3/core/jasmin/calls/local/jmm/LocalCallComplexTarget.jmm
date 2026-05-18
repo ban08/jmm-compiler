@@ -1,0 +1,21 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.local.jmm;
+
+class LocalCallComplexTarget {
+
+
+    public LocalCallComplexTarget thisInstance() {
+        return this;
+    }
+
+    public int foo() {
+        return 100;
+    }
+
+    public int method() {
+        int a;
+        a = (new LocalCallComplexTarget().thisInstance()).foo();
+        return a;
+    }
+
+}
+

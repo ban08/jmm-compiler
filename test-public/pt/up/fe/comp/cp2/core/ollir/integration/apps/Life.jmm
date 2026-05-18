@@ -220,7 +220,7 @@ class Life {
         j = 0;
         while (i < field.length) {
             if (this.gt(j, xMax)) {
-                io.println();
+                io.printLine();
                 j = 0;
             } else {
             }
@@ -230,8 +230,8 @@ class Life {
             j = j + 1;
         }
 
-        io.println();
-        io.println();
+        io.printLine();
+        io.printLine();
         return true;
 
     }

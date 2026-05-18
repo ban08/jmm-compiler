@@ -1,0 +1,33 @@
+package pt.up.fe.comp.cp3.core.jasmin.arrays.newinst.ollir;
+
+ArrayInitWithCall extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public calcSize(size.i32).i32 {
+        tmp0.bool :=.bool size.i32 <=.bool 0.i32;
+        if (tmp0.bool) goto then0;
+            newSize.i32 :=.i32 size.i32 *.i32 2.i32;
+
+            goto endif0;
+    then0:
+            newSize.i32 :=.i32 1.i32;
+
+    endif0:
+
+        ret.i32 newSize.i32;
+    }
+
+    .method public init(size.i32).array.i32 {
+        temp_arg__0.i32 :=.i32 size.i32;
+        tmp2.i32 :=.i32 invokevirtual(this.ArrayInitWithCall, "calcSize", temp_arg__0.i32).i32;
+
+        tmp3.array.i32 :=.array.i32 new(array, tmp2.i32).array.i32;
+        a.array.i32 :=.array.i32 tmp3.array.i32;
+
+        ret.array.i32 a.array.i32;
+    }
+
+}

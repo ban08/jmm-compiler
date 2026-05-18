@@ -1,0 +1,33 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.local.ollir;
+
+LocalCallsComplexLogical extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public logical(b.bool).bool {
+        ret.bool b.bool;
+    }
+
+    .method public method().bool {
+        a.i32 :=.i32 4.i32;
+
+        tmp0.bool :=.bool 0.i32 <.bool a.i32;
+
+        if (tmp0.bool) goto then0;
+            andTmp0.bool :=.bool 0.bool;
+            goto endif0;
+    then0:
+            tmp1.bool :=.bool a.i32 <.bool 10.i32;
+
+            andTmp0.bool :=.bool tmp1.bool;
+    endif0:
+        temp_arg__0.bool :=.bool andTmp0.bool;
+        tmp2.bool :=.bool invokevirtual(this.LocalCallsComplexLogical, "logical", temp_arg__0.bool).bool;
+        b.bool :=.bool tmp2.bool;
+
+        ret.bool b.bool;
+    }
+
+}

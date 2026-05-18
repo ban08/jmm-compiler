@@ -1,0 +1,12 @@
+package pt.up.fe.comp.cp3.core.jasmin.arrays.load.jmm;
+
+class ArrayAsArgument {
+    public int target(int[] a) {
+        return a[0];
+    }
+
+    public int method(int[] a) {
+
+        return this.target(a);
+    }
+}

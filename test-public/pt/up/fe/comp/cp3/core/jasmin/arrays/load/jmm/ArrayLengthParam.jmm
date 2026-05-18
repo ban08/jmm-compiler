@@ -1,0 +1,10 @@
+package pt.up.fe.comp.cp3.core.jasmin.arrays.load.jmm;
+
+class ArrayLengthParam {
+
+
+    public int getParamLength(int[] b) {
+        return b.length;
+    }
+
+}

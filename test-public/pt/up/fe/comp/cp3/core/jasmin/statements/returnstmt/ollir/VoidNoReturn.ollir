@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp3.core.jasmin.statements.returnstmt.ollir;
+
+VoidNoReturn extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method().V {
+        ret.V ;
+    }
+
+}

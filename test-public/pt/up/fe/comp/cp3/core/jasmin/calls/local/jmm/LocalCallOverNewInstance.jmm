@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.local.jmm;
+
+class LocalCallOverNewInstance {
+
+
+    public boolean callee() {
+        return true;
+    }
+
+    public boolean method() {
+        boolean b;
+        b = new LocalCallOverNewInstance().callee();
+        return b;
+    }
+
+}
+

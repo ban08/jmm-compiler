@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp3.core.jasmin.arrays.newinst.jmm;
+
+class ArrayInitLiteral {
+    public int[] init() {
+        int[] a;
+        a = new int[5];
+        return a;
+    }
+}

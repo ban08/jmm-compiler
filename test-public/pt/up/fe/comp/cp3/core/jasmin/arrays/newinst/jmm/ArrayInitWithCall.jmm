@@ -1,0 +1,19 @@
+package pt.up.fe.comp.cp3.core.jasmin.arrays.newinst.jmm;
+
+class ArrayInitWithCall {
+    public int calcSize(int size) {
+        int newSize;
+        if (size <= 0) {
+            newSize = 1;
+        } else {
+            newSize = size * 2;
+        }
+        return newSize;
+    }
+
+    public int[] init(int size) {
+        int[] a;
+        a = new int[this.calcSize(size)];
+        return a;
+    }
+}

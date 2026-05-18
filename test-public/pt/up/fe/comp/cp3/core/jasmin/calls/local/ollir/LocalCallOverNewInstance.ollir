@@ -1,0 +1,22 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.local.ollir;
+
+LocalCallOverNewInstance extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public callee().bool {
+        ret.bool 1.bool;
+    }
+
+    .method public method().bool {
+        tmp0.LocalCallOverNewInstance :=.LocalCallOverNewInstance new(LocalCallOverNewInstance).LocalCallOverNewInstance;
+        invokespecial(tmp0.LocalCallOverNewInstance, "<init>").V;
+        tmp1.bool :=.bool invokevirtual(tmp0.LocalCallOverNewInstance, "callee").bool;
+        b.bool :=.bool tmp1.bool;
+
+        ret.bool b.bool;
+    }
+
+}

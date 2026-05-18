@@ -1,0 +1,20 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.local.jmm;
+
+class LocalCallsComplexLogical {
+
+
+    public boolean logical(boolean b) {
+        return b;
+    }
+
+
+    public boolean method() {
+        int a;
+        boolean b;
+        a = 4;
+        b = this.logical(0 < a && a < 10);
+        return b;
+    }
+
+}
+

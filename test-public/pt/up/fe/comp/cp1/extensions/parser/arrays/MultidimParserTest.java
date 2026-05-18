@@ -88,13 +88,13 @@ public class MultidimParserTest extends JmmTestEnv {
     @Test
     public void testMultidimArrayWriteSimple() {
         setDescription("Parse write (assignment) to a multidimensional array element (a[1][2] = 5)");
-        parseSnippet("a[1][2] = 5;", STATEMENT);
+        parseSnippet("void foo(){ a[1][2] = 5;}", METHOD);
     }
 
     @Test
     public void testMultidimArrayWriteWithExpr() {
         setDescription("Parse write to multidimensional array where value is an expression (a[i][j] = b + 1)");
-        parseSnippet("a[i][j] = b + 1;", STATEMENT);
+        parseSnippet("void foo(){ a[i][j] = b + 1;}", METHOD);
     }
 
     @Test
@@ -106,6 +106,6 @@ public class MultidimParserTest extends JmmTestEnv {
     @Test
     public void test5DimArrayWriteWithExpr() {
         setDescription("Parse write to a 5-dimensional array where value is an expression (a[i][j][k][l][m] = b + 1)");
-        parseSnippet("a[i][j][k][l][m] = b + 1;", STATEMENT);
+        parseSnippet("void foo(){ a[i][j][k][l][m] = b + 1;}", METHOD);
     }
 }

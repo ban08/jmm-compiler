@@ -1,0 +1,544 @@
+package pt.up.fe.comp.cp3.core.jasmin.integration.ollir;
+import examples.BoardBase;
+
+TicTacToe extends Object  {
+    .field public row0.array.i32;
+    .field public row1.array.i32;
+    .field public row2.array.i32;
+    .field public whoseturn.i32;
+    .field public movesmade.i32;
+    .field public pieces.array.i32;
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public init().bool {
+
+        tmp0.array.i32 :=.array.i32 new(array, 3.i32).array.i32;
+        putfield(this, row0.array.i32, tmp0.array.i32).V;
+
+
+        tmp1.array.i32 :=.array.i32 new(array, 3.i32).array.i32;
+        putfield(this, row1.array.i32, tmp1.array.i32).V;
+
+
+        tmp2.array.i32 :=.array.i32 new(array, 3.i32).array.i32;
+        putfield(this, row2.array.i32, tmp2.array.i32).V;
+
+
+        tmp3.array.i32 :=.array.i32 new(array, 2.i32).array.i32;
+        putfield(this, pieces.array.i32, tmp3.array.i32).V;
+
+        tmp4.array.i32 :=.array.i32 getfield(this, pieces.array.i32).array.i32;
+        tmp4.array.i32[0.i32].i32 :=.i32 1.i32;
+
+        tmp5.array.i32 :=.array.i32 getfield(this, pieces.array.i32).array.i32;
+        tmp5.array.i32[1.i32].i32 :=.i32 2.i32;
+
+        putfield(this, whoseturn.i32, 0.i32).V;
+
+        putfield(this, movesmade.i32, 0.i32).V;
+
+        ret.bool 1.bool;
+    }
+
+    .method public getRow0().array.i32 {
+        tmp6.array.i32 :=.array.i32 getfield(this, row0.array.i32).array.i32;
+        ret.array.i32 tmp6.array.i32;
+    }
+
+    .method public getRow1().array.i32 {
+        tmp7.array.i32 :=.array.i32 getfield(this, row1.array.i32).array.i32;
+        ret.array.i32 tmp7.array.i32;
+    }
+
+    .method public getRow2().array.i32 {
+        tmp8.array.i32 :=.array.i32 getfield(this, row2.array.i32).array.i32;
+        ret.array.i32 tmp8.array.i32;
+    }
+
+    .method public MoveRow(row.array.i32, column.i32).bool {
+        tmp9.bool :=.bool column.i32 <.bool 0.i32;
+        if (tmp9.bool) goto then0;
+            tmp10.bool :=.bool 2.i32 <.bool column.i32;
+            if (tmp10.bool) goto then1;
+                temp_array_access_0.i32 :=.i32 row.array.i32[column.i32].i32;
+                tmp11.bool :=.bool 0.i32 <.bool temp_array_access_0.i32;
+                if (tmp11.bool) goto then2;
+                    tmp12.array.i32 :=.array.i32 getfield(this, pieces.array.i32).array.i32;
+                    tmp13.i32 :=.i32 getfield(this, whoseturn.i32).i32;
+                    temp_array_access_1.i32 :=.i32 tmp12.array.i32[tmp13.i32].i32;
+                    row.array.i32[column.i32].i32 :=.i32 temp_array_access_1.i32;
+                    tmp14.i32 :=.i32 getfield(this, movesmade.i32).i32;
+                    tmp15.i32 :=.i32 tmp14.i32 +.i32 1.i32;
+                    putfield(this, movesmade.i32, tmp15.i32).V;
+                    moved.bool :=.bool 1.bool;
+
+                    goto endif2;
+            then2:
+                    moved.bool :=.bool 0.bool;
+
+            endif2:
+
+                goto endif1;
+        then1:
+                moved.bool :=.bool 0.bool;
+
+        endif1:
+
+            goto endif0;
+    then0:
+            moved.bool :=.bool 0.bool;
+
+    endif0:
+
+        ret.bool moved.bool;
+    }
+
+    .method public Move(row.i32, column.i32).bool {
+        tmp16.bool :=.bool row.i32 <.bool 0.i32;
+        tmp17.bool :=.bool !.bool tmp16.bool;
+
+        if (tmp17.bool) goto then3;
+            andTmp0.bool :=.bool 0.bool;
+            goto endif3;
+    then3:
+            tmp18.bool :=.bool 0.i32 <.bool row.i32;
+            tmp19.bool :=.bool !.bool tmp18.bool;
+
+            andTmp0.bool :=.bool tmp19.bool;
+    endif3:
+        if (andTmp0.bool) goto then4;
+            tmp20.bool :=.bool row.i32 <.bool 1.i32;
+            tmp21.bool :=.bool !.bool tmp20.bool;
+
+            if (tmp21.bool) goto then5;
+                andTmp1.bool :=.bool 0.bool;
+                goto endif5;
+        then5:
+                tmp22.bool :=.bool 1.i32 <.bool row.i32;
+                tmp23.bool :=.bool !.bool tmp22.bool;
+
+                andTmp1.bool :=.bool tmp23.bool;
+        endif5:
+            if (andTmp1.bool) goto then6;
+                tmp24.bool :=.bool row.i32 <.bool 2.i32;
+                tmp25.bool :=.bool !.bool tmp24.bool;
+
+                if (tmp25.bool) goto then7;
+                    andTmp2.bool :=.bool 0.bool;
+                    goto endif7;
+            then7:
+                    tmp26.bool :=.bool 2.i32 <.bool row.i32;
+                    tmp27.bool :=.bool !.bool tmp26.bool;
+
+                    andTmp2.bool :=.bool tmp27.bool;
+            endif7:
+                if (andTmp2.bool) goto then8;
+                    mov.bool :=.bool 0.bool;
+
+                    goto endif8;
+            then8:
+                    tmp28.array.i32 :=.array.i32 getfield(this, row2.array.i32).array.i32;
+                    temp_arg__0.array.i32 :=.array.i32 tmp28.array.i32;
+                    temp_arg__1.i32 :=.i32 column.i32;
+                    tmp29.bool :=.bool invokevirtual(this.TicTacToe, "MoveRow", temp_arg__0.array.i32, temp_arg__1.i32).bool;
+                    mov.bool :=.bool tmp29.bool;
+
+            endif8:
+
+                goto endif6;
+        then6:
+                tmp30.array.i32 :=.array.i32 getfield(this, row1.array.i32).array.i32;
+                temp_arg__2.array.i32 :=.array.i32 tmp30.array.i32;
+                temp_arg__3.i32 :=.i32 column.i32;
+                tmp31.bool :=.bool invokevirtual(this.TicTacToe, "MoveRow", temp_arg__2.array.i32, temp_arg__3.i32).bool;
+                mov.bool :=.bool tmp31.bool;
+
+        endif6:
+
+            goto endif4;
+    then4:
+            tmp32.array.i32 :=.array.i32 getfield(this, row0.array.i32).array.i32;
+            temp_arg__4.array.i32 :=.array.i32 tmp32.array.i32;
+            temp_arg__5.i32 :=.i32 column.i32;
+            tmp33.bool :=.bool invokevirtual(this.TicTacToe, "MoveRow", temp_arg__4.array.i32, temp_arg__5.i32).bool;
+            mov.bool :=.bool tmp33.bool;
+
+    endif4:
+
+        ret.bool mov.bool;
+    }
+
+    .method public inbounds(row.i32, column.i32).bool {
+        tmp34.bool :=.bool row.i32 <.bool 0.i32;
+        if (tmp34.bool) goto then9;
+            tmp35.bool :=.bool column.i32 <.bool 0.i32;
+            if (tmp35.bool) goto then10;
+                tmp36.bool :=.bool 2.i32 <.bool row.i32;
+                if (tmp36.bool) goto then11;
+                    tmp37.bool :=.bool 2.i32 <.bool column.i32;
+                    if (tmp37.bool) goto then12;
+                        in.bool :=.bool 1.bool;
+
+                        goto endif12;
+                then12:
+                        in.bool :=.bool 0.bool;
+
+                endif12:
+
+                    goto endif11;
+            then11:
+                    in.bool :=.bool 0.bool;
+
+            endif11:
+
+                goto endif10;
+        then10:
+                in.bool :=.bool 0.bool;
+
+        endif10:
+
+            goto endif9;
+    then9:
+            in.bool :=.bool 0.bool;
+
+    endif9:
+
+        ret.bool in.bool;
+    }
+
+    .method public changeturn().bool {
+        tmp38.i32 :=.i32 getfield(this, whoseturn.i32).i32;
+        tmp39.i32 :=.i32 1.i32 -.i32 tmp38.i32;
+        putfield(this, whoseturn.i32, tmp39.i32).V;
+
+        ret.bool 1.bool;
+    }
+
+    .method public getCurrentPlayer().i32 {
+        tmp40.i32 :=.i32 getfield(this, whoseturn.i32).i32;
+        tmp41.i32 :=.i32 tmp40.i32 +.i32 1.i32;
+        ret.i32 tmp41.i32;
+    }
+
+    .method public winner().i32 {
+        winner.i32 :=.i32 0.i32 -.i32 1.i32;
+
+
+        tmp43.array.i32 :=.array.i32 new(array, 3.i32).array.i32;
+        "array".array.i32 :=.array.i32 tmp43.array.i32;
+
+        tmp44.array.i32 :=.array.i32 getfield(this, row0.array.i32).array.i32;
+        temp_arg__6.array.i32 :=.array.i32 tmp44.array.i32;
+        tmp45.bool :=.bool invokestatic(BoardBase, "sameArray", temp_arg__6.array.i32).bool;
+        completeArray.bool :=.bool tmp45.bool;
+
+        tmp46.array.i32 :=.array.i32 getfield(this, row1.array.i32).array.i32;
+        temp_arg__7.array.i32 :=.array.i32 tmp46.array.i32;
+        tmp47.bool :=.bool invokestatic(BoardBase, "sameArray", temp_arg__7.array.i32).bool;
+        completeArray1.bool :=.bool tmp47.bool;
+
+        tmp48.array.i32 :=.array.i32 getfield(this, row2.array.i32).array.i32;
+        temp_arg__8.array.i32 :=.array.i32 tmp48.array.i32;
+        tmp49.bool :=.bool invokestatic(BoardBase, "sameArray", temp_arg__8.array.i32).bool;
+        completeArray2.bool :=.bool tmp49.bool;
+
+
+        if (completeArray.bool) goto then13;
+            andTmp3.bool :=.bool 0.bool;
+            goto endif13;
+    then13:
+            tmp50.array.i32 :=.array.i32 getfield(this, row0.array.i32).array.i32;
+            temp_array_access_2.i32 :=.i32 tmp50.array.i32[0.i32].i32;
+            tmp51.bool :=.bool 0.i32 <.bool temp_array_access_2.i32;
+
+            andTmp3.bool :=.bool tmp51.bool;
+    endif13:
+        if (andTmp3.bool) goto then14;
+
+            if (completeArray1.bool) goto then15;
+                andTmp4.bool :=.bool 0.bool;
+                goto endif15;
+        then15:
+                tmp52.array.i32 :=.array.i32 getfield(this, row1.array.i32).array.i32;
+                temp_array_access_3.i32 :=.i32 tmp52.array.i32[0.i32].i32;
+                tmp53.bool :=.bool 0.i32 <.bool temp_array_access_3.i32;
+
+                andTmp4.bool :=.bool tmp53.bool;
+        endif15:
+            if (andTmp4.bool) goto then16;
+
+                if (completeArray2.bool) goto then17;
+                    andTmp5.bool :=.bool 0.bool;
+                    goto endif17;
+            then17:
+                    tmp54.array.i32 :=.array.i32 getfield(this, row2.array.i32).array.i32;
+                    temp_array_access_4.i32 :=.i32 tmp54.array.i32[0.i32].i32;
+                    tmp55.bool :=.bool 0.i32 <.bool temp_array_access_4.i32;
+
+                    andTmp5.bool :=.bool tmp55.bool;
+            endif17:
+                if (andTmp5.bool) goto then18;
+                    i.i32 :=.i32 0.i32;
+                while0:
+                        tmp56.bool :=.bool winner.i32 <.bool 1.i32;
+
+                        if (tmp56.bool) goto then19;
+                            andTmp6.bool :=.bool 0.bool;
+                            goto endif19;
+                    then19:
+                            tmp57.bool :=.bool i.i32 <.bool 3.i32;
+
+                            andTmp6.bool :=.bool tmp57.bool;
+                    endif19:
+                        if (!.bool andTmp6.bool) goto endwhile0;
+                        tmp58.array.i32 :=.array.i32 getfield(this, row0.array.i32).array.i32;
+                        temp_array_access_5.i32 :=.i32 tmp58.array.i32[i.i32].i32;
+                        "array".array.i32[0.i32].i32 :=.i32 temp_array_access_5.i32;
+                        tmp59.array.i32 :=.array.i32 getfield(this, row1.array.i32).array.i32;
+                        temp_array_access_6.i32 :=.i32 tmp59.array.i32[i.i32].i32;
+                        "array".array.i32[1.i32].i32 :=.i32 temp_array_access_6.i32;
+                        tmp60.array.i32 :=.array.i32 getfield(this, row2.array.i32).array.i32;
+                        temp_array_access_7.i32 :=.i32 tmp60.array.i32[i.i32].i32;
+                        "array".array.i32[2.i32].i32 :=.i32 temp_array_access_7.i32;
+                        temp_arg__9.array.i32 :=.array.i32 "array".array.i32;
+                        tmp61.bool :=.bool invokestatic(BoardBase, "sameArray", temp_arg__9.array.i32).bool;
+                        completeArray.bool :=.bool tmp61.bool;
+
+                        if (completeArray.bool) goto then20;
+                            andTmp7.bool :=.bool 0.bool;
+                            goto endif20;
+                    then20:
+                            temp_array_access_8.i32 :=.i32 "array".array.i32[0.i32].i32;
+                            tmp62.bool :=.bool 0.i32 <.bool temp_array_access_8.i32;
+
+                            andTmp7.bool :=.bool tmp62.bool;
+                    endif20:
+                        if (andTmp7.bool) goto then21;
+
+                            goto endif21;
+                    then21:
+                            winner.i32 :=.i32 "array".array.i32[0.i32].i32;
+
+                    endif21:
+                        i.i32 :=.i32 i.i32 +.i32 1.i32;
+
+                        goto while0;
+                endwhile0:
+                    tmp64.bool :=.bool winner.i32 <.bool 1.i32;
+                    if (tmp64.bool) goto then22;
+
+                        goto endif22;
+                then22:
+                        tmp65.array.i32 :=.array.i32 getfield(this, row0.array.i32).array.i32;
+                        temp_array_access_10.i32 :=.i32 tmp65.array.i32[0.i32].i32;
+                        "array".array.i32[0.i32].i32 :=.i32 temp_array_access_10.i32;
+                        tmp66.array.i32 :=.array.i32 getfield(this, row1.array.i32).array.i32;
+                        temp_array_access_11.i32 :=.i32 tmp66.array.i32[1.i32].i32;
+                        "array".array.i32[1.i32].i32 :=.i32 temp_array_access_11.i32;
+                        tmp67.array.i32 :=.array.i32 getfield(this, row2.array.i32).array.i32;
+                        temp_array_access_12.i32 :=.i32 tmp67.array.i32[2.i32].i32;
+                        "array".array.i32[2.i32].i32 :=.i32 temp_array_access_12.i32;
+                        temp_arg__10.array.i32 :=.array.i32 "array".array.i32;
+                        tmp68.bool :=.bool invokestatic(BoardBase, "sameArray", temp_arg__10.array.i32).bool;
+                        completeArray.bool :=.bool tmp68.bool;
+
+                        if (completeArray.bool) goto then23;
+                            andTmp8.bool :=.bool 0.bool;
+                            goto endif23;
+                    then23:
+                            temp_array_access_13.i32 :=.i32 "array".array.i32[0.i32].i32;
+                            tmp69.bool :=.bool 0.i32 <.bool temp_array_access_13.i32;
+
+                            andTmp8.bool :=.bool tmp69.bool;
+                    endif23:
+                        if (andTmp8.bool) goto then24;
+                            tmp70.array.i32 :=.array.i32 getfield(this, row0.array.i32).array.i32;
+                            temp_array_access_14.i32 :=.i32 tmp70.array.i32[2.i32].i32;
+                            "array".array.i32[0.i32].i32 :=.i32 temp_array_access_14.i32;
+                            tmp71.array.i32 :=.array.i32 getfield(this, row1.array.i32).array.i32;
+                            temp_array_access_15.i32 :=.i32 tmp71.array.i32[1.i32].i32;
+                            "array".array.i32[1.i32].i32 :=.i32 temp_array_access_15.i32;
+                            tmp72.array.i32 :=.array.i32 getfield(this, row2.array.i32).array.i32;
+                            temp_array_access_16.i32 :=.i32 tmp72.array.i32[0.i32].i32;
+                            "array".array.i32[2.i32].i32 :=.i32 temp_array_access_16.i32;
+                            temp_arg__11.array.i32 :=.array.i32 "array".array.i32;
+                            tmp73.bool :=.bool invokestatic(BoardBase, "sameArray", temp_arg__11.array.i32).bool;
+                            completeArray.bool :=.bool tmp73.bool;
+
+                            if (completeArray.bool) goto then25;
+                                andTmp9.bool :=.bool 0.bool;
+                                goto endif25;
+                        then25:
+                                temp_array_access_17.i32 :=.i32 "array".array.i32[0.i32].i32;
+                                tmp74.bool :=.bool 0.i32 <.bool temp_array_access_17.i32;
+
+                                andTmp9.bool :=.bool tmp74.bool;
+                        endif25:
+                            if (andTmp9.bool) goto then26;
+
+                                goto endif26;
+                        then26:
+                                winner.i32 :=.i32 "array".array.i32[0.i32].i32;
+
+                        endif26:
+
+                            goto endif24;
+                    then24:
+                            winner.i32 :=.i32 "array".array.i32[0.i32].i32;
+
+                    endif24:
+
+                endif22:
+
+                    goto endif18;
+            then18:
+                    tmp75.array.i32 :=.array.i32 getfield(this, row2.array.i32).array.i32;
+                    temp_array_access_20.i32 :=.i32 tmp75.array.i32[0.i32].i32;
+                    winner.i32 :=.i32 temp_array_access_20.i32;
+
+            endif18:
+
+                goto endif16;
+        then16:
+                tmp76.array.i32 :=.array.i32 getfield(this, row1.array.i32).array.i32;
+                temp_array_access_21.i32 :=.i32 tmp76.array.i32[0.i32].i32;
+                winner.i32 :=.i32 temp_array_access_21.i32;
+
+        endif16:
+
+            goto endif14;
+    then14:
+            tmp77.array.i32 :=.array.i32 getfield(this, row0.array.i32).array.i32;
+            temp_array_access_22.i32 :=.i32 tmp77.array.i32[0.i32].i32;
+            winner.i32 :=.i32 temp_array_access_22.i32;
+
+    endif14:
+
+        tmp78.bool :=.bool winner.i32 <.bool 1.i32;
+
+        if (tmp78.bool) goto then27;
+            andTmp10.bool :=.bool 0.bool;
+            goto endif27;
+    then27:
+            tmp79.i32 :=.i32 getfield(this, movesmade.i32).i32;
+            tmp80.bool :=.bool tmp79.i32 <.bool 9.i32;
+            tmp81.bool :=.bool !.bool tmp80.bool;
+
+            andTmp10.bool :=.bool tmp81.bool;
+    endif27:
+
+        if (andTmp10.bool) goto then28;
+            andTmp11.bool :=.bool 0.bool;
+            goto endif28;
+    then28:
+            tmp82.i32 :=.i32 getfield(this, movesmade.i32).i32;
+            tmp83.bool :=.bool 9.i32 <.bool tmp82.i32;
+            tmp84.bool :=.bool !.bool tmp83.bool;
+
+            andTmp11.bool :=.bool tmp84.bool;
+    endif28:
+        if (andTmp11.bool) goto then29;
+
+            goto endif29;
+    then29:
+            winner.i32 :=.i32 0.i32;
+
+    endif29:
+
+        ret.i32 winner.i32;
+    }
+
+    .method public static main(args.array.String).V {
+        tmp85.TicTacToe :=.TicTacToe new(TicTacToe).TicTacToe;
+        invokespecial(tmp85.TicTacToe, "<init>").V;
+        mygame.TicTacToe :=.TicTacToe tmp85.TicTacToe;
+
+                invokevirtual(mygame.TicTacToe, "init").bool;
+
+    while1:
+            tmp86.i32 :=.i32 invokevirtual(mygame.TicTacToe, "winner").i32;
+            tmp87.i32 :=.i32 0.i32 -.i32 1.i32;
+            tmp88.bool :=.bool tmp86.i32 <.bool tmp87.i32;
+            tmp89.bool :=.bool !.bool tmp88.bool;
+
+            if (tmp89.bool) goto then30;
+                andTmp12.bool :=.bool 0.bool;
+                goto endif30;
+        then30:
+                tmp90.i32 :=.i32 0.i32 -.i32 1.i32;
+                tmp91.i32 :=.i32 invokevirtual(mygame.TicTacToe, "winner").i32;
+                tmp92.bool :=.bool tmp90.i32 <.bool tmp91.i32;
+                tmp93.bool :=.bool !.bool tmp92.bool;
+
+                andTmp12.bool :=.bool tmp93.bool;
+        endif30:
+            if (!.bool andTmp12.bool) goto endwhile1;
+            done.bool :=.bool 0.bool;
+        while2:
+                tmp94.bool :=.bool !.bool done.bool;
+                if (!.bool tmp94.bool) goto endwhile2;
+                                tmp95.array.i32 :=.array.i32 invokevirtual(mygame.TicTacToe, "getRow0").array.i32;
+                tmp96.array.i32 :=.array.i32 invokevirtual(mygame.TicTacToe, "getRow1").array.i32;
+                tmp97.array.i32 :=.array.i32 invokevirtual(mygame.TicTacToe, "getRow2").array.i32;
+                temp_arg__12.array.i32 :=.array.i32 tmp95.array.i32;
+                temp_arg__13.array.i32 :=.array.i32 tmp96.array.i32;
+                temp_arg__14.array.i32 :=.array.i32 tmp97.array.i32;
+                invokestatic(BoardBase, "printBoard", temp_arg__12.array.i32, temp_arg__13.array.i32, temp_arg__14.array.i32).V;
+                player.i32 :=.i32 invokevirtual(mygame.TicTacToe, "getCurrentPlayer").i32;
+                temp_arg__15.i32 :=.i32 player.i32;
+                tmp99.array.i32 :=.array.i32 invokestatic(BoardBase, "playerTurn", temp_arg__15.i32).array.i32;
+                move.array.i32 :=.array.i32 tmp99.array.i32;
+                temp_array_access_23.i32 :=.i32 move.array.i32[0.i32].i32;
+                temp_array_access_24.i32 :=.i32 move.array.i32[1.i32].i32;
+                temp_arg__16.i32 :=.i32 temp_array_access_23.i32;
+                temp_arg__17.i32 :=.i32 temp_array_access_24.i32;
+                tmp100.bool :=.bool invokevirtual(mygame.TicTacToe, "inbounds", temp_arg__16.i32, temp_arg__17.i32).bool;
+                tmp101.bool :=.bool !.bool tmp100.bool;
+                if (tmp101.bool) goto then31;
+                    temp_array_access_25.i32 :=.i32 move.array.i32[0.i32].i32;
+                    temp_array_access_26.i32 :=.i32 move.array.i32[1.i32].i32;
+                    temp_arg__18.i32 :=.i32 temp_array_access_25.i32;
+                    temp_arg__19.i32 :=.i32 temp_array_access_26.i32;
+                    tmp102.bool :=.bool invokevirtual(mygame.TicTacToe, "Move", temp_arg__18.i32, temp_arg__19.i32).bool;
+                    tmp103.bool :=.bool !.bool tmp102.bool;
+                    if (tmp103.bool) goto then32;
+                        done.bool :=.bool 1.bool;
+
+                        goto endif32;
+                then32:
+                                                invokestatic(BoardBase, "placeTaken").V;
+
+                endif32:
+
+                    goto endif31;
+            then31:
+                                        invokestatic(BoardBase, "wrongMove").V;
+
+            endif31:
+
+                goto while2;
+        endwhile2:
+                        invokevirtual(mygame.TicTacToe, "changeturn").bool;
+
+            goto while1;
+    endwhile1:
+
+                tmp104.array.i32 :=.array.i32 invokevirtual(mygame.TicTacToe, "getRow0").array.i32;
+        tmp105.array.i32 :=.array.i32 invokevirtual(mygame.TicTacToe, "getRow1").array.i32;
+        tmp106.array.i32 :=.array.i32 invokevirtual(mygame.TicTacToe, "getRow2").array.i32;
+        temp_arg__20.array.i32 :=.array.i32 tmp104.array.i32;
+        temp_arg__21.array.i32 :=.array.i32 tmp105.array.i32;
+        temp_arg__22.array.i32 :=.array.i32 tmp106.array.i32;
+        invokestatic(BoardBase, "printBoard", temp_arg__20.array.i32, temp_arg__21.array.i32, temp_arg__22.array.i32).V;
+
+        win.i32 :=.i32 invokevirtual(mygame.TicTacToe, "winner").i32;
+
+                temp_arg__23.i32 :=.i32 win.i32;
+        invokestatic(BoardBase, "printWinner", temp_arg__23.i32).V;
+
+        ret.V ;
+    }
+
+}

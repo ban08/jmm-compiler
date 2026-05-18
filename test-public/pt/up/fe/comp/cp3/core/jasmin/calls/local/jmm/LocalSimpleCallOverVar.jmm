@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.local.jmm;
+
+class LocalSimpleCallOverVar {
+
+    public int callee() {
+        return 0;
+    }
+
+    public int method(LocalSimpleCallOverVar sc) {
+        int a;
+        a = sc.callee();
+        return a;
+    }
+}
+

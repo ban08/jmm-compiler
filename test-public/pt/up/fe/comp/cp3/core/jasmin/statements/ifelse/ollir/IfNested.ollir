@@ -1,0 +1,29 @@
+package pt.up.fe.comp.cp3.core.jasmin.statements.ifelse.ollir;
+
+IfNested extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method(a.bool, b.bool).i32 {
+        if (a.bool) goto then0;
+            res.i32 :=.i32 0.i32;
+
+            goto endif0;
+    then0:
+            if (b.bool) goto then1;
+                res.i32 :=.i32 1.i32;
+
+                goto endif1;
+        then1:
+                res.i32 :=.i32 2.i32;
+
+        endif1:
+
+    endif0:
+
+        ret.i32 res.i32;
+    }
+
+}

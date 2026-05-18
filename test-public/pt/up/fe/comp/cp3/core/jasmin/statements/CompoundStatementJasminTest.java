@@ -1,0 +1,46 @@
+/**
+ * Copyright 2022 SPeCS.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License. under the License.
+ */
+
+package pt.up.fe.comp.cp3.core.jasmin.statements;
+
+import examples.Pair;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import pt.up.fe.comp.cp3.BaseJasminTestEnv;
+
+@RunWith(Parameterized.class)
+public class CompoundStatementJasminTest extends BaseJasminTestEnv {
+    private static final String BASE_PATH = "pt/up/fe/comp/cp3/core/jasmin/statements/compoundstmt/";
+
+
+    public CompoundStatementJasminTest(InputSource inputSource) {
+        super(inputSource, BASE_PATH);
+    }
+
+
+    @Test
+    public void CompoundEmpty() {
+        var res = toJasmin("CompoundEmpty");
+        res.invoke("method");
+    }
+
+    @Test
+    public void CompoundNested() {
+        var res = toJasmin("CompoundNested");
+        var ret = res.invoke("method", Integer.class);
+        var expected = 2;
+        assertEquals("method should return ${expected}", expected, ret.returnValue());
+    }
+
+}

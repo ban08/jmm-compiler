@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.imported.ollir;
+import util.io;
+
+ImportedClassesStaticCallVoid extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method().V {
+                temp_arg__0.i32 :=.i32 1.i32;
+        invokestatic(io, "print", temp_arg__0.i32).V;
+
+        ret.V ;
+    }
+
+}

@@ -1,0 +1,21 @@
+package pt.up.fe.comp.cp3.core.jasmin.statements.whileloop.jmm;
+
+class WhileNested {
+
+    public int method(int n) {
+        int i;
+        int j;
+        i = 0;
+        j = 0;
+
+        while (i < n) {
+            while (j < i * n) {
+                j = j + 1;
+            }
+            i = i + 1;
+        }
+
+        return j;
+    }
+}
+

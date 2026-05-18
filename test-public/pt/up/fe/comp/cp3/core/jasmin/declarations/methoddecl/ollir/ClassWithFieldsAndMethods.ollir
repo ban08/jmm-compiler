@@ -2,11 +2,8 @@ package pt.up.fe.comp.cp3.core.jasmin.declarations.methoddecl.ollir;
 import examples.Quicksort;
 
 ClassWithFieldsAndMethods extends Quicksort  {
-
-
     .field public intField.i32;
     .field public boolField.bool;
-
     .construct "<init>"().V {
         invokespecial(this."examples.Quicksort", "<init>").V;
     }

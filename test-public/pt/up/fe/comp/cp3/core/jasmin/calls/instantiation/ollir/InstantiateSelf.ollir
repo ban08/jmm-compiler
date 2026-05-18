@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.instantiation.ollir;
+
+InstantiateSelf extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method().InstantiateSelf {
+        tmp0.InstantiateSelf :=.InstantiateSelf new(InstantiateSelf).InstantiateSelf;
+        invokespecial(tmp0.InstantiateSelf, "<init>").V;
+        other.InstantiateSelf :=.InstantiateSelf tmp0.InstantiateSelf;
+
+        ret.InstantiateSelf other.InstantiateSelf;
+    }
+
+}

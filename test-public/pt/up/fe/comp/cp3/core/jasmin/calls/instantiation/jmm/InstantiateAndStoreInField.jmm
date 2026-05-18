@@ -1,0 +1,10 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.instantiation.jmm;
+
+class InstantiateAndStoreInField {
+    InstantiateAndStoreInField other;
+
+    public void method() {
+        other = new InstantiateAndStoreInField();
+    }
+}
+

@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.instantiation.jmm;
+
+class InstantiateSelfStoreInSuperType {
+
+    public Object method() {
+        Object other;
+        other = new InstantiateSelfStoreInSuperType();
+        return other;
+    }
+}
+

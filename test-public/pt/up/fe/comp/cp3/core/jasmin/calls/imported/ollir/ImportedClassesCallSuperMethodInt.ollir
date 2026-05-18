@@ -1,0 +1,16 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.imported.ollir;
+import examples.Auxi;
+
+ImportedClassesCallSuperMethodInt extends Auxi  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."examples.Auxi", "<init>").V;
+    }
+
+    .method public method().i32 {
+        a.i32 :=.i32 invokevirtual(this.ImportedClassesCallSuperMethodInt, "instanceCallInt").i32;
+
+        ret.i32 a.i32;
+    }
+
+}

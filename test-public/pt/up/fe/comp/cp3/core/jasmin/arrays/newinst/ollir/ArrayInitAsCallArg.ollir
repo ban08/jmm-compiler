@@ -1,0 +1,20 @@
+package pt.up.fe.comp.cp3.core.jasmin.arrays.newinst.ollir;
+import examples.Quicksort;
+
+ArrayInitAsCallArg extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public sort(qs.Quicksort, size.i32).bool {
+
+        tmp0.array.i32 :=.array.i32 new(array, size.i32).array.i32;
+        temp_arg__0.array.i32 :=.array.i32 tmp0.array.i32;
+        tmp1.bool :=.bool invokevirtual(qs.Quicksort, "quicksort", temp_arg__0.array.i32).bool;
+        a.bool :=.bool tmp1.bool;
+
+        ret.bool a.bool;
+    }
+
+}

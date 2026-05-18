@@ -1,0 +1,16 @@
+package pt.up.fe.comp.cp3.core.jasmin.arrays.load.jmm;
+
+class ArrayPosCallIndex {
+
+    public int rem(int dividend, int divisor) {
+        int div;
+        int rem;
+        div = dividend / divisor;
+        rem = dividend - div * divisor;
+        return rem;
+    }
+
+    public int method(int[] arr, int num, int div) {
+        return arr[this.rem(num, div)];
+    }
+}

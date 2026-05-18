@@ -1,0 +1,23 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.local.jmm;
+
+class LocalCallChainedCall {
+
+
+    public LocalCallChainedCall thisInstance() {
+        return this;
+    }
+
+    public int foo() {
+        int a;
+        a = 0 - 2;
+        return a;
+    }
+
+    public int method() {
+        int a;
+        a = this.thisInstance().foo();
+        return a;
+    }
+
+}
+

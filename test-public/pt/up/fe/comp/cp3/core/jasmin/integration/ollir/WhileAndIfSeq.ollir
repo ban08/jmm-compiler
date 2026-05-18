@@ -1,0 +1,58 @@
+package pt.up.fe.comp.cp3.core.jasmin.integration.ollir;
+import util.io;
+
+WhileAndIfSeq extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public static main(args.array.String).V {
+        a.i32 :=.i32 20.i32;
+
+        b.i32 :=.i32 10.i32;
+
+
+        tmp0.array.i32 :=.array.i32 new(array, 10.i32).array.i32;
+        d.array.i32 :=.array.i32 tmp0.array.i32;
+
+        tmp1.bool :=.bool a.i32 <.bool b.i32;
+        if (tmp1.bool) goto then0;
+            c.i32 :=.i32 b.i32 -.i32 1.i32;
+
+            goto endif0;
+    then0:
+            c.i32 :=.i32 a.i32 -.i32 1.i32;
+
+    endif0:
+
+    while0:
+            tmp4.bool :=.bool 0.i32 <.bool c.i32;
+            if (!.bool tmp4.bool) goto endwhile0;
+            tmp5.i32 :=.i32 a.i32 -.i32 b.i32;
+            d.array.i32[c.i32].i32 :=.i32 tmp5.i32;
+            c.i32 :=.i32 c.i32 -.i32 1.i32;
+            a.i32 :=.i32 a.i32 -.i32 1.i32;
+            b.i32 :=.i32 b.i32 +.i32 1.i32;
+
+            goto while0;
+    endwhile0:
+
+        c.i32 :=.i32 0.i32;
+
+    while1:
+            tmp9.i32 :=.i32 arraylength(d.array.i32).i32;
+            tmp10.bool :=.bool c.i32 <.bool tmp9.i32;
+            if (!.bool tmp10.bool) goto endwhile1;
+                        temp_array_access_0.i32 :=.i32 d.array.i32[c.i32].i32;
+            temp_arg__0.i32 :=.i32 temp_array_access_0.i32;
+            invokestatic(io, "println", temp_arg__0.i32).V;
+            c.i32 :=.i32 c.i32 +.i32 1.i32;
+
+            goto while1;
+    endwhile1:
+
+        ret.V ;
+    }
+
+}

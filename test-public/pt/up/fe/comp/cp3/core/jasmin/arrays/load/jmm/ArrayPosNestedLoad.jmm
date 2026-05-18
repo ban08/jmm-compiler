@@ -1,0 +1,8 @@
+package pt.up.fe.comp.cp3.core.jasmin.arrays.load.jmm;
+
+class ArrayPosNestedLoad {
+
+    public int method(int[] arr, int[] n, int pos) {
+        return arr[n[pos]];
+    }
+}

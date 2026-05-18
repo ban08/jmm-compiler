@@ -1,0 +1,19 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.imported.ollir;
+import examples.Auxi;
+
+ImportedClassesCallSuperMethodWithArg extends Auxi  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."examples.Auxi", "<init>").V;
+    }
+
+    .method public method().i32 {
+        temp_arg__0.i32 :=.i32 5.i32;
+        temp_arg__1.i32 :=.i32 8.i32;
+        tmp0.i32 :=.i32 invokevirtual(this.ImportedClassesCallSuperMethodWithArg, "instanceCallIntWithArgs", temp_arg__0.i32, temp_arg__1.i32).i32;
+        a.i32 :=.i32 tmp0.i32;
+
+        ret.i32 a.i32;
+    }
+
+}

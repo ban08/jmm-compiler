@@ -1,0 +1,18 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.instantiation.ollir;
+import java.util.Date;
+
+InstantiateImportedClass extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method method().Date {
+        tmp0.Date :=.Date new(Date).Date;
+        invokespecial(tmp0.Date, "<init>").V;
+        d.Date :=.Date tmp0.Date;
+
+        ret.Date d.Date;
+    }
+
+}

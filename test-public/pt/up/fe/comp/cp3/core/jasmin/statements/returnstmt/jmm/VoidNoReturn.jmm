@@ -1,0 +1,8 @@
+package pt.up.fe.comp.cp3.core.jasmin.statements.returnstmt.jmm;
+
+class VoidNoReturn {
+
+    public void method() {
+    }
+}
+

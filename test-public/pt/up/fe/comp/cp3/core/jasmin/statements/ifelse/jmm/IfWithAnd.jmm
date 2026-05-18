@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp3.core.jasmin.statements.ifelse.jmm;
+
+class IfWithAnd {
+
+    public int method(boolean a, boolean b) {
+        int res;
+        if (a && b) {
+            res = 1;
+        } else {
+            res = 0;
+        }
+        return res;
+    }
+}
+

@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.imported.jmm;
+
+import examples.inheritance.A;
+import examples.inheritance.B;
+
+class ImportedClassesCallReturnStoredInSuperType {
+
+    public A method(B b) {
+        A a;
+        a = b.self();
+        return a;
+    }
+
+}
+

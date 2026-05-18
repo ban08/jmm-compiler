@@ -2,10 +2,7 @@ package pt.up.fe.comp.cp3.core.jasmin.declarations.methoddecl.ollir;
 import examples.Quicksort;
 
 MethodParameterIsExplicitlyImported extends Object  {
-
-
     
-
     .construct "<init>"().V {
         invokespecial(this."java.lang.Object", "<init>").V;
     }

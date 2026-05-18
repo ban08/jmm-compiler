@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.local.jmm;
+
+class LocalCallsNewInstanceArg {
+
+
+    public LocalCallsNewInstanceArg fromInstance(LocalCallsNewInstanceArg other) {
+        return other;
+    }
+
+    public LocalCallsNewInstanceArg method() {
+        LocalCallsNewInstanceArg that;
+        that = this.fromInstance(new LocalCallsNewInstanceArg());
+        return that;
+    }
+
+}
+

@@ -1,0 +1,14 @@
+package pt.up.fe.comp.cp3.core.jasmin.arrays.load.jmm;
+
+class ArrayLengthCall {
+
+    public int[] getArray() {
+        int[] c;
+        c = new int[10];
+        return c;
+    }
+
+    public int getMethodReturnLength() {
+        return this.getArray().length;
+    }
+}

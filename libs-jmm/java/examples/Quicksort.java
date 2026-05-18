@@ -1,5 +1,7 @@
 package examples;
+
 import util.io;
+
 public class Quicksort {
     public static void main(String[] a) {
         int[] L;
@@ -34,18 +36,19 @@ public class Quicksort {
     }
 
     public boolean quicksort(int[] L) {
-        return this.quicksort(L, 0, L.length - 1);
+        return this.quicksortLimit(L, 0, L.length - 1);
     }
 
-    public boolean quicksort(int[] L, int lo, int hi) {
+    public boolean quicksortLimit(int[] L, int lo, int hi) {
         int p;
 
         if (lo < hi) {
             p = this.partition(L, lo, hi);
 
-            this.quicksort(L, lo, p - 1);
-            this.quicksort(L, p + 1, hi);
-        } else {}
+            this.quicksortLimit(L, lo, p - 1);
+            this.quicksortLimit(L, p + 1, hi);
+        } else {
+        }
 
         return true;
     }
@@ -67,7 +70,8 @@ public class Quicksort {
                 L[j] = tmp;
 
                 i = i + 1;
-            } else {}
+            } else {
+            }
 
             j = j + 1;
         }

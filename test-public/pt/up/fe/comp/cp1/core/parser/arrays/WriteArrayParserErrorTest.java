@@ -5,7 +5,7 @@ import org.junit.Test;
 import pt.up.fe.comp.test.env.JmmTestEnv;
 
 import static pt.up.fe.comp.cp1.core.parser.RulesNames.EXPRESSION;
-import static pt.up.fe.comp.cp1.core.parser.RulesNames.STATEMENT;
+import static pt.up.fe.comp.cp1.core.parser.RulesNames.METHOD;
 
 public class WriteArrayParserErrorTest extends JmmTestEnv {
 
@@ -17,12 +17,12 @@ public class WriteArrayParserErrorTest extends JmmTestEnv {
     @Test
     public void testWriteArrayWitMalformattedBrackets() {
         setDescription("Test that writing to an array with bad brackets is not parsed");
-        parseSnippetWithErrors("foo[=10;", STATEMENT);
-        parseSnippetWithErrors("foo]=10;", STATEMENT);
-        parseSnippetWithErrors("foo [1=10;", STATEMENT);
-        parseSnippetWithErrors("foo 1]=10;", STATEMENT);
-        parseSnippetWithErrors("foo 1=10;", STATEMENT);
-        parseSnippet("foo[1] = 10;", STATEMENT);
+        parseSnippetWithErrors("void method(){foo[=10;}", METHOD);
+        parseSnippetWithErrors("void method(){foo]=10;}", METHOD);
+        parseSnippetWithErrors("void method(){foo [1=10;}", METHOD);
+        parseSnippetWithErrors("void method(){foo 1]=10;}", METHOD);
+        parseSnippetWithErrors("void method(){foo 1=10;}", METHOD);
+        parseSnippet("void method(){foo[1] = 10;}", METHOD);
     }
 
 }

@@ -1,0 +1,10 @@
+package pt.up.fe.comp.cp3.core.jasmin.statements.compoundstmt.jmm;
+
+class CompoundEmpty {
+
+    public void method() {
+        {
+        }
+    }
+}
+

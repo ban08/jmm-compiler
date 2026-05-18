@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp3.core.jasmin.arrays.store.ollir;
+
+ArrayStore extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method(arr.array.i32).V {
+        arr.array.i32[0.i32].i32 :=.i32 30.i32;
+
+        ret.V ;
+    }
+
+}

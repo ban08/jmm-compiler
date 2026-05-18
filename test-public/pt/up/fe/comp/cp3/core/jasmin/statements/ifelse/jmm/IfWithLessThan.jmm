@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp3.core.jasmin.statements.ifelse.jmm;
+
+class IfWithLessThan {
+
+    public int method(int a) {
+        int res;
+        if (a < 10) {
+            res = 1;
+        } else {
+            res = 0;
+        }
+        return res;
+    }
+}
+

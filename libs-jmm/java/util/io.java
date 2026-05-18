@@ -16,8 +16,6 @@ public class io {
 
         if (Buffer.isEmpty()) {
             init = true;
-
-
             BufferedReader teclado = new BufferedReader(new InputStreamReader(System.in));
             String line;
             try {
@@ -26,11 +24,8 @@ public class io {
                     String[] tokens = line.split("\\s");
 
                     for (int i = 0; i < tokens.length; i++) {
-                        //System.out.println(tokens[i]);
 
                         int value = Integer.parseInt(tokens[i]);
-
-                        //System.out.println("valor lido: "+value);
 
                         if (!init) {
                             Buffer.addElement(value);
@@ -41,7 +36,6 @@ public class io {
                     }
                 }
             } catch (java.io.IOException e) {
-//                System.out.println(e);
                 e.printStackTrace(System.err);
                 System.exit(1);
             }
@@ -54,19 +48,7 @@ public class io {
         return a;
     }
 
-	/* final static int readln() {
-		int a=0;
-		try {
-			BufferedReader teclado = new BufferedReader(new InputStreamReader(System.in));
-			a = Integer.parseInt(teclado.readLine());
-		} catch (java.io.IOException e) {
-			System.out.println(e);
-			System.exit(1);
-		}
-		return a;
-	} */
-
-    public static void print(String c, int a) {
+    public static void printSI(String c, int a) {
         System.out.print(c + a);
     }
 
@@ -74,19 +56,19 @@ public class io {
         System.out.print(a);
     }
 
-    public static void print(String a) {
+    public static void printS(String a) {
         System.out.print(a);
     }
 
-    public static void print(boolean a) {
+    public static void printB(boolean a) {
         System.out.print(a);
     }
 
-    public static void println() {
-        System.out.println();
+    public static void printLine() {
+        System.out.println("");
     }
 
-    public static void println(String c, int a) {
+    public static void printSIln(String c, int a) {
         System.out.println(c + a);
     }
 
@@ -94,11 +76,11 @@ public class io {
         System.out.println(a);
     }
 
-    public static void println(String a) {
+    public static void printSln(String a) {
         System.out.println(a);
     }
 
-    public static void println(boolean a) {
+    public static void printBln(boolean a) {
         System.out.println(a);
     }
 }

@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.imported.jmm;
+
+import util.io;
+
+class ImportedClassesStaticCallVoid {
+
+    public void method() {
+        io.print(1);
+    }
+}
+

@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp3.core.jasmin.statements.ifelse.jmm;
+
+class IfSimpleElse {
+
+    public int method(boolean a) {
+        int res;
+        if (a) {
+            res = 1;
+        } else {
+            res = 0;
+        }
+        return res;
+    }
+}
+

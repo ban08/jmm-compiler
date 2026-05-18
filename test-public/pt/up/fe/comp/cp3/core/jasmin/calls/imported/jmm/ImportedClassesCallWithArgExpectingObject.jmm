@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.imported.jmm;
+
+import examples.Auxi;
+import util.io;
+
+class ImportedClassesCallWithArgExpectingObject {
+
+    public int method(Auxi auxi) {
+        int a;
+        a = auxi.instanceExpectingObject(this);
+        return a;
+    }
+
+}
+

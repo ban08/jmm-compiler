@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.local.jmm;
+
+class LocalCallOverNewInstanceParenthesis {
+
+
+    public boolean callee() {
+        return false;
+    }
+
+    public boolean method() {
+        boolean b;
+        b = (new LocalCallOverNewInstanceParenthesis()).callee();
+        return b;
+    }
+
+}
+

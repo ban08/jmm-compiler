@@ -1,0 +1,12 @@
+package pt.up.fe.comp.cp3.core.jasmin.arrays.newinst.jmm;
+
+import examples.Quicksort;
+
+class ArrayInitAsCallArg {
+
+    public boolean sort(Quicksort qs, int size) {
+        boolean a;
+        a = qs.quicksort(new int[size]);
+        return a;
+    }
+}

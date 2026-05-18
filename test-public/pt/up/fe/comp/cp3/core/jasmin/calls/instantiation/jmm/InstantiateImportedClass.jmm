@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.instantiation.jmm;
+
+import java.util.Date;
+
+class InstantiateImportedClass {
+    Date method() {
+        Date d;
+        d = new Date();
+        return d;
+    }
+}

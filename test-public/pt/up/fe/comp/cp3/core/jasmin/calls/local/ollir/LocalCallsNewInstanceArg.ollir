@@ -1,0 +1,23 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.local.ollir;
+
+LocalCallsNewInstanceArg extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public fromInstance(other.LocalCallsNewInstanceArg).LocalCallsNewInstanceArg {
+        ret.LocalCallsNewInstanceArg other.LocalCallsNewInstanceArg;
+    }
+
+    .method public method().LocalCallsNewInstanceArg {
+        tmp0.LocalCallsNewInstanceArg :=.LocalCallsNewInstanceArg new(LocalCallsNewInstanceArg).LocalCallsNewInstanceArg;
+        invokespecial(tmp0.LocalCallsNewInstanceArg, "<init>").V;
+        temp_arg__0.LocalCallsNewInstanceArg :=.LocalCallsNewInstanceArg tmp0.LocalCallsNewInstanceArg;
+        tmp1.LocalCallsNewInstanceArg :=.LocalCallsNewInstanceArg invokevirtual(this.LocalCallsNewInstanceArg, "fromInstance", temp_arg__0.LocalCallsNewInstanceArg).LocalCallsNewInstanceArg;
+        that.LocalCallsNewInstanceArg :=.LocalCallsNewInstanceArg tmp1.LocalCallsNewInstanceArg;
+
+        ret.LocalCallsNewInstanceArg that.LocalCallsNewInstanceArg;
+    }
+
+}

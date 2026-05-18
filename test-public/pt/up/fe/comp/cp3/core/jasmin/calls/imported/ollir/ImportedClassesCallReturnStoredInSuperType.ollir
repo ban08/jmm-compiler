@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.imported.ollir;
+import examples.inheritance.A;
+import examples.inheritance.B;
+
+ImportedClassesCallReturnStoredInSuperType extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method(b.B).A {
+        a.A :=.B invokevirtual(b.B, "self").B;
+
+        ret.A a.A;
+    }
+
+}

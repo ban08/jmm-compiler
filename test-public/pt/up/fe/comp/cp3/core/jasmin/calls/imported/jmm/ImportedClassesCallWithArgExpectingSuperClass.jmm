@@ -1,0 +1,14 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.imported.jmm;
+
+import examples.Auxi;
+
+class ImportedClassesCallWithArgExpectingSuperClass extends Auxi {
+
+    public int method(Auxi auxi) {
+        int a;
+        a = auxi.instanceExpectingAuxi(this);
+        return a;
+    }
+
+}
+

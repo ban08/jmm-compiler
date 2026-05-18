@@ -1,0 +1,19 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.local.ollir;
+
+LocalCallOnThis extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public callee().i32 {
+        ret.i32 1.i32;
+    }
+
+    .method public method().i32 {
+        a.i32 :=.i32 invokevirtual(this.LocalCallOnThis, "callee").i32;
+
+        ret.i32 a.i32;
+    }
+
+}

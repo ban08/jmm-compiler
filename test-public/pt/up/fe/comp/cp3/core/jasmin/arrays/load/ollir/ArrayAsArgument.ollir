@@ -1,0 +1,20 @@
+package pt.up.fe.comp.cp3.core.jasmin.arrays.load.ollir;
+
+ArrayAsArgument extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public target(a.array.i32).i32 {
+        temp_array_access_0.i32 :=.i32 a.array.i32[0.i32].i32;
+        ret.i32 temp_array_access_0.i32;
+    }
+
+    .method public method(a.array.i32).i32 {
+        temp_arg__0.array.i32 :=.array.i32 a.array.i32;
+        tmp0.i32 :=.i32 invokevirtual(this.ArrayAsArgument, "target", temp_arg__0.array.i32).i32;
+        ret.i32 tmp0.i32;
+    }
+
+}

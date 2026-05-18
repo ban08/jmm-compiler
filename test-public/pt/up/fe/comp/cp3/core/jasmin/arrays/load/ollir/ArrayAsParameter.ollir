@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp3.core.jasmin.arrays.load.ollir;
+
+ArrayAsParameter extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method(a.array.i32).array.i32 {
+        ret.array.i32 a.array.i32;
+    }
+
+}

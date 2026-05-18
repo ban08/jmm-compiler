@@ -1,0 +1,19 @@
+package pt.up.fe.comp.cp3.core.jasmin.statements.compoundstmt.jmm;
+
+class CompoundNested {
+
+    public int method() {
+        int a;
+        a = 0;
+
+        {
+            a = a + 1;
+            {
+                a = a + 1;
+            }
+        }
+
+        return a;
+    }
+}
+

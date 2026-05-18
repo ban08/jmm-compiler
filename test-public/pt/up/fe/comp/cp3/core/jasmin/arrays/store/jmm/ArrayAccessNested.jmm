@@ -1,0 +1,8 @@
+package pt.up.fe.comp.cp3.core.jasmin.arrays.store.jmm;
+
+class ArrayAccessNested {
+    public int method(int[] a, int[] b) {
+        a[b[0]] = 5;
+        return a[0];
+    }
+}

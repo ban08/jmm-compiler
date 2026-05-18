@@ -1,0 +1,8 @@
+package pt.up.fe.comp.cp3.core.jasmin.arrays.store.jmm;
+
+class ArrayStore {
+
+    public void method(int[] arr) {
+        arr[0] = 30;
+    }
+}

@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp3.core.jasmin.arrays.newinst.ollir;
+
+ArrayInitVariable extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public init(size.i32).array.i32 {
+
+        tmp0.array.i32 :=.array.i32 new(array, size.i32).array.i32;
+        a.array.i32 :=.array.i32 tmp0.array.i32;
+
+        ret.array.i32 a.array.i32;
+    }
+
+}

@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.local.jmm;
+
+class LocalCallOnThis {
+
+    public int callee() {
+        return 1;
+    }
+
+    public int method() {
+        int a;
+        a = this.callee();
+        return a;
+    }
+}
+

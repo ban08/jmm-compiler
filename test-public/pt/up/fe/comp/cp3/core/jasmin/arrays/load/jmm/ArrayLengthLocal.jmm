@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.core.jasmin.arrays.load.jmm;
+
+class ArrayLengthLocal {
+
+    public int getLocalLength() {
+        int[] a;
+        a = new int[5];
+        return a.length;
+    }
+
+}

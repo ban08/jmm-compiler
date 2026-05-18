@@ -1,0 +1,18 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.local.jmm;
+
+class LocalCallWithMultipleArg {
+
+    public int callee(int x, boolean b, int y) {
+        int a;
+        a = x + y;
+        return a;
+    }
+
+    public int method() {
+        int a;
+        a = this.callee(1, true, 2);
+        return a;
+    }
+
+}
+

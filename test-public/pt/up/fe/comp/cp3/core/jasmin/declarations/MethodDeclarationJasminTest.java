@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import pt.up.fe.comp.cp3.BaseJasminTestEnv;
+import pt.up.fe.specs.util.SpecsStrings;
 
 @RunWith(Parameterized.class)
 
@@ -80,4 +81,47 @@ public class MethodDeclarationJasminTest extends BaseJasminTestEnv {
         assertEquals("method2 should return ${expected}", true, result2.returnValue());
     }
 
+
+    //Limits tests
+
+    @Test
+    public void Limits_Locals_Not_99() {
+        var res = toJasmin("LocalLimits");
+        var methodCode = getJasminMethod(res.jasmin(), "func");
+        var numLocals = Integer.parseInt(SpecsStrings.getRegexGroup(methodCode, getLimitLocalsRegex(), 1));
+        assertTrue("limit locals should be less than 20: " + numLocals, numLocals >= 0 && numLocals < 20);
+    }
+
+    @Test
+    public void Limits_Locals_Simple() {
+        var res = toJasmin("LocalLimits");
+        var methodCode = getJasminMethod(res.jasmin(), "func");
+        var numLocals = Integer.parseInt(SpecsStrings.getRegexGroup(methodCode, getLimitLocalsRegex(), 1));
+        // Find store or load with numLocals - 1
+        var regex = getLocalsRegex(numLocals);
+        matches("Local variables actually use the limit local value '%d - 1'.".formatted(numLocals), methodCode, regex);
+    }
+
+    @Test
+    public void Limits_Stack_Not_99() {
+        var res = toJasmin("LocalLimits");
+        var methodCode = getJasminMethod(res.jasmin(), "func");
+        var numStack = Integer.parseInt(SpecsStrings.getRegexGroup(methodCode, getLimitStackRegex(), 1));
+        var lessThan = 5;
+        assertTrue("limit stack should be less than %d: %d".formatted(lessThan, numStack), numStack >= 0 && numStack < lessThan);
+    }
+
+    @Test
+    public void Limits_Stack_Simple() {
+        var res = toJasmin("LocalLimits");
+        var methodCode = getJasminMethod(res.jasmin(), "func");
+        var numStack = Integer.parseInt(SpecsStrings.getRegexGroup(methodCode, getLimitStackRegex(), 1));
+        int expectedLimit = 3;
+        int errorMargin = 2;
+        int upperLimit = expectedLimit + errorMargin;
+
+        assertTrue(
+                "limit stack should be %d (accepted if <= %d): it is %d".formatted(expectedLimit, upperLimit, numStack),
+                numStack <= upperLimit && numStack >= expectedLimit);
+    }
 }

@@ -30,6 +30,8 @@ import java.util.regex.Pattern;
 public abstract class BaseJasminTestEnv extends JasminTestEnv {
     private Function<String, JasminResult> toJasminFunction;
     private String extension;
+    private static final List<String> classPath = List.of("./libs-jmm/compiled");
+
 
     public enum InputSource {
         JMM,
@@ -46,7 +48,7 @@ public abstract class BaseJasminTestEnv extends JasminTestEnv {
         return inputSources.stream().map(v -> new Object[]{v}).toList();
     }
 
-    private static final String RESOURCES_LOCATION = "test-public";
+    protected static final String RESOURCES_LOCATION = "test-public";
 
     private static String buildBasePath(InputSource source, String basePath) {
         if (!basePath.endsWith("/"))
@@ -56,6 +58,7 @@ public abstract class BaseJasminTestEnv extends JasminTestEnv {
 
     protected BaseJasminTestEnv(InputSource source, String basePath) {
         super(buildBasePath(source, basePath), RESOURCES_LOCATION);
+        this.addClassPaths(classPath);
         switch (source) {
             case JMM:
                 toJasminFunction = super::getJasminFromJmm;

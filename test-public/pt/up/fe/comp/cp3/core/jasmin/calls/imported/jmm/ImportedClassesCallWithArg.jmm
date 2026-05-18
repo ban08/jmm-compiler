@@ -1,0 +1,12 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.imported.jmm;
+
+import examples.Pair;
+
+class ImportedClassesCallWithArg {
+
+    public void method(Pair pair) {
+        int a;
+        a = pair.setLeft(1);
+    }
+}
+

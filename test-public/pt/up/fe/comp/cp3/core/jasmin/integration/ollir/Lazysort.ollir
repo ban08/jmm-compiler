@@ -1,0 +1,117 @@
+package pt.up.fe.comp.cp3.core.jasmin.integration.ollir;
+import examples.Quicksort;
+import util.MathUtils;
+
+Lazysort extends Quicksort  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."examples.Quicksort", "<init>").V;
+    }
+
+    .method public static main(args.array.String).V {
+                temp_arg__0.i32 :=.i32 13505.i32;
+        invokestatic(MathUtils, "setSeed", temp_arg__0.i32).V;
+
+
+        tmp0.array.i32 :=.array.i32 new(array, 10.i32).array.i32;
+        L.array.i32 :=.array.i32 tmp0.array.i32;
+
+        i.i32 :=.i32 0.i32;
+
+    while0:
+            tmp1.i32 :=.i32 arraylength(L.array.i32).i32;
+            tmp2.bool :=.bool i.i32 <.bool tmp1.i32;
+            if (!.bool tmp2.bool) goto endwhile0;
+            tmp3.i32 :=.i32 arraylength(L.array.i32).i32;
+            tmp4.i32 :=.i32 tmp3.i32 -.i32 i.i32;
+            L.array.i32[i.i32].i32 :=.i32 tmp4.i32;
+            i.i32 :=.i32 i.i32 +.i32 1.i32;
+
+            goto while0;
+    endwhile0:
+
+        tmp6.Lazysort :=.Lazysort new(Lazysort).Lazysort;
+        invokespecial(tmp6.Lazysort, "<init>").V;
+        q.Lazysort :=.Lazysort tmp6.Lazysort;
+
+                temp_arg__1.array.i32 :=.array.i32 L.array.i32;
+        invokevirtual(q.Lazysort, "quicksort", temp_arg__1.array.i32).bool;
+
+                temp_arg__2.array.i32 :=.array.i32 L.array.i32;
+        invokevirtual(q.Lazysort, "printL", temp_arg__2.array.i32).bool;
+
+        ret.V ;
+    }
+
+    .method public quicksort(L.array.i32).bool {
+        temp_arg__3.i32 :=.i32 0.i32;
+        temp_arg__4.i32 :=.i32 5.i32;
+        tmp7.i32 :=.i32 invokestatic(MathUtils, "random", temp_arg__3.i32, temp_arg__4.i32).i32;
+        rand.i32 :=.i32 tmp7.i32;
+
+        tmp8.bool :=.bool rand.i32 <.bool 4.i32;
+        if (tmp8.bool) goto then0;
+            lazy.bool :=.bool 0.bool;
+
+            goto endif0;
+    then0:
+                        temp_arg__5.array.i32 :=.array.i32 L.array.i32;
+            invokevirtual(this.Lazysort, "beLazy", temp_arg__5.array.i32).bool;
+            lazy.bool :=.bool 1.bool;
+
+    endif0:
+
+        if (lazy.bool) goto then1;
+            tmp9.i32 :=.i32 arraylength(L.array.i32).i32;
+            tmp10.i32 :=.i32 tmp9.i32 -.i32 1.i32;
+            temp_arg__6.array.i32 :=.array.i32 L.array.i32;
+            temp_arg__7.i32 :=.i32 0.i32;
+            temp_arg__8.i32 :=.i32 tmp10.i32;
+            tmp11.bool :=.bool invokevirtual(this.Lazysort, "quicksortLimit", temp_arg__6.array.i32, temp_arg__7.i32, temp_arg__8.i32).bool;
+            lazy.bool :=.bool tmp11.bool;
+
+            goto endif1;
+    then1:
+            lazy.bool :=.bool !.bool lazy.bool;
+
+    endif1:
+
+        ret.bool lazy.bool;
+    }
+
+    .method public beLazy(L.array.i32).bool {
+        _allowedNameL.i32 :=.i32 arraylength(L.array.i32).i32;
+
+        "$allowedNameI".i32 :=.i32 0.i32;
+
+    while1:
+            tmp14.i32 :=.i32 _allowedNameL.i32 /.i32 2.i32;
+            tmp15.bool :=.bool "$allowedNameI".i32 <.bool tmp14.i32;
+            if (!.bool tmp15.bool) goto endwhile1;
+            temp_arg__9.i32 :=.i32 0.i32;
+            temp_arg__10.i32 :=.i32 10.i32;
+            tmp16.i32 :=.i32 invokestatic(MathUtils, "random", temp_arg__9.i32, temp_arg__10.i32).i32;
+            L.array.i32["$allowedNameI".i32].i32 :=.i32 tmp16.i32;
+            "$allowedNameI".i32 :=.i32 "$allowedNameI".i32 +.i32 1.i32;
+
+            goto while1;
+    endwhile1:
+
+    while2:
+            tmp18.bool :=.bool "$allowedNameI".i32 <.bool _allowedNameL.i32;
+            if (!.bool tmp18.bool) goto endwhile2;
+            temp_arg__11.i32 :=.i32 0.i32;
+            temp_arg__12.i32 :=.i32 10.i32;
+            tmp19.i32 :=.i32 invokestatic(MathUtils, "random", temp_arg__11.i32, temp_arg__12.i32).i32;
+            rand.i32 :=.i32 tmp19.i32;
+            tmp20.i32 :=.i32 rand.i32 +.i32 1.i32;
+            L.array.i32["$allowedNameI".i32].i32 :=.i32 tmp20.i32;
+            "$allowedNameI".i32 :=.i32 "$allowedNameI".i32 +.i32 1.i32;
+
+            goto while2;
+    endwhile2:
+
+        ret.bool 1.bool;
+    }
+
+}

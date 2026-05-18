@@ -1,0 +1,22 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.local.ollir;
+
+LocalCallOverNewInstanceParenthesis extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public callee().bool {
+        ret.bool 0.bool;
+    }
+
+    .method public method().bool {
+        tmp0.LocalCallOverNewInstanceParenthesis :=.LocalCallOverNewInstanceParenthesis new(LocalCallOverNewInstanceParenthesis).LocalCallOverNewInstanceParenthesis;
+        invokespecial(tmp0.LocalCallOverNewInstanceParenthesis, "<init>").V;
+        tmp1.bool :=.bool invokevirtual(tmp0.LocalCallOverNewInstanceParenthesis, "callee").bool;
+        b.bool :=.bool tmp1.bool;
+
+        ret.bool b.bool;
+    }
+
+}

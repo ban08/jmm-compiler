@@ -1,0 +1,19 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.local.jmm;
+
+class LocalCallGetField {
+    int field;
+
+    public int callee() {
+        return field;
+    }
+
+    public int method() {
+
+        int i;
+        i = this.callee();
+        return i;
+    }
+
+
+}
+

@@ -1,0 +1,16 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.imported.ollir;
+import util.ioPlus;
+
+ImportedClassStaticCallFromMain extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public static main(args.array.String).V {
+                invokestatic(ioPlus, "sayHello").V;
+
+        ret.V ;
+    }
+
+}

@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.instantiation.ollir;
+
+InstantiateSelfStoreInSuperType extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method().Object {
+        tmp0.InstantiateSelfStoreInSuperType :=.InstantiateSelfStoreInSuperType new(InstantiateSelfStoreInSuperType).InstantiateSelfStoreInSuperType;
+        invokespecial(tmp0.InstantiateSelfStoreInSuperType, "<init>").V;
+        other.Object :=.Object tmp0.InstantiateSelfStoreInSuperType;
+
+        ret.Object other.Object;
+    }
+
+}

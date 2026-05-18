@@ -17,13 +17,13 @@ public class IfNoElseParserTest extends JmmTestEnv {
     @Test
     public void testIfWithoutElse() {
         setDescription("Test that an if statement without an else branch is parsed correctly");
-        parseSnippet("if (q) { }", STATEMENT);
+        parseSnippet("void foo(){if (q) { }}", METHOD);
     }
 
     @Test
     public void testWithSingleStatement() {
         setDescription("Test that an if statement without an else branch and with a single statement is parsed correctly");
-        parseSnippet("if (q) a.foo();", STATEMENT);
+        parseSnippet("void foo(){if (q) a.foo();}", METHOD);
     }
 
 
@@ -44,22 +44,26 @@ public class IfNoElseParserTest extends JmmTestEnv {
     @Test
     public void testIfIfElse() {
         setDescription("Test that an if statement without an else branch and with an if-else statement as its body is parsed correctly");
-        //Else reflects in second statement!
+        //Else reflects in second METHOD!
         parseSnippet("""
-                if (q)
-                    if (r)
-                        { }
-                    else
-                        { }""", STATEMENT);
+                void foo(){
+                    if (q)
+                        if (r)
+                            { }
+                        else
+                            { }
+                }""", METHOD);
     }
 
     @Test
     public void testIfIfIf() {
         setDescription("Test that an if statement without an else branch and with an if statement as its body is parsed correctly");
         parseSnippet("""
-                if (q)
-                    if (r)
-                        if (s)
-                            { }""", STATEMENT);
+                void foo(){
+                    if (q)
+                        if (r)
+                            if (s)
+                                { }
+                }""", METHOD);
     }
 }

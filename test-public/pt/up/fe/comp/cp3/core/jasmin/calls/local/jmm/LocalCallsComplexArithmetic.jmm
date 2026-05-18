@@ -1,0 +1,18 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.local.jmm;
+
+class LocalCallsComplexArithmetic {
+
+    public int arithmetic(int x) {
+        int a;
+        a = x * x;
+        return a;
+    }
+
+    public int method() {
+        int a;
+        a = this.arithmetic(1 + 2 * 3);
+        return a;
+    }
+
+}
+

@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.imported.jmm;
+
+import examples.Auxi;
+
+class ImportedClassesSimpleCallFromNewInstance {
+
+    public int method() {
+        int a;
+        a = (new Auxi()).instanceCallInt();
+        return a;
+    }
+}
+

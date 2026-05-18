@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.instantiation.ollir;
+
+InstantiateJavaLangClass extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method method().String {
+        tmp0."String" :=."String" new("String")."String";
+        invokespecial(tmp0."String", "<init>").V;
+        s.String :=.String tmp0."String";
+
+        ret.String s.String;
+    }
+
+}

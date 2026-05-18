@@ -1,0 +1,30 @@
+package pt.up.fe.comp.cp3.core.jasmin.statements.ifelse.ollir;
+
+IfWithAnd extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method(a.bool, b.bool).i32 {
+
+        if (a.bool) goto then0;
+            andTmp0.bool :=.bool 0.bool;
+            goto endif0;
+    then0:
+
+            andTmp0.bool :=.bool b.bool;
+    endif0:
+        if (andTmp0.bool) goto then1;
+            res.i32 :=.i32 0.i32;
+
+            goto endif1;
+    then1:
+            res.i32 :=.i32 1.i32;
+
+    endif1:
+
+        ret.i32 res.i32;
+    }
+
+}

@@ -1,0 +1,16 @@
+package pt.up.fe.comp.cp3.core.jasmin.statements.whileloop.jmm;
+
+class WhileSimple {
+
+    public int method(int limit) {
+        int i;
+        i = 0;
+
+        while (i < limit * 2) {
+            i = i + 1;
+        }
+
+        return i;
+    }
+}
+

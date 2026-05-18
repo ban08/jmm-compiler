@@ -1,0 +1,25 @@
+package pt.up.fe.comp.cp3.core.jasmin.statements.whileloop.jmm;
+
+class WhileIf {
+
+    public int method(int n) {
+        int i;
+        int j;
+        int res;
+        i = 0;
+        res = 0;
+
+        while (i < n) {
+            j = i / 2;
+
+            if (i - j * 2 == 0) {
+                res = res + i;
+            } else {
+            }
+            i = i + 1;
+        }
+
+        return res;
+    }
+}
+

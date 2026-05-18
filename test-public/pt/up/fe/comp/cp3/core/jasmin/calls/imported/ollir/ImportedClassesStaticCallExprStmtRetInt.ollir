@@ -1,0 +1,16 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.imported.ollir;
+import util.ioPlus;
+
+ImportedClassesStaticCallExprStmtRetInt extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method().V {
+                invokestatic(ioPlus, "requestNumber").i32;
+
+        ret.V ;
+    }
+
+}

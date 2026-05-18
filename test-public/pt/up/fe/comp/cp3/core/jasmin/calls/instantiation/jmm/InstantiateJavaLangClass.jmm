@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.instantiation.jmm;
+
+class InstantiateJavaLangClass {
+    String method() {
+        String s;
+        s = new String();
+        return s;
+    }
+}

@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.imported.jmm;
+
+import examples.Auxi;
+
+class ImportedClassesSimpleCallVoid {
+
+    public void method(Auxi auxi) {
+        auxi.instanceCallVoid();
+    }
+}
+

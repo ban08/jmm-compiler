@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp3.core.jasmin.calls.local.jmm;
+
+class LocalCallExprStmtIntStoreField {
+    int field;
+
+    public int callee(int x) {
+        field = x;
+        return x;
+    }
+
+    public void method() {
+        this.callee(1);
+    }
+
+
+}
+

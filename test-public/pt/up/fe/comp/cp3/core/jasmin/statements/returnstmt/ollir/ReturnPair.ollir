@@ -1,0 +1,14 @@
+package pt.up.fe.comp.cp3.core.jasmin.statements.returnstmt.ollir;
+import examples.Pair;
+
+ReturnPair extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method(p.Pair).Pair {
+        ret.Pair p.Pair;
+    }
+
+}

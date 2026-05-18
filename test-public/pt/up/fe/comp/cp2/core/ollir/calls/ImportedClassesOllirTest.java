@@ -1,5 +1,6 @@
 package pt.up.fe.comp.cp2.core.ollir.calls;
 
+import examples.Auxi;
 import org.junit.Test;
 import org.specs.comp.ollir.ClassUnit;
 import org.specs.comp.ollir.LiteralElement;
@@ -200,7 +201,7 @@ public class ImportedClassesOllirTest extends OllirTestEnv {
         var methodName = "instanceExpectingObject";
         var callerType = "examples.Auxi";
         var returnType = BuiltinKind.INT32;
-        var argsTypes = List.of("pt.up.fe.comp.cp2.core.ollir.calls.jmm.ImportedClassesCallWithArgExpectingObject");
+        var argsTypes = List.of(Object.class.getName());
         Object assignmentType = BuiltinKind.INT32;
 
         assertCall(method, methodName, false, callerType, returnType, argsTypes, assignmentType, assignmentType);
@@ -212,7 +213,7 @@ public class ImportedClassesOllirTest extends OllirTestEnv {
         var methodName = "instanceExpectingAuxi";
         var callerType = "examples.Auxi";
         var returnType = BuiltinKind.INT32;
-        var argsTypes = List.of("pt.up.fe.comp.cp2.core.ollir.calls.jmm.ImportedClassesCallWithArgExpectingSuperClass");
+        var argsTypes = List.of(Auxi.class.getName());
         Object assignmentType = BuiltinKind.INT32;
 
         assertCall(method, methodName, false, callerType, returnType, argsTypes, assignmentType, assignmentType);
