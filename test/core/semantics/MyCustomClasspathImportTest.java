@@ -204,6 +204,39 @@ public class MyCustomClasspathImportTest {
     }
 
     @Test
+    public void overrideCannotChangeInheritedReturnType() throws Exception {
+        var tempDir = Files.createTempDirectory("jmm-extra-classpath-override-return");
+        var packageDir = Files.createDirectories(tempDir.resolve("ext"));
+        var baseFile = packageDir.resolve("Base.java");
+
+        Files.writeString(baseFile, """
+                package ext;
+
+                public class Base {
+                    public int value() {
+                        return 0;
+                    }
+                }
+                """);
+
+        compileHelpers(tempDir, baseFile);
+
+        var code = """
+                package p;
+                import ext.Base;
+                class A extends Base {
+                    public boolean value() {
+                        return true;
+                    }
+                }
+                """;
+
+        var semanticsResult = analyze(code, tempDir);
+        Assert.assertTrue("Semantic analysis should reject overrides with a different return type",
+                semanticsResult.hasErrors());
+    }
+
+    @Test
     public void importedOverloadsPreferTheMostSpecificInheritedArgumentType() throws Exception {
         var tempDir = Files.createTempDirectory("jmm-extra-classpath-overloads");
         var packageDir = Files.createDirectories(tempDir.resolve("ext"));

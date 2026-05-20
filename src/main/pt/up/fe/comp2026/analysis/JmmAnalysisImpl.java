@@ -30,6 +30,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new TypeExistenceValidation(table),
                 new VoidTypeValidation(table),
                 new ArrayTypeValidation(table),
+                new MethodOverrideValidation(table),
                 new ReturnPathValidation(table),
                 new FieldInitializerValidation(table),
                 new EntityAccessValidation(table),
