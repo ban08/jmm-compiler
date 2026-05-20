@@ -36,7 +36,7 @@ public class Quicksort {
     }
 
     public boolean quicksort(int[] L) {
-        return this.quicksor(L, 0, L.length - 1);
+        return this.quicksort(L, 0, L.length - 1);
     }
 
     public boolean quicksort(int[] L, int lo, int hi) {
