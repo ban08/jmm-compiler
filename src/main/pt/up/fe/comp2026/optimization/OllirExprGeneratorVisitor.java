@@ -11,6 +11,7 @@ import pt.up.fe.comp.jmm.analysis.table.type.impls.JmmArrayType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static pt.up.fe.comp2026.jmm.ast.JmmKind.*;
 
@@ -171,15 +172,17 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         StringBuilder computation = new StringBuilder();
 
+        var resolvedCall = types.resolveImplicitThisMethodCall(node);
+
         StringBuilder argsCode = new StringBuilder();
         for (int i = 0; i < node.getNumChildren(); i++) {
             var arg = visit(node.getChild(i));
             computation.append(arg.getComputation());
 
-            argsCode.append(", ").append(arg.getCode());
+            argsCode.append(", ")
+                    .append(argumentCode(node.getChild(i), arg, expectedArgumentType(resolvedCall, i)));
         }
 
-        var resolvedCall = types.resolveImplicitThisMethodCall(node);
         boolean staticCall = resolvedCall.map(call -> call.method().isStatic())
                 .orElseGet(() -> types.isStaticMethodContext(node));
         String invocationKind = staticCall ? "invokestatic" : "invokevirtual";
@@ -234,15 +237,17 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         StringBuilder computation = new StringBuilder();
         computation.append(receiver.getComputation());
 
+        var resolvedCall = types.resolveMethodCall(node);
+
         StringBuilder argsCode = new StringBuilder();
         for (int i = 1; i < node.getNumChildren(); i++) {
             var arg = visit(node.getChild(i));
             computation.append(arg.getComputation());
 
-            argsCode.append(", ").append(arg.getCode());
+            argsCode.append(", ")
+                    .append(argumentCode(node.getChild(i), arg, expectedArgumentType(resolvedCall, i - 1)));
         }
 
-        var resolvedCall = types.resolveMethodCall(node);
         boolean staticCall = resolvedCall.map(call -> call.method().isStatic())
                 .orElseGet(() -> types.tryGetExprType(receiverNode)
                         .filter(JmmType::isClass)
@@ -287,6 +292,34 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                 .append(END_STMT);
 
         return new OllirExprResult(tmp, computation);
+    }
+
+    private Optional<JmmType> expectedArgumentType(Optional<TypeUtils.ResolvedMethodCall> resolvedCall, int argumentIndex) {
+        return resolvedCall
+                .filter(call -> argumentIndex < call.method().parameters().size())
+                .map(call -> call.method().parameters().get(argumentIndex).type());
+    }
+
+    private String argumentCode(JmmNode argumentNode, OllirExprResult argument, Optional<JmmType> expectedType) {
+        if (expectedType.isEmpty() || !expectedType.get().isClass()) {
+            return argument.getCode();
+        }
+
+        var actualType = types.tryGetExprType(argumentNode);
+        if (actualType.isEmpty() || !actualType.get().isClass()) {
+            return argument.getCode();
+        }
+
+        return replaceClassSuffix(argument.getCode(), expectedType.get());
+    }
+
+    private String replaceClassSuffix(String operandCode, JmmType expectedType) {
+        var suffixStart = operandCode.lastIndexOf('.');
+        if (suffixStart < 0) {
+            return operandCode + ollirTypes.toOllirType(expectedType);
+        }
+
+        return operandCode.substring(0, suffixStart) + ollirTypes.toOllirType(expectedType);
     }
 
     private OllirExprResult visitNot(JmmNode node, Void unused) {
