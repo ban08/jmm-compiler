@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.arrays.init.jmm;
+
+class ArrayInitEmpty {
+    public int[] method() {
+        int[] a;
+        a = new int[]{};
+        return a;
+    }
+}

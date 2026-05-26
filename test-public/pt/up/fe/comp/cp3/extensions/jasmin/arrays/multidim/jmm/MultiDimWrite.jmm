@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.arrays.multidim.jmm;
+
+class MultiDimWrite {
+    public int[][][] method(int[][][] a, int[] b) {
+        a[0][1][2] = 13;
+        a[1][2] = b;
+        return a;
+    }
+}

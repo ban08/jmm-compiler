@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.arrays.multidim.jmm;
+
+class MultiDimInit {
+    public int[][] method() {
+        int[][] a;
+        a = new int[4][2];
+        return a;
+    }
+}

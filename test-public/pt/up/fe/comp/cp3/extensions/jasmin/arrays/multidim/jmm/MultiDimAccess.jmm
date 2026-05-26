@@ -1,0 +1,7 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.arrays.multidim.jmm;
+
+class MultiDimAccess {
+    public int[] method(int[][][] a) {
+        return a[2][3];
+    }
+}

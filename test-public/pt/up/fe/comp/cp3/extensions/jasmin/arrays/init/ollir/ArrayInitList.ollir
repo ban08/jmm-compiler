@@ -1,0 +1,19 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.arrays.init.ollir;
+
+ArrayInitList extends Object  {
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method().array.i32 {
+        tmp0.array.i32 :=.array.i32 new(array, 3.i32).array.i32;
+        tmp0[0.i32].i32 :=.i32 10.i32;
+        tmp0[1.i32].i32 :=.i32 20.i32;
+        tmp0[2.i32].i32 :=.i32 30.i32;
+        a.array.i32 :=.array.i32 tmp0.array.i32;
+
+        ret.array.i32 a.array.i32;
+    }
+
+}

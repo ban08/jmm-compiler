@@ -1,0 +1,14 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.arrays.multidim.ollir;
+
+MultiDimAccess extends Object {
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method(a.array.array.array.i32).array.i32 {
+        t0.array.array.i32 :=.array.array.i32 a.array.array.array.i32[2.i32].array.array.i32;
+        t1.array.i32 :=.array.i32 t0.array.array.i32[3.i32].array.i32;
+        ret.array.i32 t1.array.i32;
+    }
+}

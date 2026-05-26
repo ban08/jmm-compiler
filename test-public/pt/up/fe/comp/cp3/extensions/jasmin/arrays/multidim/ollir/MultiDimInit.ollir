@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.arrays.multidim.ollir;
+
+MultiDimInit extends Object  {
+
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method().array.array.i32 {
+
+        a.array.array.i32 :=.array.array.i32 new(array, 4.i32, 2.i32).array.array.i32;
+        ret.array.array.i32 a.array.array.i32;
+    }
+
+}
