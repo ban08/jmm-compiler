@@ -3,7 +3,7 @@ package pt.up.fe.comp.cp3.extensions.jasmin.calls.implthis.jmm;
 class VirtualCallImplicitThisOnCondition {
 
     public boolean isEmpty(int s) {
-        return s < 1 && s > -1;
+        return s < 1 && s > (0-1);
     }
 
     public int method(int s) {
