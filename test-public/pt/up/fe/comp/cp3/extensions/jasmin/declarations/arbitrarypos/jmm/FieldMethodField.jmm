@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.declarations.arbitrarypos.jmm;
+
+class FieldMethodField {
+    int b;
+
+    int foo() {
+        return a + b;
+    }
+
+    int a;
+}

@@ -1,0 +1,24 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.statements.doloop.jmm;
+
+class DoWhileWithWhile {
+
+    public int method(int n) {
+        int i;
+        int j;
+        int res;
+        i = 0;
+        j = 0;
+        res = 0;
+
+        do {
+            while (j < n) {
+                j = j + 1;
+                res = res + i + j;
+            }
+            i = i + 1;
+        } while (i < n);
+
+        return res;
+    }
+}
+

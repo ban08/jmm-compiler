@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.calls.localstatic.jmm;
+
+import util.io;
+
+class LocalStaticMethodCallExprStmtRetInt {
+    public static int readNumber() {
+        int readNumber;
+        readNumber = io.read();
+        io.print(2 - readNumber);
+        return readNumber;
+    }
+
+    public void method() {
+        LocalStaticMethodCallExprStmtRetInt.readNumber();
+    }
+}
+

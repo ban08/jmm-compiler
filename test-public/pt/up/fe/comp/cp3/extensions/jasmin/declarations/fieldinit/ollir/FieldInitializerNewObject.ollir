@@ -1,0 +1,14 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.declarations.fieldinit.ollir;
+import examples.Quicksort;
+
+FieldInitializerNewObject extends Object  {
+    .field public a.Quicksort;
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+        tmp0.Quicksort :=.Quicksort new(Quicksort).Quicksort;
+        invokespecial(tmp0.Quicksort, "<init>").V;
+        putfield(this, a.Quicksort, tmp0.Quicksort).V;
+
+    }
+
+}

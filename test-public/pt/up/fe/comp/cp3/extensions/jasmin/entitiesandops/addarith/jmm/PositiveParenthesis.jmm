@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.entitiesandops.addarith.jmm;
+
+class PositiveParenthesis {
+
+    public int method(int b) {
+        int a;
+        a = +(b - 1);
+        return a;
+    }
+}
+

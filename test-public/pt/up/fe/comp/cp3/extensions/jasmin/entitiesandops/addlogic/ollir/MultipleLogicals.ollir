@@ -1,0 +1,50 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.entitiesandops.addlogic.ollir;
+
+MultipleLogicals extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method(a.i32, b.i32, c.i32, d.i32, e.i32).bool {
+        tmp0.bool :=.bool a.i32 >.bool b.i32;
+
+        if (tmp0.bool) goto then0;
+            tmp1.bool :=.bool a.i32 >=.bool c.i32;
+
+            if (tmp1.bool) goto then1;
+                andTmp0.bool :=.bool 0.bool;
+                goto endif1;
+        then1:
+                tmp2.bool :=.bool a.i32 <.bool d.i32;
+
+                andTmp0.bool :=.bool tmp2.bool;
+        endif1:
+
+            orTmp0.bool :=.bool andTmp0.bool;
+            goto endif0;
+    then0:
+            orTmp0.bool :=.bool 1.bool;
+    endif0:
+
+        if (orTmp0.bool) goto then2;
+            tmp3.bool :=.bool a.i32 ==.bool d.i32;
+
+            if (tmp3.bool) goto then3;
+                andTmp1.bool :=.bool 0.bool;
+                goto endif3;
+        then3:
+                tmp4.bool :=.bool e.i32 !=.bool 0.i32;
+
+                andTmp1.bool :=.bool tmp4.bool;
+        endif3:
+
+            orTmp1.bool :=.bool andTmp1.bool;
+            goto endif2;
+    then2:
+            orTmp1.bool :=.bool 1.bool;
+    endif2:
+        ret.bool orTmp1.bool;
+    }
+
+}

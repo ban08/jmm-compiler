@@ -1,0 +1,21 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.entitiesandops.addlogic.ollir;
+
+OrLiterals extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method().bool {
+
+        if (0.bool) goto then0;
+
+            orTmp0.bool :=.bool 1.bool;
+            goto endif0;
+    then0:
+            orTmp0.bool :=.bool 1.bool;
+    endif0:
+        ret.bool orTmp0.bool;
+    }
+
+}

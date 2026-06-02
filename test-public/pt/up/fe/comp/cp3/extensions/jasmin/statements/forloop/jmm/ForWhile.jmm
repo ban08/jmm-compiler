@@ -1,0 +1,22 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.statements.forloop.jmm;
+
+class ForWhile {
+
+    public int method(int n) {
+        int i;
+        int j;
+        int ret;
+        j = 0;
+        ret = 0;
+
+        for (i = 0; i < n; i = i + 1) {
+            while (j < n) {
+                j = j + 1;
+                ret = ret + j + i;
+            }
+        }
+
+        return ret;
+    }
+}
+

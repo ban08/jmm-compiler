@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.calls.implthis.jmm;
+
+class VirtualCallImplicitThis {
+
+    public int callee(int x) {
+        return x + 3;
+    }
+
+    public int method(int b) {
+        int a;
+        a = callee(b);
+        return a;
+    }
+}
+

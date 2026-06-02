@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.declarations.arbitrarypos.jmm;
+
+class MethodThenField {
+    int foo() {
+        return a;
+    }
+
+    int a;
+}

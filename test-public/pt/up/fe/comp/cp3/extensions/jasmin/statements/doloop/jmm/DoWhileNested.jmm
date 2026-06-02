@@ -1,0 +1,23 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.statements.doloop.jmm;
+
+class DoWhileNested {
+
+    public int method(int n) {
+        int i;
+        int j;
+        int res;
+        i = 0;
+        j = 0;
+        res = 0;
+        do {
+            do {
+                j = j + 1;
+                res = res + j + i;
+            } while (j < n);
+            i = i + 1;
+        } while (i < n);
+
+        return res;
+    }
+}
+

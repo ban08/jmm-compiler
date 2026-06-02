@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.declarations.methodvis.ollir;
+
+ProtectedMethodDeclaration extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method protected bar().i32 {
+        ret.i32 0.i32;
+    }
+
+}

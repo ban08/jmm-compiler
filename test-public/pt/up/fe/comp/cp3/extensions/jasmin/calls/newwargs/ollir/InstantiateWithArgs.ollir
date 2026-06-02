@@ -1,0 +1,18 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.calls.newwargs.ollir;
+import java.util.Date;
+
+InstantiateWithArgs extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method method(year.i32, month.i32, day.i32).Date {
+        tmp0.Date :=.Date new(Date).Date;
+        invokespecial(tmp0.Date, "<init>", year.i32, month.i32, day.i32).V;
+        d.Date :=.Date tmp0.Date;
+
+        ret.Date d.Date;
+    }
+
+}

@@ -1,0 +1,26 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.calls.localstatic.ollir;
+import util.io;
+
+LocalStaticMethodCallExprStmtRetInt extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public static readNumber().i32 {
+        readNumber.i32 :=.i32 invokestatic(io, "read").i32;
+
+                tmp1.i32 :=.i32 2.i32 -.i32 readNumber.i32;
+        temp_arg__0.i32 :=.i32 tmp1.i32;
+        invokestatic(io, "print", temp_arg__0.i32).V;
+
+        ret.i32 readNumber.i32;
+    }
+
+    .method public method().V {
+                invokestatic(LocalStaticMethodCallExprStmtRetInt, "readNumber").i32;
+
+        ret.V ;
+    }
+
+}

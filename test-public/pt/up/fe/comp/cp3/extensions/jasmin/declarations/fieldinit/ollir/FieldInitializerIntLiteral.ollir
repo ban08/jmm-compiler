@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.declarations.fieldinit.ollir;
+
+FieldInitializerIntLiteral extends Object  {
+    .field public a.i32;
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+        putfield(this, a.i32, 123.i32).V;
+
+    }
+
+}

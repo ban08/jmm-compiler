@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.statements.forloop.jmm;
+
+class ForAsWhile {
+
+    public int method(int limit) {
+        int i;
+        i = 0;
+        for (; i < limit; ) {
+            i = i + 3;
+        }
+
+        return i;
+    }
+}
+

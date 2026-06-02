@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.entitiesandops.addarith.jmm;
+
+class DecrementOnReturn {
+
+    public int method(int b) {
+        return --b;
+    }
+}
+

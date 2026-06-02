@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.statements.ifnoelse.jmm;
+
+class IfNested {
+
+    public int method(boolean a, boolean b) {
+        int res;
+        res = 0;
+        if (a) {
+            res = 1;
+            if (b) {
+                res = 2;
+            }
+        }
+        return res;
+    }
+}
+

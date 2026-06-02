@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.entitiesandops.addlogic.jmm;
+
+class GreaterThanLiterals {
+
+    public boolean method() {
+        boolean a;
+        a = 1 > 2;
+        return a;
+    }
+}
+

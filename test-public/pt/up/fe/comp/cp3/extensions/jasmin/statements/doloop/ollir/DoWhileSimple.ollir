@@ -1,0 +1,20 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.statements.doloop.ollir;
+
+DoWhileSimple extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method(limit.i32).i32 {
+        i.i32 :=.i32 0.i32;
+
+    while0:
+            i.i32 :=.i32 i.i32 +.i32 1.i32;
+            tmp1.bool :=.bool i.i32 <.bool limit.i32;
+            if (tmp1.bool) goto while0;
+
+            ret.i32 i.i32;
+        }
+
+}

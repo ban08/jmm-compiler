@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.entitiesandops.addlogic.ollir;
+
+GreaterThanLiteralAndParam extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method(b.i32).bool {
+        a.bool :=.bool 1.i32 >.bool b.i32;
+
+        ret.bool a.bool;
+    }
+
+}

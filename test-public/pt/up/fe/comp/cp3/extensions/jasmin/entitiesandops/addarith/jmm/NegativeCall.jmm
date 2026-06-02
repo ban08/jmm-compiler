@@ -1,0 +1,14 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.entitiesandops.addarith.jmm;
+
+class NegativeCall {
+    public int foo(int b) {
+        return b;
+    }
+
+    public int method(int b) {
+        int a;
+        a = -this.foo(b);
+        return a;
+    }
+}
+

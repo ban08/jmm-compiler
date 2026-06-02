@@ -1,0 +1,7 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.declarations.methodvis.jmm;
+
+class PrivateMethodDeclaration {
+
+    private void foo() {
+    }
+}

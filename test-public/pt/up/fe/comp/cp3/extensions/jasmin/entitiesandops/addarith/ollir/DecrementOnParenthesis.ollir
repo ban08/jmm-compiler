@@ -1,0 +1,14 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.entitiesandops.addarith.ollir;
+
+DecrementOnParenthesis extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method(b.i32).i32 {
+        b.i32 :=.i32 b.i32 -.i32 1.i32;
+        ret.i32 b.i32;
+    }
+
+}

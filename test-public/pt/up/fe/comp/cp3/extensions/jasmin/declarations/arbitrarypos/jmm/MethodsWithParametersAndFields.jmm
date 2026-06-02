@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.declarations.arbitrarypos.jmm;
+
+class MethodsWithParametersAndFields {
+    void add(int x) {
+        count = count + x;
+    }
+
+    int count;
+
+    void reset() {
+        count = 0;
+    }
+}

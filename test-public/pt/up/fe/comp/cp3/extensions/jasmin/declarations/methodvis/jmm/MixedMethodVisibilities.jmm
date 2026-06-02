@@ -1,0 +1,28 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.declarations.methodvis.jmm;
+
+class MixedMethodVisibilities {
+
+    private void privateMethod() {
+    }
+
+    protected void protectedMethod() {
+    }
+
+    public void publicMethod() {
+    }
+
+    void packageProtectedMethod() {
+    }
+
+    private static void privateStaticMethod() {
+    }
+
+    protected static void protectedStaticMethod() {
+    }
+
+    public static void publicStaticMethod() {
+    }
+
+    static void packageProtectedStaticMethod() {
+    }
+}

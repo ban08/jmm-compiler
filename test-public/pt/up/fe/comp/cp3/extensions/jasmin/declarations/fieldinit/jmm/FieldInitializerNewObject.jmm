@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.declarations.fieldinit.jmm;
+
+import examples.Quicksort;
+
+class FieldInitializerNewObject {
+
+    Quicksort a = new Quicksort();
+
+}

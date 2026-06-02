@@ -1,0 +1,41 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.calls.implthis.ollir;
+
+VirtualCallImplicitThisOnCondition extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public isEmpty(s.i32).bool {
+        tmp0.bool :=.bool s.i32 <.bool 1.i32;
+
+        if (tmp0.bool) goto then0;
+            andTmp0.bool :=.bool 0.bool;
+            goto endif0;
+    then0:
+            tmp1.i32 :=.i32 0.i32 -.i32 1.i32;
+            tmp2.bool :=.bool s.i32 >.bool tmp1.i32;
+
+            andTmp0.bool :=.bool tmp2.bool;
+    endif0:
+        ret.bool andTmp0.bool;
+    }
+
+    .method public method(s.i32).i32 {
+        temp_arg__0.i32 :=.i32 s.i32;
+        tmp3.bool :=.bool invokevirtual(this.VirtualCallImplicitThisOnCondition, "isEmpty", temp_arg__0.i32).bool;
+        if (tmp3.bool) goto then1;
+            a.i32 :=.i32 2.i32;
+
+            goto endif1;
+    then1:
+            a.i32 :=.i32 1.i32;
+
+    endif1:
+
+        a.i32 :=.i32 a.i32 +.i32 1.i32;
+
+        ret.i32 a.i32;
+    }
+
+}

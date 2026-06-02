@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.declarations.arbitrarypos.jmm;
+
+class InterleavedFieldsAndMethods {
+    int a;
+
+    String f1() {
+        return s;
+    }
+
+    int b;
+
+    int f2() {
+        return a + b;
+    }
+
+    String s;
+}

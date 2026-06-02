@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.declarations.fieldinit.ollir;
+
+FieldInitializerBooleanLiteral extends Object  {
+    .field public b.bool;
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+        putfield(this, b.bool, 0.bool).V;
+
+    }
+
+}

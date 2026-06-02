@@ -1,0 +1,24 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.calls.localstatic.ollir;
+import examples.foo.bar.A;
+import util.io;
+
+LocalStaticMethodCallVoid extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public static printNumber(i.i32).String {
+        tmp0.bool :=.bool i.i32 >.bool 0.i32;
+        temp_arg__0.bool :=.bool tmp0.bool;
+        tmp1.String :=.String invokestatic(A, "bar", temp_arg__0.bool).String;
+        ret.String tmp1.String;
+    }
+
+    .method public method(number.i32).String {
+        temp_arg__1.i32 :=.i32 number.i32;
+        tmp2.String :=.String invokestatic(LocalStaticMethodCallVoid, "printNumber", temp_arg__1.i32).String;
+        ret.String tmp2.String;
+    }
+
+}

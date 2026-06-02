@@ -1,0 +1,10 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.declarations.fieldinit.jmm;
+
+class FieldInitializerMethodInvocation {
+
+    int a = this.init();
+
+    int init() {
+        return 0 - 10;
+    }
+}

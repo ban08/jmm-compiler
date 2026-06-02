@@ -115,10 +115,11 @@ public class CompleteAppsJasminTest extends BaseJasminTestEnv {
                 + "0 2\n"   //2
                 + "1 0\n"   //1
                 + "2 0\n";  //2
-        var expected = "Congratulations, 2, you have won the game.";
+        var winner = 2;
+        var expected = "Congratulations, %d, you have won the game.".formatted(winner);
         var run = executeWith(res.jasmin(), input);
         var output = run.getFullOutput().trim();
-        assertTrue("Game should finish with player 2 as a winner.", output.endsWith(expected), expected, output);
+        assertTrue("Game should finish with player 2 as a winner (Checking last phrase). ", output.endsWith(expected), expected, output);
     }
 
     @Test

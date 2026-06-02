@@ -1,0 +1,6 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.declarations.fieldinit.jmm;
+
+class FieldInitializerBooleanLiteral {
+
+    boolean b = false;
+}

@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.calls.newwargs.ollir;
+
+InstantiateJavaLangWithArgs extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method method(original.String).String {
+        tmp0."String" :=."String" new("String")."String";
+        invokespecial(tmp0."String", "<init>", original.String).V;
+        s.String :=.String tmp0."String";
+
+        ret.String s.String;
+    }
+
+}

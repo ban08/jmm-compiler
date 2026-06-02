@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.entitiesandops.addarith.jmm;
+
+class NegativeVar {
+
+    public int method(int b) {
+        return -b;
+    }
+}
+

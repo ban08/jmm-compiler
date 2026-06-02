@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.calls.implthis.jmm;
+
+import examples.Auxi;
+
+class VirtualCallImplicitThisOnSuper extends Auxi {
+
+    public int method(int b, int c) {
+        int a;
+        a = instanceCallIntWithArgs(b, c);
+        return a;
+    }
+}
+

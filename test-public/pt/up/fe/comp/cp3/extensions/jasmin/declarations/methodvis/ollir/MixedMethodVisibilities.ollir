@@ -1,0 +1,41 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.declarations.methodvis.ollir;
+
+MixedMethodVisibilities extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method private privateMethod().V {
+        ret.V ;
+    }
+
+    .method protected protectedMethod().V {
+        ret.V ;
+    }
+
+    .method public publicMethod().V {
+        ret.V ;
+    }
+
+    .method packageProtectedMethod().V {
+        ret.V ;
+    }
+
+    .method private static privateStaticMethod().V {
+        ret.V ;
+    }
+
+    .method protected static protectedStaticMethod().V {
+        ret.V ;
+    }
+
+    .method public static publicStaticMethod().V {
+        ret.V ;
+    }
+
+    .method static packageProtectedStaticMethod().V {
+        ret.V ;
+    }
+
+}

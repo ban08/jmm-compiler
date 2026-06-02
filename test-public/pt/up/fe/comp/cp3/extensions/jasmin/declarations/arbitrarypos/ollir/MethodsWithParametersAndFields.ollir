@@ -1,0 +1,23 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.declarations.arbitrarypos.ollir;
+
+MethodsWithParametersAndFields extends Object  {
+    .field public count.i32;
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method add(x.i32).V {
+        tmp0.i32 :=.i32 getfield(this, count.i32).i32;
+        tmp1.i32 :=.i32 tmp0.i32 +.i32 x.i32;
+        putfield(this, count.i32, tmp1.i32).V;
+
+        ret.V ;
+    }
+
+    .method reset().V {
+        putfield(this, count.i32, 0.i32).V;
+
+        ret.V ;
+    }
+
+}

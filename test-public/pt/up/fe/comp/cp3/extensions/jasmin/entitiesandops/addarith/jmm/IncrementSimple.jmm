@@ -1,0 +1,10 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.entitiesandops.addarith.jmm;
+
+class IncrementSimple {
+
+    public int method(int b) {
+        ++b;
+        return b;
+    }
+}
+

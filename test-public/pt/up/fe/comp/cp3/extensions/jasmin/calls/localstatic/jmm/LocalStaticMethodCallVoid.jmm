@@ -1,0 +1,17 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.calls.localstatic.jmm;
+
+import examples.foo.bar.A;
+import util.io;
+
+
+class LocalStaticMethodCallVoid {
+
+    public static String printNumber(int i) {
+        return A.bar(i > 0);
+    }
+
+    public String method(int number) {
+        return LocalStaticMethodCallVoid.printNumber(number);
+    }
+}
+

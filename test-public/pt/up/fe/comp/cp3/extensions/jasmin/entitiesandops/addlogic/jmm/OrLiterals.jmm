@@ -1,0 +1,9 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.entitiesandops.addlogic.jmm;
+
+class OrLiterals {
+
+    public boolean method() {
+        return false || true;
+    }
+}
+

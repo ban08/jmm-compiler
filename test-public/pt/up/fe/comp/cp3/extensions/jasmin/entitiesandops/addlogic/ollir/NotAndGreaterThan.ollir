@@ -1,0 +1,15 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.entitiesandops.addlogic.ollir;
+
+NotAndGreaterThan extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method(value1.i32, value2.i32).bool {
+        tmp0.bool :=.bool value1.i32 >.bool value2.i32;
+        tmp1.bool :=.bool !.bool tmp0.bool;
+        ret.bool tmp1.bool;
+    }
+
+}

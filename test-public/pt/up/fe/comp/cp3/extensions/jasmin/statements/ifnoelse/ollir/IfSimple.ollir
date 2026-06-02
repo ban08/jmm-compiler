@@ -1,0 +1,23 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.statements.ifnoelse.ollir;
+
+IfSimple extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method(a.bool).i32 {
+        res.i32 :=.i32 0.i32;
+
+        if (a.bool) goto then0;
+
+            goto endif0;
+    then0:
+            res.i32 :=.i32 1.i32;
+
+    endif0:
+
+        ret.i32 res.i32;
+    }
+
+}

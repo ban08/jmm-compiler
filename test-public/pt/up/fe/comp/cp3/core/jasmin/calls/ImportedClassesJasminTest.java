@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import pt.up.fe.comp.cp3.BaseJasminTestEnv;
+import pt.up.fe.specs.util.SpecsStrings;
 
 @RunWith(Parameterized.class)
 public class ImportedClassesJasminTest extends BaseJasminTestEnv {
@@ -181,10 +182,14 @@ public class ImportedClassesJasminTest extends BaseJasminTestEnv {
         var res = toJasmin("ImportedClassStaticCallFromMain");
         var inputText = "John Doe";
         var ret = res.interact("main", inputText, (Object) new String[0]); //value will be ignored, but necessary
+
         var expectedOutput = """
-                Who are you?\s
+                Who are you?
                 Hello, %s!""".formatted(inputText);
-        assertEquals("method should output: ${expected}", expectedOutput, ret.outputText().strip());
+        assertEquals("method should output: ${expected}", SpecsStrings.normalizeFileContents(expectedOutput, true),
+                SpecsStrings.normalizeFileContents(ret.outputText(), true));
+
+
     }
 
 }

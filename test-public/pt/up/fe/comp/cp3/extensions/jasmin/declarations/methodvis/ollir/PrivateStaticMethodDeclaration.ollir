@@ -1,0 +1,13 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.declarations.methodvis.ollir;
+
+PrivateStaticMethodDeclaration extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method private static helper().V {
+        ret.V ;
+    }
+
+}

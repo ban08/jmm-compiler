@@ -1,0 +1,11 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.calls.newwargs.jmm;
+
+import java.util.Date;
+
+class InstantiateWithArgs {
+    Date method(int year, int month, int day) {
+        Date d;
+        d = new Date(year, month, day);
+        return d;
+    }
+}

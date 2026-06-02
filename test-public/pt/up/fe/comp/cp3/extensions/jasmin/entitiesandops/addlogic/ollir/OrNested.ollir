@@ -1,0 +1,45 @@
+package pt.up.fe.comp.cp3.extensions.jasmin.entitiesandops.addlogic.ollir;
+
+OrNested extends Object  {
+    
+    .construct "<init>"().V {
+        invokespecial(this."java.lang.Object", "<init>").V;
+    }
+
+    .method public method(a.bool, b.bool, c.bool, d.bool, e.bool).bool {
+
+        if (a.bool) goto then0;
+
+            orTmp0.bool :=.bool b.bool;
+            goto endif0;
+    then0:
+            orTmp0.bool :=.bool 1.bool;
+    endif0:
+
+        if (orTmp0.bool) goto then1;
+
+            orTmp1.bool :=.bool c.bool;
+            goto endif1;
+    then1:
+            orTmp1.bool :=.bool 1.bool;
+    endif1:
+
+        if (orTmp1.bool) goto then2;
+
+            orTmp2.bool :=.bool d.bool;
+            goto endif2;
+    then2:
+            orTmp2.bool :=.bool 1.bool;
+    endif2:
+
+        if (orTmp2.bool) goto then3;
+
+            orTmp3.bool :=.bool e.bool;
+            goto endif3;
+    then3:
+            orTmp3.bool :=.bool 1.bool;
+    endif3:
+        ret.bool orTmp3.bool;
+    }
+
+}
