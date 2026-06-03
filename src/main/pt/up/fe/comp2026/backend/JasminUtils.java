@@ -137,14 +137,14 @@ public class JasminUtils {
         var prefix = getTypePrefix(reg.getVarType());
         var value = reg.getVirtualReg();
 
-        return prefix + "load " + value;
+        return getLocalInstruction(prefix, "load", value);
     }
 
     public String getStore(Descriptor reg) {
         var prefix = getTypePrefix(reg.getVarType());
         var value = reg.getVirtualReg();
 
-        return prefix + "store " + value;
+        return getLocalInstruction(prefix, "store", value);
     }
 
     private String getInternalName(ClassType classType) {
@@ -165,5 +165,13 @@ public class JasminUtils {
         }
 
         return normalizedName.replace("\"", "");
+    }
+
+    private String getLocalInstruction(String prefix, String operation, int virtualReg) {
+        if (virtualReg >= 0 && virtualReg <= 3) {
+            return prefix + operation + "_" + virtualReg;
+        }
+
+        return prefix + operation + " " + virtualReg;
     }
 }
