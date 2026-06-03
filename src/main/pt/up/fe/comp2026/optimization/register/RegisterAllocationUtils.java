@@ -2,6 +2,8 @@ package pt.up.fe.comp2026.optimization.register;
 
 import org.specs.comp.ollir.Method;
 import org.specs.comp.ollir.VarScope;
+import org.specs.comp.ollir.type.BuiltinKind;
+import org.specs.comp.ollir.type.BuiltinType;
 
 import java.util.Map;
 import java.util.Set;
@@ -37,7 +39,15 @@ final class RegisterAllocationUtils {
         return descriptor != null && descriptor.getScope() == VarScope.LOCAL && !THIS.equals(name);
     }
 
-    static boolean isGeneratedTemporary(String name) {
+    static boolean isGeneratedBooleanTemporary(Method method, String name) {
+        var descriptor = method.getVarTable().get(name);
+        return descriptor != null
+                && descriptor.getScope() == VarScope.LOCAL
+                && isGeneratedTemporaryName(name)
+                && BuiltinType.is(descriptor.getVarType(), BuiltinKind.BOOLEAN);
+    }
+
+    private static boolean isGeneratedTemporaryName(String name) {
         if (!name.startsWith(TEMP_PREFIX) || name.length() == TEMP_PREFIX.length()) {
             return false;
         }

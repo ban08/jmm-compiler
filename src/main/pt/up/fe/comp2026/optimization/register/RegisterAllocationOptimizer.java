@@ -58,7 +58,8 @@ public class RegisterAllocationOptimizer {
         if (!locals.isEmpty()) {
             var liveness = LivenessAnalysis.analyze(method);
             var graph = InterferenceGraphBuilder.build(locals, liveness.def(), liveness.liveOut());
-            var coloring = new RegisterColoring(method.getMethodName(), firstLocalRegister)
+            var coloring = new RegisterColoring(method.getMethodName(), firstLocalRegister,
+                    name -> RegisterAllocationUtils.isGeneratedBooleanTemporary(method, name))
                     .select(graph, registerLimit);
 
             var varTable = method.getVarTable();

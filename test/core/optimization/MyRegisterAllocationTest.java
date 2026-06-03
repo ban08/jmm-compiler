@@ -80,17 +80,17 @@ public class MyRegisterAllocationTest {
     }
 
     @Test
-    public void myTestGeneratedTemporariesOnlyGetOneBoundedExtraRegister() {
+    public void generatedTemporariesRespectStrictRegisterLimit() {
         var result = optimize(strictTemporaryOllir(), "1");
 
         var errors = result.reports().stream()
                 .filter(report -> report.getType() == ReportType.ERROR)
                 .toList();
 
-        assertEquals("Expected one error when generated temporaries would need more than one extra register",
+        assertEquals("Expected one error when a generated temporary needs a second JVM local slot",
                 1, errors.size());
-        assertTrue("The bounded allocator should report that three JVM locals are required",
-                errors.getFirst().getMessage().contains("Minimum required: 3 JVM local register(s)"));
+        assertTrue("The strict allocator should report that two JVM locals are required",
+                errors.getFirst().getMessage().contains("Minimum required: 2 JVM local register(s)"));
     }
 
     private OllirResult optimize(String ollirCode, String registerAllocation) {
@@ -164,10 +164,8 @@ public class MyRegisterAllocationTest {
                     .method public static method().i32 {
                         a.i32 :=.i32 1.i32;
                         tmp0.i32 :=.i32 2.i32;
-                        tmp1.i32 :=.i32 3.i32;
                         b.i32 :=.i32 a.i32 +.i32 tmp0.i32;
-                        c.i32 :=.i32 b.i32 +.i32 tmp1.i32;
-                        ret.i32 c.i32;
+                        ret.i32 b.i32;
                     }
                 }
                 """;

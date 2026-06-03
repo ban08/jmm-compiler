@@ -6,15 +6,18 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 final class RegisterColoring {
 
     private final String methodName;
     private final int firstLocalRegister;
+    private final Predicate<String> canUseExtraConditionSlot;
 
-    RegisterColoring(String methodName, int firstLocalRegister) {
+    RegisterColoring(String methodName, int firstLocalRegister, Predicate<String> canUseExtraConditionSlot) {
         this.methodName = methodName;
         this.firstLocalRegister = firstLocalRegister;
+        this.canUseExtraConditionSlot = canUseExtraConditionSlot;
     }
 
     Coloring select(Map<String, Set<String>> graph, int registerLimit) {
@@ -33,13 +36,13 @@ final class RegisterColoring {
             return strictColoring.get();
         }
 
-        var boundedTemporaryColoring = colorWithDomains(graph, node ->
-                RegisterAllocationUtils.isGeneratedTemporary(node)
+        var conditionTemporaryColoring = colorWithDomains(graph, node ->
+                canUseExtraConditionSlot.test(node)
                         ? Math.max(localRegisterLimit + 1, 0)
                         : Math.max(localRegisterLimit, 0));
 
-        if (boundedTemporaryColoring.isPresent()) {
-            return boundedTemporaryColoring.get();
+        if (conditionTemporaryColoring.isPresent()) {
+            return conditionTemporaryColoring.get();
         }
 
         var minimumColoring = minimumColoring(graph);
