@@ -6,6 +6,8 @@ import org.specs.comp.ollir.tree.TreeNode;
 import org.specs.comp.ollir.type.ArrayType;
 import org.specs.comp.ollir.type.BuiltinKind;
 import org.specs.comp.ollir.type.BuiltinType;
+import org.specs.comp.ollir.type.ClassKind;
+import org.specs.comp.ollir.type.ClassType;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.Stage;
@@ -277,6 +279,11 @@ public class JasminGenerator {
         try {
             isInsideAssignment = true;
 
+            var iinc = generateIinc(assign);
+            if (iinc.isPresent()) {
+                return iinc.get();
+            }
+
             var code = new StringBuilder();
 
             var lhs = assign.getDest();
@@ -300,6 +307,72 @@ public class JasminGenerator {
         } finally {
             isInsideAssignment = false;
         }
+    }
+
+    private Optional<String> generateIinc(AssignInstruction assign) {
+        if (!(assign.getDest() instanceof Operand dest) || dest instanceof ArrayOperand) {
+            return Optional.empty();
+        }
+
+        var reg = currentMethod.getVarTable().get(dest.getName());
+        if (reg == null || !isIntType(reg.getVarType())) {
+            return Optional.empty();
+        }
+
+        return getIincDelta(dest, assign.getRhs())
+                .map(delta -> "iinc " + reg.getVirtualReg() + " " + delta + NL);
+    }
+
+    private Optional<Integer> getIincDelta(Operand dest, Instruction rhs) {
+        if (!(rhs instanceof BinaryOpInstruction binaryOp)) {
+            return Optional.empty();
+        }
+
+        var opType = binaryOp.getOperation().getOpType();
+        var left = binaryOp.getLeftOperand();
+        var right = binaryOp.getRightOperand();
+
+        if (opType == OperationType.ADD) {
+            if (isSameLocalOperand(dest, left)) {
+                return getIincDelta(right, 1);
+            }
+
+            if (isSameLocalOperand(dest, right)) {
+                return getIincDelta(left, 1);
+            }
+        }
+
+        if (opType == OperationType.SUB && isSameLocalOperand(dest, left)) {
+            return getIincDelta(right, -1);
+        }
+
+        return Optional.empty();
+    }
+
+    private Optional<Integer> getIincDelta(Element amountElement, int sign) {
+        return getIntegerLiteralValue(amountElement)
+                .flatMap(value -> normalizeIincDelta((long) value * sign));
+    }
+
+    private Optional<Integer> normalizeIincDelta(long delta) {
+        if (delta == 0 || delta < Byte.MIN_VALUE || delta > Byte.MAX_VALUE) {
+            return Optional.empty();
+        }
+
+        return Optional.of((int) delta);
+    }
+
+    private boolean isSameLocalOperand(Operand dest, Element element) {
+        if (!(element instanceof Operand operand) || element instanceof ArrayOperand) {
+            return false;
+        }
+
+        var destReg = currentMethod.getVarTable().get(dest.getName());
+        var operandReg = currentMethod.getVarTable().get(operand.getName());
+        return destReg != null
+                && operandReg != null
+                && destReg.getVirtualReg() == operandReg.getVirtualReg()
+                && isIntType(operandReg.getVarType());
     }
 
     private String generateSingleOp(SingleOpInstruction singleOp) {
@@ -332,17 +405,16 @@ public class JasminGenerator {
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
 
+        var opType = binaryOp.getOperation().getOpType();
+        if (opType.isConditional()) {
+            return generateComparisonValue(binaryOp);
+        }
+
         var code = new StringBuilder();
 
         // load values on the left and on the right
         code.append(apply(binaryOp.getLeftOperand()));
         code.append(apply(binaryOp.getRightOperand()));
-
-
-        var opType = binaryOp.getOperation().getOpType();
-        if (opType.isConditional()) {
-            return generateComparisonValue(binaryOp);
-        }
 
         var op = switch (opType) {
             case ADD -> "iadd";
@@ -411,16 +483,7 @@ public class JasminGenerator {
         if (condition instanceof BinaryOpInstruction binaryOp
                 && binaryOp.getOperation().getOpType().isConditional()) {
 
-            var code = new StringBuilder();
-            code.append(apply(binaryOp.getLeftOperand()));
-            code.append(apply(binaryOp.getRightOperand()));
-            code.append("if_icmp")
-                    .append(getComparisonSuffix(binaryOp.getOperation().getOpType()))
-                    .append(" ")
-                    .append(branch.getLabel())
-                    .append(NL);
-            updateStack(-2);
-            return code.toString();
+            return generateComparisonBranch(binaryOp, branch.getLabel());
         }
 
         if (condition instanceof UnaryOpInstruction unaryOp
@@ -448,9 +511,7 @@ public class JasminGenerator {
 
         var owner = invokeSpecial.getSuperClass()
                 .map(types::getInternalName)
-                .orElseGet(() -> currentMethod != null && currentMethod.isConstructMethod()
-                        ? types.getInternalName(currentMethod.getOllirClass().getSuperClass())
-                        : types.getInternalName(invokeSpecial.getCaller().getType()));
+                .orElseGet(() -> getInvokeSpecialOwner(invokeSpecial));
 
         code.append("invokespecial ")
                 .append(owner)
@@ -463,6 +524,19 @@ public class JasminGenerator {
         code.append(popIfIsolated(invokeSpecial));
 
         return code.toString();
+    }
+
+    private String getInvokeSpecialOwner(InvokeSpecialInstruction invokeSpecial) {
+        var callerType = invokeSpecial.getCaller().getType();
+        if (currentMethod != null
+                && currentMethod.isConstructMethod()
+                && "<init>".equals(getMethodName(invokeSpecial))
+                && callerType instanceof ClassType classType
+                && classType.getKind() == ClassKind.THIS) {
+            return types.getInternalName(currentMethod.getOllirClass().getSuperClass());
+        }
+
+        return types.getInternalName(callerType);
     }
 
     private String generateInvokeVirtual(InvokeVirtualInstruction invokeVirtual) {
@@ -506,11 +580,27 @@ public class JasminGenerator {
     private String generateNew(NewInstruction newInstruction) {
         if (newInstruction.getReturnType() instanceof ArrayType arrayType) {
             var code = new StringBuilder();
-            newInstruction.getArguments().forEach(argument -> code.append(apply(argument)));
-            code.append("newarray ")
-                    .append(types.getTypeDescriptor(arrayType.getElementType()).equals("I") ? "int" : "boolean")
-                    .append(NL);
-            updateStack(1 - newInstruction.getArguments().size());
+            var arguments = newInstruction.getArguments();
+
+            if (arguments.isEmpty()) {
+                throw new NotImplementedException("array allocation without size");
+            }
+
+            arguments.forEach(argument -> code.append(apply(argument)));
+
+            if (arrayType.getNumDimensions() > 1 || arguments.size() > 1) {
+                code.append("multianewarray ")
+                        .append(types.getTypeDescriptor(arrayType))
+                        .append(" ")
+                        .append(arguments.size())
+                        .append(NL);
+            } else {
+                code.append("newarray ")
+                        .append(getNewArrayElementType(arrayType))
+                        .append(NL);
+            }
+
+            updateStack(1 - arguments.size());
             code.append(popIfIsolated(newInstruction));
             return code.toString();
         }
@@ -521,6 +611,14 @@ public class JasminGenerator {
 
         updateStack(1);
         return "new " + types.getInternalName(newInstruction.getReturnType()) + NL + popIfIsolated(newInstruction);
+    }
+
+    private String getNewArrayElementType(ArrayType arrayType) {
+        return switch (types.getTypeDescriptor(arrayType.getElementType())) {
+            case "I" -> "int";
+            case "Z" -> "boolean";
+            default -> throw new NotImplementedException("array element type in newarray: " + arrayType.getElementType());
+        };
     }
 
     private String generateArrayLength(ArrayLengthInstruction arrayLength) {
@@ -642,14 +740,7 @@ public class JasminGenerator {
         var endLabel = nextGeneratedLabel("cmp_end");
         var code = new StringBuilder();
 
-        code.append(apply(binaryOp.getLeftOperand()));
-        code.append(apply(binaryOp.getRightOperand()));
-        code.append("if_icmp")
-                .append(getComparisonSuffix(binaryOp.getOperation().getOpType()))
-                .append(" ")
-                .append(trueLabel)
-                .append(NL);
-        updateStack(-2);
+        code.append(generateComparisonBranch(binaryOp, trueLabel));
 
         code.append(getIntegerConstantInstruction(0)).append(NL);
         updateStack(1);
@@ -661,6 +752,52 @@ public class JasminGenerator {
         updateStack(1);
         code.append(endLabel).append(":").append(NL);
 
+        return code.toString();
+    }
+
+    private String generateComparisonBranch(BinaryOpInstruction binaryOp, String label) {
+        var zeroBranch = generateComparisonBranchAgainstZero(binaryOp, label);
+        if (zeroBranch.isPresent()) {
+            return zeroBranch.get();
+        }
+
+        var code = new StringBuilder();
+        code.append(apply(binaryOp.getLeftOperand()));
+        code.append(apply(binaryOp.getRightOperand()));
+        code.append("if_icmp")
+                .append(getComparisonSuffix(binaryOp.getOperation().getOpType()))
+                .append(" ")
+                .append(label)
+                .append(NL);
+        updateStack(-2);
+        return code.toString();
+    }
+
+    private Optional<String> generateComparisonBranchAgainstZero(BinaryOpInstruction binaryOp, String label) {
+        var opType = binaryOp.getOperation().getOpType();
+        var left = binaryOp.getLeftOperand();
+        var right = binaryOp.getRightOperand();
+
+        if (isLiteralZero(right)) {
+            return Optional.of(generateZeroComparison(left, opType, label));
+        }
+
+        if (isLiteralZero(left)) {
+            return Optional.of(generateZeroComparison(right, swapComparison(opType), label));
+        }
+
+        return Optional.empty();
+    }
+
+    private String generateZeroComparison(Element value, OperationType opType, String label) {
+        var code = new StringBuilder();
+        code.append(apply(value));
+        code.append("if")
+                .append(getComparisonSuffix(opType))
+                .append(" ")
+                .append(label)
+                .append(NL);
+        updateStack(-1);
         return code.toString();
     }
 
@@ -696,6 +833,44 @@ public class JasminGenerator {
             case GTE -> "ge";
             default -> throw new NotImplementedException(opType);
         };
+    }
+
+    private OperationType swapComparison(OperationType opType) {
+        return switch (opType) {
+            case EQ -> OperationType.EQ;
+            case NEQ -> OperationType.NEQ;
+            case LTH -> OperationType.GTH;
+            case LTE -> OperationType.GTE;
+            case GTH -> OperationType.LTH;
+            case GTE -> OperationType.LTE;
+            default -> throw new NotImplementedException(opType);
+        };
+    }
+
+    private boolean isLiteralZero(Element element) {
+        return getIntegerLiteralValue(element)
+                .map(value -> value == 0)
+                .orElse(false);
+    }
+
+    private Optional<Integer> getIntegerLiteralValue(Element element) {
+        if (!(element instanceof LiteralElement literal) || rawLiteralIsString(literal)) {
+            return Optional.empty();
+        }
+
+        try {
+            return Optional.of(Integer.parseInt(literal.getLiteral()));
+        } catch (NumberFormatException ignored) {
+            return Optional.empty();
+        }
+    }
+
+    private boolean rawLiteralIsString(LiteralElement literal) {
+        return literal.getType() instanceof BuiltinType builtinType && builtinType.getKind() == BuiltinKind.STRING;
+    }
+
+    private boolean isIntType(org.specs.comp.ollir.type.Type type) {
+        return type instanceof BuiltinType builtinType && builtinType.getKind() == BuiltinKind.INT32;
     }
 
     private String generateArrayAddress(ArrayOperand arrayOperand) {

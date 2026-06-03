@@ -95,6 +95,84 @@ public class MyJasminBackendStructureTest {
                 exact.contains(".limit stack 99") || exact.contains(".limit locals 99"));
     }
 
+    @Test
+    public void emitsIincForSameRegisterIncrementAssignments() {
+        var jasmin = toJasmin("""
+                package core.backend.jasmin;
+
+                IincFixture extends Object {
+                    .construct "<init>"().V {
+                        invokespecial(this."java.lang.Object", "<init>").V;
+                    }
+
+                    .method public bump(a.i32).i32 {
+                        a.i32 :=.i32 a.i32 +.i32 1.i32;
+                        a.i32 :=.i32 a.i32 -.i32 2.i32;
+                        ret.i32 a.i32;
+                    }
+                }
+                """);
+
+        var bump = method(jasmin, "bump");
+        Assert.assertTrue("a := a + 1 should become iinc", bump.contains("iinc 1 1"));
+        Assert.assertTrue("a := a - 2 should become iinc with a negative delta", bump.contains("iinc 1 -2"));
+        Assert.assertFalse("simple increments should not use stack arithmetic",
+                bump.contains("iadd") || bump.contains("isub"));
+    }
+
+    @Test
+    public void emitsZeroBranchesForComparisonsAgainstLiteralZero() {
+        var jasmin = toJasmin("""
+                package core.backend.jasmin;
+
+                ZeroBranchFixture extends Object {
+                    .construct "<init>"().V {
+                        invokespecial(this."java.lang.Object", "<init>").V;
+                    }
+
+                    .method public negative(a.i32).bool {
+                        res.bool :=.bool a.i32 <.i32 0.i32;
+                        ret.bool res.bool;
+                    }
+
+                    .method public positive(a.i32).bool {
+                        res.bool :=.bool 0.i32 <.i32 a.i32;
+                        ret.bool res.bool;
+                    }
+                }
+                """);
+
+        var negative = method(jasmin, "negative");
+        Assert.assertTrue("a < 0 should branch directly against zero", negative.contains("iflt "));
+        Assert.assertFalse("a < 0 should not need if_icmp", negative.contains("if_icmp"));
+
+        var positive = method(jasmin, "positive");
+        Assert.assertTrue("0 < a should flip to a > 0", positive.contains("ifgt "));
+        Assert.assertFalse("0 < a should not need if_icmp", positive.contains("if_icmp"));
+    }
+
+    @Test
+    public void comparisonValueStackLimitDoesNotCountDiscardedOperands() {
+        var jasmin = toJasmin("""
+                package core.backend.jasmin;
+
+                ComparisonLimitFixture extends Object {
+                    .construct "<init>"().V {
+                        invokespecial(this."java.lang.Object", "<init>").V;
+                    }
+
+                    .method public less(a.i32, b.i32).bool {
+                        res.bool :=.bool a.i32 <.i32 b.i32;
+                        ret.bool res.bool;
+                    }
+                }
+                """);
+
+        var less = method(jasmin, "less");
+        Assert.assertTrue("comparison value should only need both operands on the stack",
+                less.contains(".limit stack 2"));
+    }
+
     private static String toJasmin(String ollirCode) {
         var result = new JasminBackendImpl().toJasmin(new OllirResult(ollirCode, Map.of()));
         assertNoBackendErrors(result);
