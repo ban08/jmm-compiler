@@ -1,15 +1,15 @@
 # Compiler Project
 
-For the last delivery (CP3), complete the following sections.
+Final delivery covering CP1 (frontend), CP2 (OLLIR generation and optimizations) and CP3 (Jasmin backend).
 
 ## Participation
 
 The sum of the participations should be 100%, for a group of four elements with balanced participation, this corresponds to 25% participation each.
 
-[Student 1] - [percentage]% 
-[Student 2] - [percentage]% 
-[Student 3] - [percentage]% 
-[Student 4] - [percentage]% 
+António Pais (up202305444) - 25%
+Miguel Neri (up202006475) - 25%
+Rodrigo Tsou (up202208354) - 25%  
+Filipe Camacho (up202208040) - 25%
 
 ## Declaration of AI Tools Used
 
@@ -20,11 +20,11 @@ Finally, check the box regarding responsibility for the work.
 AI tools/services used in this work:
 
 [] No AI tools were used.
-[] The following tools were used:
- - [Name]: [specific use]
- - [Name]: [specific use]
+[x] The following tools were used:
+ - ChatGPT: general implementation questions, mostly helping with edge case testing.
+ - Claude: general implementation questions, mostly helping with edge case testing.
 
-[] All content has been reviewed, understood, validated, and we assume full responsibility for the work in this repository.
+[x] All content has been reviewed, understood, validated, and we assume full responsibility for the work in this repository.
 
 
 ## Implemented CP2 Optimizations
