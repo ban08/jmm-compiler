@@ -59,7 +59,7 @@ public class RegisterAllocationOptimizer {
             var liveness = LivenessAnalysis.analyze(method);
             var graph = InterferenceGraphBuilder.build(locals, liveness.def(), liveness.liveOut());
             var coloring = new RegisterColoring(method.getMethodName(), firstLocalRegister,
-                    name -> RegisterAllocationUtils.isGeneratedBooleanTemporary(method, name))
+                    name -> RegisterAllocationUtils.isGeneratedBooleanConditionTemporary(method, name))
                     .select(graph, registerLimit);
 
             var varTable = method.getVarTable();

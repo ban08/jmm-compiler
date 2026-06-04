@@ -57,6 +57,36 @@ public class MyOllirEdgeCasesTest {
     }
 
     @Test
+    public void myTestFieldInitializersKeepSourceOrderInConstructor() {
+        var result = toOllir("""
+                package core.optimization;
+
+                class FieldInitOrder {
+                    int first = 1;
+                    int second = first + 1;
+
+                    int method() {
+                        return second;
+                    }
+                }
+                """);
+
+        assertNoErrors(result);
+
+        String ollir = result.getOllirCode();
+        int firstWrite = ollir.indexOf("putfield(this, first.i32, 1.i32).V");
+        int firstRead = ollir.indexOf("getfield(this, first.i32).i32");
+        int secondWrite = ollir.indexOf("putfield(this, second.i32,");
+
+        Assert.assertTrue("Constructor should write the first field initializer",
+                firstWrite >= 0);
+        Assert.assertTrue("The second initializer should read the first field after it was written",
+                firstRead > firstWrite);
+        Assert.assertTrue("Constructor should write the second field after evaluating its initializer",
+                secondWrite > firstRead);
+    }
+
+    @Test
     public void myTestPrefixIncrementWritesBackToLocal() {
         var result = toOllir("""
                 package core.optimization;

@@ -93,6 +93,20 @@ public class MyRegisterAllocationTest {
                 errors.getFirst().getMessage().contains("Minimum required: 2 JVM local register(s)"));
     }
 
+    @Test
+    public void generatedBooleanTemporariesRespectStrictRegisterLimit() {
+        var result = optimize(strictBooleanTemporaryOllir(), "1");
+
+        var errors = result.reports().stream()
+                .filter(report -> report.getType() == ReportType.ERROR)
+                .toList();
+
+        assertEquals("Expected one error when two live boolean temporaries need two JVM local slots",
+                1, errors.size());
+        assertTrue("The strict allocator should not grant generated boolean temps a bonus slot",
+                errors.getFirst().getMessage().contains("Minimum required: 2 JVM local register(s)"));
+    }
+
     private OllirResult optimize(String ollirCode, String registerAllocation) {
         return new JmmOptimizationImpl().transformOllir(new OllirResult(
                 ollirCode,
@@ -166,6 +180,25 @@ public class MyRegisterAllocationTest {
                         tmp0.i32 :=.i32 2.i32;
                         b.i32 :=.i32 a.i32 +.i32 tmp0.i32;
                         ret.i32 b.i32;
+                    }
+                }
+                """;
+    }
+
+    private String strictBooleanTemporaryOllir() {
+        return """
+                package core.optimization;
+
+                Test extends Object {
+                    .construct "<init>"().V {
+                        invokespecial(this, "<init>" "java.lang.Object").V;
+                    }
+
+                    .method public static method().bool {
+                        tmp0.bool :=.bool 0.bool;
+                        tmp1.bool :=.bool 1.bool;
+                        res.bool :=.bool tmp0.bool &&.bool tmp1.bool;
+                        ret.bool res.bool;
                     }
                 }
                 """;

@@ -340,6 +340,46 @@ public class MyAstOptimizationTest extends JmmTestEnv {
     }
 
     @Test
+    public void skippedShortCircuitRhsMutationKeepsEarlierConstant() {
+        var method = optimizedMethod("""
+                package p;
+                class A {
+                    int method() {
+                        int x;
+                        x = 1;
+                        true || (++x < 3);
+                        return x;
+                    }
+                }
+                """);
+
+        var returnExpr = method.getDescendants(JmmKind.RETURN_STMT).getFirst().getChild(0);
+        assertTrue("The RHS mutation is skipped, so x can still propagate",
+                JmmKind.INTEGER_LITERAL.check(returnExpr));
+        assertEquals("Expected x to keep its pre-short-circuit value",
+                "1", returnExpr.get(JmmAttributes.INTEGER_LITERAL.VALUE));
+    }
+
+    @Test
+    public void executingShortCircuitRhsMutationInvalidatesConstant() {
+        var method = optimizedMethod("""
+                package p;
+                class A {
+                    int method() {
+                        int x;
+                        x = 1;
+                        false || (++x < 3);
+                        return x;
+                    }
+                }
+                """);
+
+        var returnExpr = method.getDescendants(JmmKind.RETURN_STMT).getFirst().getChild(0);
+        assertTrue("The RHS mutation executes, so x must still be read at runtime",
+                JmmKind.VAR_REF_EXPR.check(returnExpr));
+    }
+
+    @Test
     public void propagatesConstantsAfterMatchingBranchAssignments() {
         var method = optimizedMethod("""
                 package p;
@@ -433,6 +473,31 @@ public class MyAstOptimizationTest extends JmmTestEnv {
         assertTrue("The side-effecting method call should still be present",
                 method.getDescendants(JmmKind.METHOD_CALL_EXPR).stream()
                         .anyMatch(call -> call.get(JmmAttributes.METHOD_CALL_EXPR.NAME).equals("sideEffect")));
+    }
+
+    @Test
+    public void myTestDeadStoreEliminationKeepsAssignmentsWhoseRhsReadsAField() {
+        var method = optimizedMethod("""
+                package p;
+                class A {
+                    int value;
+
+                    int method(A other) {
+                        int x;
+                        x = other.value;
+                        return 0;
+                    }
+                }
+                """);
+
+        var storesToX = method.getDescendants(JmmKind.ASSIGN_STMT).stream()
+                .filter(assign -> assign.get(JmmAttributes.ASSIGN_STMT.VAR).equals("x"))
+                .toList();
+
+        assertEquals("The dead local value can be ignored, but the field read must still execute",
+                1, storesToX.size());
+        assertEquals("The RHS should remain a field access",
+                1, method.getDescendants(JmmKind.FIELD_ACCESS_EXPR).size());
     }
 
     @Test

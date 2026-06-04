@@ -1,7 +1,10 @@
 package pt.up.fe.comp2026.optimization.register;
 
+import org.specs.comp.ollir.Element;
 import org.specs.comp.ollir.Method;
+import org.specs.comp.ollir.Operand;
 import org.specs.comp.ollir.VarScope;
+import org.specs.comp.ollir.inst.CondBranchInstruction;
 import org.specs.comp.ollir.type.BuiltinKind;
 import org.specs.comp.ollir.type.BuiltinType;
 
@@ -39,12 +42,25 @@ final class RegisterAllocationUtils {
         return descriptor != null && descriptor.getScope() == VarScope.LOCAL && !THIS.equals(name);
     }
 
-    static boolean isGeneratedBooleanTemporary(Method method, String name) {
+    static boolean isGeneratedBooleanConditionTemporary(Method method, String name) {
         var descriptor = method.getVarTable().get(name);
         return descriptor != null
                 && descriptor.getScope() == VarScope.LOCAL
                 && isGeneratedTemporaryName(name)
-                && BuiltinType.is(descriptor.getVarType(), BuiltinKind.BOOLEAN);
+                && BuiltinType.is(descriptor.getVarType(), BuiltinKind.BOOLEAN)
+                && isUsedDirectlyByConditionalBranch(method, name);
+    }
+
+    private static boolean isUsedDirectlyByConditionalBranch(Method method, String name) {
+        return method.getInstructions().stream()
+                .filter(CondBranchInstruction.class::isInstance)
+                .map(CondBranchInstruction.class::cast)
+                .flatMap(branch -> branch.getOperands().stream())
+                .anyMatch(operand -> isNamedOperand(operand, name));
+    }
+
+    private static boolean isNamedOperand(Element element, String name) {
+        return element instanceof Operand operand && operand.getName().equals(name);
     }
 
     private static boolean isGeneratedTemporaryName(String name) {
