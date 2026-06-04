@@ -173,6 +173,187 @@ public class MyJasminBackendStructureTest {
                 less.contains(".limit stack 2"));
     }
 
+    @Test
+    public void emitsReferenceArrayDescriptorsLoadsStoresAndAnewarray() {
+        var jasmin = toJasmin("""
+                package core.backend.jasmin;
+                import java.util.ArrayList;
+
+                ReferenceArrayFixture extends Object {
+                    .construct "<init>"().V {
+                        invokespecial(this."java.lang.Object", "<init>").V;
+                    }
+
+                    .method public make(size.i32).array.ArrayList {
+                        items.array.ArrayList :=.array.ArrayList new(array, size.i32).array.ArrayList;
+                        first.ArrayList :=.ArrayList new(ArrayList).ArrayList;
+                        invokespecial(first.ArrayList, "<init>").V;
+                        items.array.ArrayList[0.i32].ArrayList :=.ArrayList first.ArrayList;
+                        got.ArrayList :=.ArrayList items.array.ArrayList[0.i32].ArrayList;
+                        invokevirtual(got.ArrayList, "size").i32;
+                        ret.array.ArrayList items.array.ArrayList;
+                    }
+
+                    .method public strings(size.i32).array.String {
+                        values.array.String :=.array.String new(array, size.i32).array.String;
+                        ret.array.String values.array.String;
+                    }
+
+                    .method public use(list.ArrayList, strings.array.String, self.ReferenceArrayFixture).ArrayList {
+                        ret.ArrayList list.ArrayList;
+                    }
+                }
+                """);
+
+        Assert.assertTrue("Imported reference arrays should use the correct method descriptor",
+                jasmin.contains(".method public make(I)[Ljava/util/ArrayList;"));
+        Assert.assertTrue("java.lang String arrays should use the correct method descriptor",
+                jasmin.contains(".method public strings(I)[Ljava/lang/String;"));
+        Assert.assertTrue("Mixed descriptors should resolve imported, java.lang, and current classes exactly",
+                jasmin.contains(".method public use(Ljava/util/ArrayList;[Ljava/lang/String;Lcore/backend/jasmin/ReferenceArrayFixture;)Ljava/util/ArrayList;"));
+
+        var make = method(jasmin, "make");
+        Assert.assertTrue("One-dimensional imported object arrays should use anewarray",
+                make.contains("anewarray java/util/ArrayList"));
+        Assert.assertTrue("Reference array stores should use aastore",
+                make.contains("aastore"));
+        Assert.assertTrue("Reference array loads should use aaload",
+                make.contains("aaload"));
+        Assert.assertTrue("Reference locals should use astore",
+                make.contains("astore_2") && make.contains("astore_3"));
+        Assert.assertTrue("Reference locals should use aload",
+                make.contains("aload_2") && make.contains("aload_3"));
+        Assert.assertTrue("Discarded non-void virtual calls must be popped",
+                make.contains("invokevirtual java/util/ArrayList/size()I") && make.contains("pop"));
+
+        var strings = method(jasmin, "strings");
+        Assert.assertTrue("One-dimensional String arrays should use anewarray",
+                strings.contains("anewarray java/lang/String"));
+    }
+
+    @Test
+    public void emitsReferenceMultianewarrayDescriptor() {
+        var jasmin = toJasmin("""
+                package core.backend.jasmin;
+
+                ReferenceMultidimFixture extends Object {
+                    .construct "<init>"().V {
+                        invokespecial(this."java.lang.Object", "<init>").V;
+                    }
+
+                    .method public matrix(rows.i32, cols.i32).array.array.String {
+                        values.array.array.String :=.array.array.String new(array, rows.i32, cols.i32).array.array.String;
+                        ret.array.array.String values.array.array.String;
+                    }
+                }
+                """);
+
+        var matrix = method(jasmin, "matrix");
+        Assert.assertTrue("String[][] allocation should use JVM reference-array descriptor",
+                matrix.contains("multianewarray [[Ljava/lang/String; 2"));
+    }
+
+    @Test
+    public void emitsConstructorArgumentDescriptorsForImplicitJavaLangClasses() {
+        var jasmin = toJasmin("""
+                package core.backend.jasmin;
+
+                ConstructorArgFixture extends Object {
+                    .construct "<init>"().V {
+                        invokespecial(this."java.lang.Object", "<init>").V;
+                    }
+
+                    .method public build(text.String).String {
+                        builder.StringBuilder :=.StringBuilder new(StringBuilder).StringBuilder;
+                        invokespecial(builder.StringBuilder, "<init>", text.String).V;
+                        out.String :=.String invokevirtual(builder.StringBuilder, "toString").String;
+                        ret.String out.String;
+                    }
+                }
+                """);
+
+        var build = method(jasmin, "build");
+        Assert.assertTrue("Implicit java.lang constructor owner should resolve to java/lang/StringBuilder",
+                build.contains("new java/lang/StringBuilder"));
+        Assert.assertTrue("Constructor argument descriptor should include java.lang.String",
+                build.contains("invokespecial java/lang/StringBuilder/<init>(Ljava/lang/String;)V"));
+        Assert.assertTrue("Returned java.lang object descriptor should be exact",
+                build.contains("invokevirtual java/lang/StringBuilder/toString()Ljava/lang/String;"));
+    }
+
+    @Test
+    public void keepsStackNeutralAroundMaterializedComparisonLabelsAndDiscardedCalls() {
+        var jasmin = toJasmin("""
+                package core.backend.jasmin;
+
+                StackNeutralFixture extends Object {
+                    .construct "<init>"().V {
+                        invokespecial(this."java.lang.Object", "<init>").V;
+                    }
+
+                    .method public id(x.i32).i32 {
+                        ret.i32 x.i32;
+                    }
+
+                    .method public branch(a.i32, b.i32).i32 {
+                        cond.bool :=.bool a.i32 <.i32 b.i32;
+                        if (cond.bool) goto true_label;
+                        invokevirtual(this.StackNeutralFixture, "id", a.i32).i32;
+                        goto end_label;
+                    true_label:
+                        tmp.i32 :=.i32 invokevirtual(this.StackNeutralFixture, "id", b.i32).i32;
+                        ret.i32 tmp.i32;
+                    end_label:
+                        ret.i32 0.i32;
+                    }
+                }
+                """);
+
+        var branch = method(jasmin, "branch");
+        var popIndex = branch.indexOf("pop");
+        var gotoIndex = branch.indexOf("goto end_label");
+
+        Assert.assertTrue("Materialized comparison should still produce a branchable local",
+                branch.contains("istore") && branch.contains("ifne true_label"));
+        Assert.assertTrue("Discarded call result should be popped before jumping to a label",
+                popIndex >= 0 && popIndex < gotoIndex);
+        Assert.assertTrue("Both OLLIR labels should be emitted as clean Jasmin labels",
+                branch.contains("true_label:") && branch.contains("end_label:"));
+    }
+
+    @Test
+    public void emitsConstantLoadingBoundaryInstructions() {
+        var jasmin = toJasmin("""
+                package core.backend.jasmin;
+
+                ConstantBoundaryFixture extends Object {
+                    .construct "<init>"().V {
+                        invokespecial(this."java.lang.Object", "<init>").V;
+                    }
+
+                    .method public constants().i32 {
+                        c0.i32 :=.i32 0.i32;
+                        c5.i32 :=.i32 5.i32;
+                        c6.i32 :=.i32 6.i32;
+                        c127.i32 :=.i32 127.i32;
+                        c128.i32 :=.i32 128.i32;
+                        c32767.i32 :=.i32 32767.i32;
+                        c32768.i32 :=.i32 32768.i32;
+                        ret.i32 c32768.i32;
+                    }
+                }
+                """);
+
+        var constants = method(jasmin, "constants");
+        Assert.assertTrue("0 should use iconst_0", constants.contains("iconst_0"));
+        Assert.assertTrue("5 should use iconst_5", constants.contains("iconst_5"));
+        Assert.assertTrue("6 should use bipush", constants.contains("bipush 6"));
+        Assert.assertTrue("127 should still use bipush", constants.contains("bipush 127"));
+        Assert.assertTrue("128 should use sipush", constants.contains("sipush 128"));
+        Assert.assertTrue("32767 should still use sipush", constants.contains("sipush 32767"));
+        Assert.assertTrue("32768 should fall back to ldc", constants.contains("ldc 32768"));
+    }
+
     private static String toJasmin(String ollirCode) {
         var result = new JasminBackendImpl().toJasmin(new OllirResult(ollirCode, Map.of()));
         assertNoBackendErrors(result);

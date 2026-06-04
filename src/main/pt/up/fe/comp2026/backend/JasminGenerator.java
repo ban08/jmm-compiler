@@ -595,9 +595,7 @@ public class JasminGenerator {
                         .append(arguments.size())
                         .append(NL);
             } else {
-                code.append("newarray ")
-                        .append(getNewArrayElementType(arrayType))
-                        .append(NL);
+                code.append(getOneDimensionalNewArrayInstruction(arrayType)).append(NL);
             }
 
             updateStack(1 - arguments.size());
@@ -613,12 +611,22 @@ public class JasminGenerator {
         return "new " + types.getInternalName(newInstruction.getReturnType()) + NL + popIfIsolated(newInstruction);
     }
 
-    private String getNewArrayElementType(ArrayType arrayType) {
-        return switch (types.getTypeDescriptor(arrayType.getElementType())) {
-            case "I" -> "int";
-            case "Z" -> "boolean";
-            default -> throw new NotImplementedException("array element type in newarray: " + arrayType.getElementType());
-        };
+    private String getOneDimensionalNewArrayInstruction(ArrayType arrayType) {
+        var elementType = arrayType.getElementType();
+        if (elementType instanceof BuiltinType builtinType) {
+            return switch (builtinType.getKind()) {
+                case INT32 -> "newarray int";
+                case BOOLEAN -> "newarray boolean";
+                case STRING -> "anewarray " + types.getInternalName(elementType);
+                case VOID -> throw new NotImplementedException("array element type in newarray: " + elementType);
+            };
+        }
+
+        if (elementType instanceof ClassType) {
+            return "anewarray " + types.getInternalName(elementType);
+        }
+
+        throw new NotImplementedException("array element type in newarray: " + elementType);
     }
 
     private String generateArrayLength(ArrayLengthInstruction arrayLength) {
