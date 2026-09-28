@@ -2,6 +2,8 @@
 
 A compiler for **Java--** (a subset of Java) that takes source code all the way to runnable JVM bytecode.
 
+Group project of four for the Compilers course at FEUP (2025/26).
+
 ## What it does
 
 Reads a `.jmm` file and runs it through the full pipeline:
@@ -31,18 +33,3 @@ gradle build                 # compile the compiler and the grammar
 ```
 
 The generated `.class` file can then be run with `java`.
-
-## What I built
-
-Group project of four for the Compilers course (2025/26). My part was the middle and back of the pipeline:
-
-- Most of the **semantic analysis**: symbol table population, type checking, and resolution of imports, inherited members and method signatures, including the edge cases around static calls, qualified names and array types.
-- The **OLLIR optimizations**: constant propagation and folding, dead-code elimination, and branch elimination.
-- **Register allocation** by liveness analysis and graph colouring.
-- Core of the **Jasmin backend**: method emission, instruction selection, and keyword escaping.
-
-Teammates worked mainly on array code generation and parts of the frontend grammar.
-
-## What I would do differently
-
-Split the semantic analysis into clearly separated passes from the start instead of growing it into one large stage that later had to be broken apart. I would also add end-to-end tests that run the emitted bytecode and check its output, rather than relying mostly on stage-by-stage fixtures.
